@@ -18,6 +18,8 @@ public class RongCallKit {
         void onGotUserList(ArrayList<String> userIds);
     }
 
+    private static GroupMembersProvider mGroupMembersProvider;
+
     /**
      * 发起单人通话。
      *
@@ -96,5 +98,53 @@ public class RongCallKit {
                 context.startActivity(intent);
             }
         };
+    }
+
+    /**
+     * 群组成员提供者。
+     * CallKit 本身不保存群组成员，如果在聊天中需要使用群组成员，CallKit 将调用此 Provider 获取群组成员。
+     */
+    public interface GroupMembersProvider {
+        /**
+         * 获取群组成员列表，用户根据groupId返回对应的群组成员列表。
+         * @param groupId 群组id
+         * @param result  getMemberList可以同步返回，也可以异步返回。
+         *                同步返回的情况下，直接返回成员列表。
+         *                异步返回的情况下，需要在异步返回的时候调用{@link io.rong.imkit.RongCallKit.OnGroupMembersResult#onGotMemberList(ArrayList)}
+         *                来通知CallKit刷新列表。
+         * @return  同步返回的时候返回列表，异步返回直接返回null。
+         */
+        ArrayList<String> getMemberList(String groupId, OnGroupMembersResult result);
+    }
+
+    /**
+     * 群组成员提供者的异步回调接口。
+     */
+    public interface OnGroupMembersResult {
+        /**
+         * 群组成员提供者的异步回调接口。
+         * @param members 成员列表。
+         */
+        void onGotMemberList(ArrayList<String> members);
+    }
+
+    /**
+     * <p>设置群组成员的提供者。</p>
+     * <p>设置后，当 {@link CallSelectMemberActivity} 界面展示群组成员时，会回调 {@link GroupMembersProvider#getMemberList(String, OnGroupMembersResult)}，
+     * 使用者只需要根据对应的 groupId 提供对应的群组成员。
+     * 如果需要异步从服务器获取群组成员，使用者可以在此方法中发起异步请求，然后返回 null 信息。
+     * 在异步请求结果返回后，根据返回的结果调用 {@link io.rong.imkit.RongCallKit.OnGroupMembersResult#onGotMemberList(ArrayList)}  刷新信息。</p>
+     * @param groupMembersProvider 群组成员提供者。
+     */
+    public static void setGroupMemberProvider(GroupMembersProvider groupMembersProvider) {
+        mGroupMembersProvider = groupMembersProvider;
+    }
+
+    /**
+     * 获取群组成员提供者。
+     * @return 群组成员提供者。
+     */
+    public static GroupMembersProvider getGroupMemberProvider () {
+        return mGroupMembersProvider;
     }
 }

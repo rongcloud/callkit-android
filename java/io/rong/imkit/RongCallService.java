@@ -86,11 +86,17 @@ public class RongCallService {
         if (RongCallClient.getInstance().isAudioCallEnabled(Conversation.ConversationType.DISCUSSION)) {
             RongIM.addInputExtensionProvider(Conversation.ConversationType.DISCUSSION, audioProvider);
         }
+        if (RongCallClient.getInstance().isAudioCallEnabled(Conversation.ConversationType.GROUP)) {
+            RongIM.addInputExtensionProvider(Conversation.ConversationType.GROUP, audioProvider);
+        }
         if (RongCallClient.getInstance().isVideoCallEnabled(Conversation.ConversationType.PRIVATE)) {
             RongIM.addInputExtensionProvider(Conversation.ConversationType.PRIVATE, videoProvider);
         }
         if (RongCallClient.getInstance().isVideoCallEnabled(Conversation.ConversationType.DISCUSSION)) {
             RongIM.addInputExtensionProvider(Conversation.ConversationType.DISCUSSION, videoProvider);
+        }
+        if (RongCallClient.getInstance().isAudioCallEnabled(Conversation.ConversationType.GROUP)) {
+            RongIM.addInputExtensionProvider(Conversation.ConversationType.GROUP, videoProvider);
         }
 
         List<ConversationInfo> infoList = RongContext.getInstance().getCurrentConversationList();
@@ -104,6 +110,11 @@ public class RongCallService {
                 }
             }
             for (InputProvider provider : RongContext.getInstance().getRegisteredExtendProviderList(Conversation.ConversationType.DISCUSSION)) {
+                if (provider instanceof VideoCallInputProvider || provider instanceof AudioCallInputProvider) {
+                    provider.setCurrentConversation(conversation);
+                }
+            }
+            for (InputProvider provider : RongContext.getInstance().getRegisteredExtendProviderList(Conversation.ConversationType.GROUP)) {
                 if (provider instanceof VideoCallInputProvider || provider instanceof AudioCallInputProvider) {
                     provider.setCurrentConversation(conversation);
                 }
@@ -122,7 +133,8 @@ public class RongCallService {
     public static void startVoIPActivity(Context context, final RongCallSession callSession, boolean startForCheckPermissions) {
         RLog.d("VoIPReceiver", "startVoIPActivity");
         String action;
-        if (callSession.getConversationType().equals(Conversation.ConversationType.DISCUSSION)) {
+        if (callSession.getConversationType().equals(Conversation.ConversationType.DISCUSSION)
+                || callSession.getConversationType().equals(Conversation.ConversationType.GROUP)) {
             if (callSession.getMediaType().equals(RongCallCommon.CallMediaType.VIDEO)) {
                 action = RongVoIPIntent.RONG_INTENT_ACTION_VOIP_MULTIVIDEO;
             } else {

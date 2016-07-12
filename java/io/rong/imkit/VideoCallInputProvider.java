@@ -11,14 +11,16 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import io.rong.calllib.RongCallClient;
+import io.rong.calllib.RongCallSession;
+import io.rong.common.RLog;
 import io.rong.imkit.widget.provider.InputProvider;
 import io.rong.imlib.RongIMClient;
 import io.rong.imlib.model.Conversation;
 import io.rong.imlib.model.Discussion;
-import io.rong.calllib.RongCallClient;
-import io.rong.calllib.RongCallSession;
 
 public class VideoCallInputProvider extends InputProvider.ExtendProvider {
+    private static final String TAG = "VideoCallInputProvider";
     ArrayList<String> allMembers;
     public VideoCallInputProvider(RongContext context) {
         super(context);
@@ -73,9 +75,17 @@ public class VideoCallInputProvider extends InputProvider.ExtendProvider {
 
                 @Override
                 public void onError(RongIMClient.ErrorCode e) {
-
+                    RLog.d(TAG, "get discussion errorCode = " + e.getValue());
                 }
             });
+        } else if (conversation.getConversationType().equals(Conversation.ConversationType.GROUP)) {
+            Intent intent = new Intent(getContext(), CallSelectMemberActivity.class);
+            String myId = RongIMClient.getInstance().getCurrentUserId();
+            ArrayList<String> invited = new ArrayList<>();
+            invited.add(myId);
+            intent.putStringArrayListExtra("invitedMembers", invited);
+            intent.putExtra("groupId", conversation.getTargetId());
+            startActivityForResult(intent, 110);
         }
     }
 

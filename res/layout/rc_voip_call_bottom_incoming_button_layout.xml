@@ -3,7 +3,7 @@
     android:id="@+id/rc_voip_two_btn"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="20dp"
+    android:paddingBottom="20dp"
     android:layout_gravity="bottom">
 
     <RelativeLayout

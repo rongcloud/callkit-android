@@ -28,6 +28,7 @@ public class CallSelectMemberActivity extends Activity {
 
     ArrayList<String> selectedMember;
     TextView txtvStart;
+    ListAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,10 +64,30 @@ public class CallSelectMemberActivity extends Activity {
         Intent intent = getIntent();
         final ArrayList<String> invitedMembers = intent.getStringArrayListExtra("invitedMembers");
         ArrayList<String> allMembers = intent.getStringArrayListExtra("allMembers");
+        String GroupId = intent.getStringExtra("groupId");
+        RongCallKit.GroupMembersProvider provider = RongCallKit.getGroupMemberProvider();
+        if (GroupId != null && allMembers == null && provider != null) {
+            allMembers = provider.getMemberList(GroupId, new RongCallKit.OnGroupMembersResult() {
+                @Override
+                public void onGotMemberList(ArrayList<String> members) {
+                    if (mAdapter != null) {
+                        if (members != null && members.size() > 0) {
+                            mAdapter.setAllMembers(members);
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    }
+                }
+            });
+        }
+
+        if (allMembers == null) {
+            allMembers = invitedMembers;
+        }
 
         ListView listView = (ListView) findViewById(R.id.rc_listview_select_member);
         if (invitedMembers != null && invitedMembers.size() > 0) {
-            listView.setAdapter(new ListAdapter(allMembers, invitedMembers));
+            mAdapter = new ListAdapter(allMembers, invitedMembers);
+            listView.setAdapter(mAdapter);
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -106,6 +127,10 @@ public class CallSelectMemberActivity extends Activity {
         public ListAdapter(List<String> allMembers, List<String> invitedMembers) {
             this.allMembers = allMembers;
             this.invitedMembers = invitedMembers;
+        }
+
+        public void setAllMembers(List<String> allMembers) {
+            this.allMembers = allMembers;
         }
 
         @Override

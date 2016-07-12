@@ -22,6 +22,7 @@ import android.widget.Toast;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import io.rong.common.RLog;
 import io.rong.imlib.model.Conversation;
 import io.rong.calllib.IRongCallListener;
 import io.rong.calllib.RongCallClient;
@@ -40,6 +41,7 @@ public class CallFloatBoxView {
     private static Boolean isShown = false;
     private static WindowManager wm;
     private static Bundle mBundle;
+    private static final String TAG = "CallFloatBoxView";
 
     public static void showFloatBox(Context context, Bundle bundle, int time) {
         if (isShown) {
@@ -248,6 +250,11 @@ public class CallFloatBoxView {
     }
 
     private static void onClickToResume() {
+        //当快速双击悬浮窗时，第一次点击之后会把mBundle置为空，第二次点击的时候出现NPE
+        if (mBundle == null) {
+            RLog.d(TAG, "onClickToResume mBundle is null");
+            return;
+        }
         Intent intent = new Intent(mBundle.getString("action"));
         intent.putExtra("floatbox", mBundle);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
