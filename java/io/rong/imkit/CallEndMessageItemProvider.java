@@ -1,8 +1,10 @@
 package io.rong.imkit;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.support.v4.app.FragmentActivity;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.view.LayoutInflater;
@@ -17,8 +19,11 @@ import io.rong.calllib.message.CallSTerminateMessage;
 import io.rong.imkit.model.LinkTextView;
 import io.rong.imkit.model.ProviderTag;
 import io.rong.imkit.model.UIMessage;
+import io.rong.imkit.userInfoCache.RongUserInfoManager;
+import io.rong.imkit.widget.ArraysDialogFragment;
 import io.rong.imkit.widget.provider.IContainerItemProvider;
 import io.rong.imlib.model.Message;
+import io.rong.imlib.model.UserInfo;
 
 @ProviderTag(messageContent = CallSTerminateMessage.class, showSummaryWithName = false, showProgress = false, showWarning = false)
 public class CallEndMessageItemProvider extends IContainerItemProvider.MessageProvider<CallSTerminateMessage> {
@@ -56,7 +61,6 @@ public class CallEndMessageItemProvider extends IContainerItemProvider.MessagePr
         holder.message.setText(content.getContent());
         holder.message.setCompoundDrawablePadding(15);
 
-        int size = 54;
         if (mediaType.equals(RongCallCommon.CallMediaType.VIDEO)) {
             if (direction != null && direction.equals("MO")) {
                 drawable = v.getResources().getDrawable(R.drawable.rc_voip_video_right);
@@ -116,6 +120,7 @@ public class CallEndMessageItemProvider extends IContainerItemProvider.MessagePr
             action = RongVoIPIntent.RONG_INTENT_ACTION_VOIP_SINGLEAUDIO;
         }
         Intent intent = new Intent(action);
+        intent.setPackage(view.getContext().getPackageName());
         intent.putExtra("conversationType", message.getConversationType().getName().toLowerCase());
         intent.putExtra("targetId", message.getTargetId());
         intent.putExtra("callAction", RongCallAction.ACTION_OUTGOING_CALL.getName());
@@ -124,33 +129,29 @@ public class CallEndMessageItemProvider extends IContainerItemProvider.MessagePr
 
     @Override
     public void onItemLongClick(final View view, int position, final CallSTerminateMessage content, final UIMessage message) {
-//        String name = null;
-//
-//        if (message.getSenderUserId() != null) {
-//            UserInfo userInfo = message.getUserInfo();
-//            if (userInfo == null || userInfo.getName() == null)
-//                userInfo = RongUserInfoManager.getInstance().getUserInfo(message.getSenderUserId());
-//
-//            if (userInfo != null)
-//                name = userInfo.getName();
-//        }
-//
-//        String[] items;
-//
-//        items = new String[]{view.getContext().getResources().getString(R.string.rc_dialog_item_message_delete)};
-//
-//        ArraysDialogFragment.newInstance(name, items).setArraysDialogItemListener(new ArraysDialogFragment.OnArraysDialogItemListener() {
-//            @Override
-//            public void OnArraysDialogItemClick(DialogInterface dialog, int which) {
-//                if (which == 0) {
-//                    @SuppressWarnings("deprecation")
-//                    ClipboardManager clipboard = (ClipboardManager) view.getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-//                    clipboard.setText(((CallSTerminateMessage) content).getContent());
-//                } else if (which == 1) {
-//                    RongIM.getInstance().deleteMessages(new int[]{message.getMessageId()}, null);
-//                }
-//
-//            }
-//        }).show(((FragmentActivity) view.getContext()).getSupportFragmentManager());
+        String name = null;
+
+        if (message.getSenderUserId() != null) {
+            UserInfo userInfo = message.getUserInfo();
+            if (userInfo == null || userInfo.getName() == null)
+                userInfo = RongUserInfoManager.getInstance().getUserInfo(message.getSenderUserId());
+
+            if (userInfo != null)
+                name = userInfo.getName();
+        }
+
+        String[] items;
+
+        items = new String[] {view.getContext().getResources().getString(R.string.rc_dialog_item_message_delete)};
+
+        ArraysDialogFragment.newInstance(name, items).setArraysDialogItemListener(new ArraysDialogFragment.OnArraysDialogItemListener() {
+            @Override
+            public void OnArraysDialogItemClick(DialogInterface dialog, int which) {
+                if (which == 0) {
+                    RongIM.getInstance().deleteMessages(new int[] {message.getMessageId()}, null);
+                }
+
+            }
+        }).show(((FragmentActivity) view.getContext()).getSupportFragmentManager());
     }
 }

@@ -585,6 +585,16 @@ public class MultiVideoCallActivity extends BaseCallActivity {
 
                 }
             });
+        } else if (callSession.getConversationType().equals(Conversation.ConversationType.GROUP)) {
+            Intent intent = new Intent(MultiVideoCallActivity.this, CallSelectMemberActivity.class);
+            ArrayList<String> added = new ArrayList<>();
+            List<CallUserProfile> list = RongCallClient.getInstance().getCallSession().getParticipantProfileList();
+            for (CallUserProfile profile : list) {
+                added.add(profile.getUserId());
+            }
+            intent.putStringArrayListExtra("invitedMembers", added);
+            intent.putExtra("groupId", callSession.getTargetId());
+            startActivityForResult(intent, 110);
         }
     }
 

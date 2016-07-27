@@ -64,10 +64,10 @@ public class CallSelectMemberActivity extends Activity {
         Intent intent = getIntent();
         final ArrayList<String> invitedMembers = intent.getStringArrayListExtra("invitedMembers");
         ArrayList<String> allMembers = intent.getStringArrayListExtra("allMembers");
-        String GroupId = intent.getStringExtra("groupId");
+        String groupId = intent.getStringExtra("groupId");
         RongCallKit.GroupMembersProvider provider = RongCallKit.getGroupMemberProvider();
-        if (GroupId != null && allMembers == null && provider != null) {
-            allMembers = provider.getMemberList(GroupId, new RongCallKit.OnGroupMembersResult() {
+        if (groupId != null && allMembers == null && provider != null) {
+            allMembers = provider.getMemberList(groupId, new RongCallKit.OnGroupMembersResult() {
                 @Override
                 public void onGotMemberList(ArrayList<String> members) {
                     if (mAdapter != null) {
