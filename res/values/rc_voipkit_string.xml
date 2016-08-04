@@ -34,7 +34,7 @@
     <string name="rc_voip_mt_cancel">对方已取消</string>
     <string name="rc_voip_mt_reject">对方已拒绝</string>
     <string name="rc_voip_mt_no_response">对方未接听</string>
-    <string name="rc_voip_call_time_length">通话时长</string>
+    <string name="rc_voip_call_time_length">通话时长&#160;</string>
     <string name="rc_voip_mt_busy">对方忙,请稍后再播</string>
     <string name="rc_voip_message_audio">[语音聊天]</string>
     <string name="rc_voip_message_video">[视频聊天]</string>

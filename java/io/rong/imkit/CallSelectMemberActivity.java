@@ -29,6 +29,7 @@ public class CallSelectMemberActivity extends Activity {
     ArrayList<String> selectedMember;
     TextView txtvStart;
     ListAdapter mAdapter;
+    ListView mList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +39,7 @@ public class CallSelectMemberActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         setContentView(R.layout.rc_voip_activity_select_member);
+        RongContext.getInstance().getEventBus().register(this);
 
         txtvStart = (TextView) findViewById(R.id.rc_btn_ok);
         txtvStart.setEnabled(false);
@@ -84,11 +86,11 @@ public class CallSelectMemberActivity extends Activity {
             allMembers = invitedMembers;
         }
 
-        ListView listView = (ListView) findViewById(R.id.rc_listview_select_member);
+        mList = (ListView) findViewById(R.id.rc_listview_select_member);
         if (invitedMembers != null && invitedMembers.size() > 0) {
             mAdapter = new ListAdapter(allMembers, invitedMembers);
-            listView.setAdapter(mAdapter);
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            mList.setAdapter(mAdapter);
+            mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     View v = view.findViewById(R.id.rc_checkbox);
@@ -118,6 +120,12 @@ public class CallSelectMemberActivity extends Activity {
                 }
             });
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        RongContext.getInstance().getEventBus().unregister(this);
+        super.onDestroy();
     }
 
     class ListAdapter extends BaseAdapter {
@@ -187,6 +195,21 @@ public class CallSelectMemberActivity extends Activity {
                 holder.portrait.setAvatar(null);
             }
             return convertView;
+        }
+    }
+
+    public void onEventMainThread(UserInfo userInfo) {
+        if (mList != null) {
+            int first = mList.getFirstVisiblePosition() - mList.getHeaderViewsCount();
+            int last = mList.getLastVisiblePosition() - mList.getHeaderViewsCount();
+
+            int index = first - 1;
+
+            while (++index <= last && index >= 0 && index < mAdapter.getCount()) {
+                if (mAdapter.getItem(index).equals(userInfo.getUserId())) {
+                    mAdapter.getView(index, mList.getChildAt(index - mList.getFirstVisiblePosition() + mList.getHeaderViewsCount()), mList);
+                }
+            }
         }
     }
 

@@ -73,52 +73,72 @@ public class RongCallService {
      * CallKit收到这个intent，在会话扩展区域添加音视频通话按钮。
      */
     public static void onConnected() {
-        InputProvider.ExtendProvider[] audioProvider = {
-            new AudioCallInputProvider(RongContext.getInstance())
-        };
-        InputProvider.ExtendProvider[] videoProvider = {
-            new VideoCallInputProvider(RongContext.getInstance())
-        };
-
-        if (RongCallClient.getInstance().isAudioCallEnabled(Conversation.ConversationType.PRIVATE)) {
-            RongIM.addInputExtensionProvider(Conversation.ConversationType.PRIVATE, audioProvider);
-        }
-        if (RongCallClient.getInstance().isAudioCallEnabled(Conversation.ConversationType.DISCUSSION)) {
-            RongIM.addInputExtensionProvider(Conversation.ConversationType.DISCUSSION, audioProvider);
-        }
-        if (RongCallClient.getInstance().isAudioCallEnabled(Conversation.ConversationType.GROUP)) {
-            RongIM.addInputExtensionProvider(Conversation.ConversationType.GROUP, audioProvider);
-        }
-        if (RongCallClient.getInstance().isVideoCallEnabled(Conversation.ConversationType.PRIVATE)) {
-            RongIM.addInputExtensionProvider(Conversation.ConversationType.PRIVATE, videoProvider);
-        }
-        if (RongCallClient.getInstance().isVideoCallEnabled(Conversation.ConversationType.DISCUSSION)) {
-            RongIM.addInputExtensionProvider(Conversation.ConversationType.DISCUSSION, videoProvider);
-        }
-        if (RongCallClient.getInstance().isAudioCallEnabled(Conversation.ConversationType.GROUP)) {
-            RongIM.addInputExtensionProvider(Conversation.ConversationType.GROUP, videoProvider);
-        }
-
+        Conversation conversation = null;
         List<ConversationInfo> infoList = RongContext.getInstance().getCurrentConversationList();
         if (infoList.size() > 0) {
             Conversation.ConversationType conversationType = infoList.get(0).getConversationType();
             String targetId = infoList.get(0).getTargetId();
-            Conversation conversation = Conversation.obtain(conversationType, targetId, null);
-            for (InputProvider provider : RongContext.getInstance().getRegisteredExtendProviderList(Conversation.ConversationType.PRIVATE)) {
-                if (provider instanceof VideoCallInputProvider || provider instanceof AudioCallInputProvider) {
-                    provider.setCurrentConversation(conversation);
-                }
+            conversation = Conversation.obtain(conversationType, targetId, null);
+        }
+
+        AudioCallInputProvider audioCallInputProvider = new AudioCallInputProvider(RongContext.getInstance());
+        VideoCallInputProvider videoCallInputProvider = new VideoCallInputProvider(RongContext.getInstance());
+        audioCallInputProvider.setCurrentConversation(conversation);
+        videoCallInputProvider.setCurrentConversation(conversation);
+
+        InputProvider.ExtendProvider[] audioProvider = {
+            audioCallInputProvider
+        };
+        InputProvider.ExtendProvider[] videoProvider = {
+            videoCallInputProvider
+        };
+
+        boolean hasAudio = false;
+        boolean hasVideo = false;
+        for (InputProvider provider : RongContext.getInstance().getRegisteredExtendProviderList(Conversation.ConversationType.PRIVATE)) {
+            if (provider instanceof AudioCallInputProvider) {
+                hasAudio = true;
+            } else if (provider instanceof VideoCallInputProvider) {
+                hasVideo = true;
             }
-            for (InputProvider provider : RongContext.getInstance().getRegisteredExtendProviderList(Conversation.ConversationType.DISCUSSION)) {
-                if (provider instanceof VideoCallInputProvider || provider instanceof AudioCallInputProvider) {
-                    provider.setCurrentConversation(conversation);
-                }
+        }
+        if (!hasAudio) {
+            RongIM.addInputExtensionProvider(Conversation.ConversationType.PRIVATE, audioProvider);
+        }
+        if (!hasVideo) {
+            RongIM.addInputExtensionProvider(Conversation.ConversationType.PRIVATE, videoProvider);
+        }
+
+        hasAudio = false;
+        hasVideo = false;
+        for (InputProvider provider : RongContext.getInstance().getRegisteredExtendProviderList(Conversation.ConversationType.DISCUSSION)) {
+            if (provider instanceof AudioCallInputProvider) {
+                hasAudio = true;
+            } else if (provider instanceof VideoCallInputProvider) {
+                hasVideo = true;
             }
-            for (InputProvider provider : RongContext.getInstance().getRegisteredExtendProviderList(Conversation.ConversationType.GROUP)) {
-                if (provider instanceof VideoCallInputProvider || provider instanceof AudioCallInputProvider) {
-                    provider.setCurrentConversation(conversation);
-                }
+        }
+        if (!hasAudio) {
+            RongIM.addInputExtensionProvider(Conversation.ConversationType.DISCUSSION, audioProvider);
+        }
+        if (!hasVideo) {
+            RongIM.addInputExtensionProvider(Conversation.ConversationType.DISCUSSION, videoProvider);
+        }
+
+        hasAudio = false;
+        hasVideo = false;
+        for (InputProvider provider : RongContext.getInstance().getRegisteredExtendProviderList(Conversation.ConversationType.GROUP)) {
+            if (provider instanceof AudioCallInputProvider) {
+                hasAudio = true;
+            } else if (provider instanceof VideoCallInputProvider) {
+                hasVideo = true;
             }
+        }
+        if (!hasAudio) {
+            RongIM.addInputExtensionProvider(Conversation.ConversationType.GROUP, audioProvider);
+        }
+        if (!hasVideo) {
+            RongIM.addInputExtensionProvider(Conversation.ConversationType.GROUP, videoProvider);
         }
     }
 

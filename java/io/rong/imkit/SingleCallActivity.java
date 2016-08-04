@@ -459,7 +459,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         super.onCallDisconnected(callSession, reason);
 
         String senderId;
-        String msgContent = "";
+        String extra = "";
         stopRing();
 
         if (callSession == null) {
@@ -474,48 +474,22 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         }
         senderId = callSession.getInviterUserId();
         switch (reason) {
-            case CANCEL:
-                msgContent = getString(R.string.rc_voip_mo_cancel);
-                break;
-            case REJECT:
-                msgContent = getString(R.string.rc_voip_mo_reject);
-                break;
-            case NO_RESPONSE:
-            case BUSY_LINE:
-                msgContent = getString(R.string.rc_voip_mo_no_response);
-                break;
-            case REMOTE_BUSY_LINE:
-                msgContent = getString(R.string.rc_voip_mt_busy);
-                break;
-            case REMOTE_CANCEL:
-                msgContent = getString(R.string.rc_voip_mt_cancel);
-                break;
-            case REMOTE_REJECT:
-                msgContent = getString(R.string.rc_voip_mt_reject);
-                break;
-            case REMOTE_NO_RESPONSE:
-                msgContent = getString(R.string.rc_voip_mt_no_response);
-                break;
             case HANGUP:
             case REMOTE_HANGUP:
                 int time = getTime();
-                msgContent = getString(R.string.rc_voip_call_time_length);
                 if (time >= 3600) {
-                    msgContent += String.format("%d:%02d:%02d", time / 3600, (time % 3600) / 60, (time % 60));
+                    extra = String.format("%d:%02d:%02d", time / 3600, (time % 3600) / 60, (time % 60));
                 } else {
-                    msgContent += String.format("%02d:%02d", (time % 3600) / 60, (time % 60));
+                    extra = String.format("%02d:%02d", (time % 3600) / 60, (time % 60));
                 }
-                break;
-            case NETWORK_ERROR:
-            case REMOTE_NETWORK_ERROR:
-                msgContent = getString(R.string.rc_voip_call_interrupt);
                 break;
         }
 
-        if (!TextUtils.isEmpty(msgContent) && !TextUtils.isEmpty(senderId)) {
-            CallSTerminateMessage message = new CallSTerminateMessage(msgContent);
+        if (!TextUtils.isEmpty(senderId)) {
+            CallSTerminateMessage message = new CallSTerminateMessage();
             message.setReason(reason);
             message.setMediaType(callSession.getMediaType());
+            message.setExtra(extra);
             if (senderId.equals(callSession.getSelfUserId())) {
                 message.setDirection("MO");
             } else {

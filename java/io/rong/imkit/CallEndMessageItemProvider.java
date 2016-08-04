@@ -58,7 +58,43 @@ public class CallEndMessageItemProvider extends IContainerItemProvider.MessagePr
         RongCallCommon.CallMediaType mediaType = content.getMediaType();
         String direction = content.getDirection();
         Drawable drawable = null;
-        holder.message.setText(content.getContent());
+
+        String msgContent = "";
+        switch (content.getReason()) {
+            case CANCEL:
+                msgContent = v.getResources().getString(R.string.rc_voip_mo_cancel);
+                break;
+            case REJECT:
+                msgContent = v.getResources().getString(R.string.rc_voip_mo_reject);
+                break;
+            case NO_RESPONSE:
+            case BUSY_LINE:
+                msgContent = v.getResources().getString(R.string.rc_voip_mo_no_response);
+                break;
+            case REMOTE_BUSY_LINE:
+                msgContent = v.getResources().getString(R.string.rc_voip_mt_busy);
+                break;
+            case REMOTE_CANCEL:
+                msgContent = v.getResources().getString(R.string.rc_voip_mt_cancel);
+                break;
+            case REMOTE_REJECT:
+                msgContent = v.getResources().getString(R.string.rc_voip_mt_reject);
+                break;
+            case REMOTE_NO_RESPONSE:
+                msgContent = v.getResources().getString(R.string.rc_voip_mt_no_response);
+                break;
+            case HANGUP:
+            case REMOTE_HANGUP:
+                msgContent = v.getResources().getString(R.string.rc_voip_call_time_length);
+                msgContent += content.getExtra();
+                break;
+            case NETWORK_ERROR:
+            case REMOTE_NETWORK_ERROR:
+                msgContent = v.getResources().getString(R.string.rc_voip_call_interrupt);
+                break;
+        }
+
+        holder.message.setText(msgContent);
         holder.message.setCompoundDrawablePadding(15);
 
         if (mediaType.equals(RongCallCommon.CallMediaType.VIDEO)) {

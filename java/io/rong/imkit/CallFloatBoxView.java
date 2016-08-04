@@ -134,50 +134,24 @@ public class CallFloatBoxView {
             @Override
             public void onCallDisconnected(RongCallSession callProfile, RongCallCommon.CallDisconnectedReason reason) {
                 String senderId;
-                String msgContent = "";
+                String extra = "";
                 senderId = callProfile.getInviterUserId();
                 switch (reason) {
-                    case CANCEL:
-                        msgContent = mContext.getString(R.string.rc_voip_mo_cancel);
-                        break;
-                    case REJECT:
-                        msgContent = mContext.getString(R.string.rc_voip_mo_reject);
-                        break;
-                    case NO_RESPONSE:
-                    case BUSY_LINE:
-                        msgContent = mContext.getString(R.string.rc_voip_mo_no_response);
-                        break;
-                    case REMOTE_BUSY_LINE:
-                        msgContent = mContext.getString(R.string.rc_voip_mt_busy);
-                        break;
-                    case REMOTE_CANCEL:
-                        msgContent = mContext.getString(R.string.rc_voip_mt_cancel);
-                        break;
-                    case REMOTE_REJECT:
-                        msgContent = mContext.getString(R.string.rc_voip_mt_reject);
-                        break;
-                    case REMOTE_NO_RESPONSE:
-                        msgContent = mContext.getString(R.string.rc_voip_mt_no_response);
-                        break;
                     case HANGUP:
                     case REMOTE_HANGUP:
-                        msgContent = mContext.getString(R.string.rc_voip_call_time_length);
                         if (mTime >= 3600) {
-                            msgContent += String.format("%d:%02d:%02d", mTime / 3600, (mTime % 3600) / 60, (mTime % 60));
+                            extra = String.format("%d:%02d:%02d", mTime / 3600, (mTime % 3600) / 60, (mTime % 60));
                         } else {
-                            msgContent += String.format("%02d:%02d", (mTime % 3600) / 60, (mTime % 60));
+                            extra = String.format("%02d:%02d", (mTime % 3600) / 60, (mTime % 60));
                         }
-                        break;
-                    case NETWORK_ERROR:
-                    case REMOTE_NETWORK_ERROR:
-                        msgContent = mContext.getString(R.string.rc_voip_call_interrupt);
                         break;
                 }
 
-                if (!TextUtils.isEmpty(msgContent) && !TextUtils.isEmpty(senderId)) {
-                    CallSTerminateMessage message = new CallSTerminateMessage(msgContent);
+                if (!TextUtils.isEmpty(senderId)) {
+                    CallSTerminateMessage message = new CallSTerminateMessage();
                     message.setReason(reason);
                     message.setMediaType(callProfile.getMediaType());
+                    message.setExtra(extra);
                     if (senderId.equals(callProfile.getSelfUserId())) {
                         message.setDirection("MO");
                     } else {
