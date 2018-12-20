@@ -1,11 +1,14 @@
 package io.rong.callkit;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -13,21 +16,26 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.rong.callkit.util.ICallScrollView;
 import io.rong.imkit.widget.AsyncImageView;
+import io.rong.imlib.model.Group;
 import io.rong.imlib.model.UserInfo;
 
 /**
  * Created by weiqinxiao on 16/3/25.
+ * coming 横向显示
+ * 多人语音_被叫
  */
-public class CallUserGridView extends ScrollView {
+public class CallUserGridView extends HorizontalScrollView implements ICallScrollView {
     private Context context;
     private boolean enableTitle;
     private LinearLayout linearLayout;
 
-    private final static int CHILDREN_PER_LINE = 4;
-    private final static int CHILDREN_SPACE = 10;
+    private static int CHILDREN_PER_LINE = 5;
+    private final static int CHILDREN_SPACE = 13;
 
     private int portraitSize;
+    private boolean isHorizontal=true;
 
     public CallUserGridView(Context context) {
         super(context);
@@ -36,14 +44,20 @@ public class CallUserGridView extends ScrollView {
 
     public CallUserGridView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        TypedArray a = context.obtainStyledAttributes(attrs,
+                R.styleable.CallUserGridView);
+        isHorizontal=a.getBoolean(R.styleable.CallUserGridView_CallGridViewOrientation,true);
+        CHILDREN_PER_LINE=a.getInteger(R.styleable.CallUserGridView_CallGridViewChildrenPerLine,4);
         init(context);
+        a.recycle();
     }
 
     private void init(Context context) {
         this.context = context;
         linearLayout = new LinearLayout(context);
         linearLayout.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+//        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
         addView(linearLayout);
     }
 
@@ -81,15 +95,21 @@ public class CallUserGridView extends ScrollView {
         }
         if (lastContainer == null) {
             lastContainer = new LinearLayout(context);
-            lastContainer.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            lastContainer.setGravity(Gravity.CENTER);
+            lastContainer.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT));
+            lastContainer.setGravity(Gravity.CENTER_HORIZONTAL);
             lastContainer.setPadding(0, dip2pix(CHILDREN_SPACE), 0, 0);
             linearLayout.addView(lastContainer);
         }
 
         LinearLayout child = (LinearLayout)LayoutInflater.from(context).inflate(R.layout.rc_voip_user_info, null);
         child.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        child.setPadding(0, 0, dip2pix(CHILDREN_SPACE), 0);
+
+        if(containerCount==0){
+            child.setPadding(dip2pix(15), 0, dip2pix(CHILDREN_SPACE), 0);
+        }else{
+            child.setPadding(0, 0, dip2pix(CHILDREN_SPACE), 0);
+        }
         child.setTag(childId);
         if (portraitSize > 0) {
             child.findViewById(R.id.rc_user_portrait_layout).setLayoutParams(new LinearLayout.LayoutParams(portraitSize, portraitSize));
@@ -114,6 +134,11 @@ public class CallUserGridView extends ScrollView {
         lastContainer.addView(child);
     }
 
+
+    @Override
+    public void setScrollViewOverScrollMode(int mode) {
+        this.setOverScrollMode(mode);
+    }
 
     public void removeChild(String childId) {
         int containerCount = linearLayout.getChildCount();

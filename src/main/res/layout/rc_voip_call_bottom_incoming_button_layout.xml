@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/rc_voip_two_btn"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingBottom="20dp"
+    android:paddingBottom="30dp"
     android:layout_gravity="bottom">
+    <!--接听和挂断-->
 
     <RelativeLayout
+        android:id="@+id/callkit_callhang_up_left"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="left"
-        android:layout_marginLeft="60dp">
+        android:layout_marginLeft="72.5dp">
 
         <ImageView
             android:id="@+id/rc_voip_call_hang_up"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/callkit_voip_imagebutton_65_centerCrop"
             android:layout_centerHorizontal="true"
             android:onClick="onHangupBtnClick"
             android:src="@drawable/rc_voip_hangup_selector" />
@@ -25,33 +26,32 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/rc_voip_call_hang_up"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="10dp"
             style="@style/rc_voip_text_style_style"
             android:text="@string/rc_voip_hangup" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:layout_marginRight="60dp">
+        android:layout_alignParentRight="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginRight="72.5dp"
+        android:layout_height="wrap_content">
 
         <ImageView
             android:id="@+id/rc_voip_call_answer_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/callkit_voip_imagebutton_65_centerCrop"
             android:layout_centerHorizontal="true"
-            android:onClick="onReceiveBtnClick"
-            android:src="@drawable/rc_voip_audio_answer_selector" />
+            android:onClick="onReceiveBtnClick" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/rc_voip_call_answer_btn"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="10dp"
             android:text="@string/rc_voip_answer"
             style="@style/rc_voip_text_style_style" />
     </RelativeLayout>
 
-</FrameLayout>
+</RelativeLayout>

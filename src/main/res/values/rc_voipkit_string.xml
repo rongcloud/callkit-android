@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="callkit_selected_contacts_count">已选择 %d 人</string>
+    <string name="callkit_voip_ok">确定</string>
     <string name="rc_voip_video">视频聊天</string>
     <string name="rc_voip_audio">语音聊天</string>
     <string name="rc_voip_call_waiting">正在等待对方接受邀请...</string>
@@ -16,8 +18,8 @@
     <string name="rc_voip_call_video_start_fail">正在进行视频通话，请稍后再试</string>
     <string name="rc_voip_call_other">其它设备已处理</string>
 
-    <string name="rc_voip_audio_call_inviting">邀请你进行语音聊天...</string>
-    <string name="rc_voip_video_call_inviting">邀请你进行视频聊天...</string>
+    <string name="rc_voip_audio_call_inviting">正在邀请你进行语音聊天...</string>
+    <string name="rc_voip_video_call_inviting">正在邀请你进行视频聊天...</string>
     <string name="rc_voip_video_ended">视频聊天已经结束</string>
     <string name="rc_voip_video_no_response">视频聊天未接听</string>
     <string name="rc_voip_audio_ended">语音聊天已经结束</string>
@@ -61,4 +63,6 @@
     <string name="rc_voip_close">关闭</string>
     <string name="rc_voip_video_observer">为了保证会议流畅，后续用户只能以观众模式加入，是否继续？</string>
     <string name="rc_voip_observer_hint">当前您的身份是观察者，其他人看不见您。\n如需发言请举手。</string>
+    <string name="rc_voip_video_numberofobservers">最多允许%d人同时视频聊天</string>
+    <string name="rc_voip_audio_numberofobservers">最多允许%d人同时语音聊天</string>
 </resources>

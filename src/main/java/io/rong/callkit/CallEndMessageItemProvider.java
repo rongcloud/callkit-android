@@ -91,6 +91,7 @@ public class CallEndMessageItemProvider extends IContainerItemProvider.MessagePr
                 break;
             case NETWORK_ERROR:
             case REMOTE_NETWORK_ERROR:
+            case INIT_VIDEO_ERROR:
                 msgContent = v.getResources().getString(R.string.rc_voip_call_interrupt);
                 break;
             case OTHER_DEVICE_HAD_ACCEPTED:
@@ -106,10 +107,12 @@ public class CallEndMessageItemProvider extends IContainerItemProvider.MessagePr
                 drawable = v.getResources().getDrawable(R.drawable.rc_voip_video_right);
                 drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
                 holder.message.setCompoundDrawables(null, null, drawable, null);
+                holder.message.setTextColor(v.getResources().getColor(R.color.rc_voip_color_right));
             } else {
                 drawable = v.getResources().getDrawable(R.drawable.rc_voip_video_left);
                 drawable.setBounds(0, 0,  drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
                 holder.message.setCompoundDrawables(drawable, null, null, null);
+                holder.message.setTextColor(v.getResources().getColor(R.color.rc_voip_color_left));
             }
         } else {
             if (direction != null && direction.equals("MO")) {
@@ -121,6 +124,7 @@ public class CallEndMessageItemProvider extends IContainerItemProvider.MessagePr
                 }
                 drawable.setBounds(0, 0,  drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
                 holder.message.setCompoundDrawables(null, null, drawable, null);
+                holder.message.setTextColor(v.getResources().getColor(R.color.rc_voip_color_right));
             } else {
                 if (content.getReason().equals(RongCallCommon.CallDisconnectedReason.HANGUP) ||
                         content.getReason().equals(RongCallCommon.CallDisconnectedReason.REMOTE_HANGUP)) {
@@ -130,6 +134,7 @@ public class CallEndMessageItemProvider extends IContainerItemProvider.MessagePr
                 }
                 drawable.setBounds(0, 0,  drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
                 holder.message.setCompoundDrawables(drawable, null, null, null);
+                holder.message.setTextColor(v.getResources().getColor(R.color.rc_voip_color_left));
             }
         }
     }

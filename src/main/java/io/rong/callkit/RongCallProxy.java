@@ -35,12 +35,12 @@ public class RongCallProxy implements IRongCallListener {
     public void setCallListener(IRongCallListener listener) {
         RLog.d(TAG, "setCallListener listener = " + listener);
         this.mCallListener = listener;
-        if (listener != null) {
-            CallDisconnectedInfo callDisconnectedInfo = mCachedCallQueue.poll();
-            if (callDisconnectedInfo != null) {
-                listener.onCallDisconnected(callDisconnectedInfo.mCallSession, callDisconnectedInfo.mReason);
-            }
-        }
+//        if (listener != null) {
+//            CallDisconnectedInfo callDisconnectedInfo = mCachedCallQueue.poll();
+//            if (callDisconnectedInfo != null) {
+//                listener.onCallDisconnected(callDisconnectedInfo.mCallSession, callDisconnectedInfo.mReason);
+//            }
+//        }
     }
 
     @Override
@@ -162,6 +162,13 @@ public class RongCallProxy implements IRongCallListener {
     public void onNotifyHostControlUserDevice(String userId, int dType, int isOpen) {
         if (mCallListener != null) {
             mCallListener.onNotifyHostControlUserDevice(userId, dType, isOpen);
+        }
+    }
+
+    @Override
+    public void onNotifyAnswerUpgradeObserverToNormalUser(String userId, SurfaceView remoteVideo) {
+        if (mCallListener != null) {
+            mCallListener.onNotifyAnswerUpgradeObserverToNormalUser(userId,remoteVideo);
         }
     }
 

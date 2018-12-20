@@ -3,6 +3,8 @@ package io.rong.callkit;
 import android.content.Context;
 import android.content.Intent;
 
+import com.bailingcloud.bailingvideo.engine.binstack.util.FinLog;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +43,7 @@ public class RongCallModule implements IExternalModule {
         RongCallClient.getInstance().setVoIPCallListener(RongCallProxy.getInstance());
         // 开启音视频日志，如果不需要开启，则去掉下面这句。
         RongCallClient.getInstance().setEnablePrintLog(true);
+        RongCallClient.getInstance().setVideoProfile(RongCallCommon.CallVideoProfile.VIDEO_PROFILE_480P);
     }
 
     @Override
@@ -49,17 +52,19 @@ public class RongCallModule implements IExternalModule {
         IRongReceivedCallListener callListener = new IRongReceivedCallListener() {
             @Override
             public void onReceivedCall(final RongCallSession callSession) {
-                RLog.d("VoIPReceiver", "onReceivedCall");
+                FinLog.d("VoIPReceiver", "onReceivedCall");
                 if (mViewLoaded) {
+                    FinLog.d("VoIPReceiver", "onReceivedCall->onCreate->mViewLoaded=true");
                     startVoIPActivity(mContext, callSession, false);
                 } else {
+                    FinLog.d("VoIPReceiver", "onReceivedCall->onCreate->mViewLoaded=false");
                     mCallSession = callSession;
                 }
             }
 
             @Override
             public void onCheckPermission(RongCallSession callSession) {
-                RLog.d("VoIPReceiver", "onCheckPermissions");
+                FinLog.d("VoIPReceiver", "onCheckPermissions");
                 if (mViewLoaded) {
                     startVoIPActivity(mContext, callSession, true);
                 }
@@ -87,8 +92,15 @@ public class RongCallModule implements IExternalModule {
     @Override
     public List<IPluginModule> getPlugins(Conversation.ConversationType conversationType) {
         List<IPluginModule> pluginModules = new ArrayList<>();
-        pluginModules.add(new AudioPlugin());
-        pluginModules.add(new VideoPlugin());
+        try {
+            if (RongCallClient.getInstance().isVoIPEnabled(mContext)) {
+                pluginModules.add(new AudioPlugin());
+                pluginModules.add(new VideoPlugin());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            RLog.i(TAG,"getPlugins()->Error :"+e.getMessage());
+        }
         return pluginModules;
     }
 
@@ -108,6 +120,7 @@ public class RongCallModule implements IExternalModule {
      */
     private void startVoIPActivity(Context context, final RongCallSession callSession, boolean startForCheckPermissions) {
         RLog.d("VoIPReceiver", "startVoIPActivity");
+        FinLog.d("VoIPReceiver", "startVoIPActivity");
         String action;
         if (callSession.getConversationType().equals(Conversation.ConversationType.DISCUSSION)
                 || callSession.getConversationType().equals(Conversation.ConversationType.GROUP)

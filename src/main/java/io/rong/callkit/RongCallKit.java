@@ -191,7 +191,7 @@ public class RongCallKit {
             return false;
         }
         if (!RongIMClient.getInstance().getCurrentConnectionStatus().equals(RongIMClient.ConnectionStatusListener.ConnectionStatus.CONNECTED)) {
-            Toast.makeText(context, context.getResources().getString(io.rong.callkit.R.string.rc_voip_call_network_error), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, context.getResources().getString(R.string.rc_voip_call_network_error), Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;
@@ -228,7 +228,7 @@ public class RongCallKit {
          * @param groupId 群组id
          * @param result  getMemberList可以同步返回，也可以异步返回。
          *                同步返回的情况下，直接返回成员列表。
-         *                异步返回的情况下，需要在异步返回的时候调用{@link RongCallKit.OnGroupMembersResult#onGotMemberList(ArrayList)}
+         *                异步返回的情况下，需要在异步返回的时候调用{@link OnGroupMembersResult#onGotMemberList(ArrayList)}
          *                来通知CallKit刷新列表。
          * @return 同步返回的时候返回列表，异步返回直接返回null。
          */
@@ -252,7 +252,7 @@ public class RongCallKit {
      * <p>设置后，当 {@link CallSelectMemberActivity} 界面展示群组成员时，会回调 {@link GroupMembersProvider#getMemberList(String, OnGroupMembersResult)}，
      * 使用者只需要根据对应的 groupId 提供对应的群组成员。
      * 如果需要异步从服务器获取群组成员，使用者可以在此方法中发起异步请求，然后返回 null 信息。
-     * 在异步请求结果返回后，根据返回的结果调用 {@link RongCallKit.OnGroupMembersResult#onGotMemberList(ArrayList)}  刷新信息。</p>
+     * 在异步请求结果返回后，根据返回的结果调用 {@link OnGroupMembersResult#onGotMemberList(ArrayList)}  刷新信息。</p>
      *
      * @param groupMembersProvider 群组成员提供者。
      */

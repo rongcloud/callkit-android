@@ -9,15 +9,15 @@
 
     <FrameLayout
         android:id="@+id/rc_user_portrait_layout"
-        android:layout_width="60dp"
-        android:layout_height="60dp">
+        android:layout_width="55dp"
+        android:layout_height="55dp">
 
         <io.rong.imkit.widget.AsyncImageView
             android:id="@id/rc_user_portrait"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@android:color/transparent"
-            app:RCCornerRadius="3dp"
+            app:RCCornerRadius="@dimen/asynimg_cornerRadius8dp"
             app:RCDefDrawable="@drawable/rc_default_portrait"/>
 
         <TextView
@@ -33,13 +33,14 @@
 
     <TextView
         android:id="@id/rc_user_name"
-        android:layout_width="60dp"
+        android:layout_width="55dp"
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:singleLine="true"
         android:layout_gravity="center"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="12dp"
         android:gravity="center"
+        android:textSize="12sp"
         android:text="Susan"
-        android:textColor="#ffffff" />
+        android:textColor="@color/rc_voip_white" />
 </LinearLayout>

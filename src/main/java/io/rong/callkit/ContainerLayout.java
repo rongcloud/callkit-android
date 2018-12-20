@@ -61,7 +61,7 @@ public class ContainerLayout extends RelativeLayout {
                 layoutParams = new LayoutParams(layoutParamsWidth, screenHeight);
             }
         } else {
-            layoutParams = new LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+            layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         }
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
         return layoutParams;
