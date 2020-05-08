@@ -66,6 +66,9 @@ public class AudioPlugin implements IPluginModule, IPluginRequestPermissionResul
     }
 
     private void startAudioActivity(Fragment currentFragment, final RongExtension extension) {
+        if (context == null){
+            return;
+        }
         RongCallSession profile = RongCallClient.getInstance().getCallSession();
         if (profile != null && profile.getStartTime() > 0) {
             Toast.makeText(context,
@@ -76,9 +79,7 @@ public class AudioPlugin implements IPluginModule, IPluginRequestPermissionResul
                     .show();
             return;
         }
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-        if (networkInfo == null || !networkInfo.isConnected() || !networkInfo.isAvailable()) {
+        if (!CallKitUtils.isNetworkAvailable(context)) {
             Toast.makeText(context, currentFragment.getString(R.string.rc_voip_call_network_error), Toast.LENGTH_SHORT).show();
             return;
         }
@@ -93,7 +94,7 @@ public class AudioPlugin implements IPluginModule, IPluginRequestPermissionResul
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             Log.i(TAG,"getPackageName==="+context.getPackageName());
             intent.setPackage(context.getPackageName());
-            context.getApplicationContext().startActivity(intent);
+            context.startActivity(intent);
         } else if (conversationType.equals(Conversation.ConversationType.DISCUSSION)) {
             RongIM.getInstance().getDiscussion(targetId, new RongIMClient.ResultCallback<Discussion>() {
                 @Override
@@ -145,7 +146,7 @@ public class AudioPlugin implements IPluginModule, IPluginRequestPermissionResul
         intent.putStringArrayListExtra("observers",observers);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setPackage(context.getPackageName());
-        context.getApplicationContext().startActivity(intent);
+        context.startActivity(intent);
     }
 
     @Override
@@ -153,7 +154,7 @@ public class AudioPlugin implements IPluginModule, IPluginRequestPermissionResul
         if (PermissionCheckUtil.checkPermissions(fragment.getActivity(), permissions)) {
             startAudioActivity(fragment, extension);
         } else {
-            extension.showRequestPermissionFailedAlter(PermissionCheckUtil.getNotGrantedPermissionMsg(context, permissions, grantResults));
+            extension.showRequestPermissionFailedAlter(PermissionCheckUtil.getNotGrantedPermissionMsg(fragment.getContext(), permissions, grantResults));
         }
         return true;
     }

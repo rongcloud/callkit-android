@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="callkit_selected_contacts_count">%d contact(s) selected</string>
+    <string name="callkit_voip_ok">OK</string>
     <string name="rc_voip_video">Video Call</string>
     <string name="rc_voip_audio">Voice Call</string>
     <string name="rc_voip_call_waiting">Waiting for response...</string>
@@ -18,17 +20,24 @@
 
     <string name="rc_voip_audio_call_inviting">Invites you to voice call</string>
     <string name="rc_voip_video_call_inviting">Invites you to video call</string>
+
+    <string name="rc_voip_notificatio_video_call_inviting">Invites you to video call</string>
+    <string name="rc_voip_notificatio_audio_call_inviting">Invites you to voice call</string>
+    <string name="rc_voip_notificatio_audio_call_inviting_general">You\'ve got a voice chat invitation</string>
+    <string name="rc_voip_notificatio_video_call_inviting_general">You\'ve got a video chat invitation</string>
+
+
     <string name="rc_voip_video_ended">Video call ended</string>
     <string name="rc_voip_video_no_response">Video call no answer</string>
     <string name="rc_voip_audio_ended">Voice call ended</string>
     <string name="rc_voip_audio_no_response">Voice call no answer</string>
-    <string name="rc_voip_mute">mute</string>
+    <string name="rc_voip_mute">Mute</string>
     <string name="rc_voip_hangup">Hang up</string>
     <string name="rc_voip_answer">Accept</string>
     <string name="rc_voip_camera">Camera</string>
     <string name="rc_voip_handfree">Speaker</string>
-    <string name="rc_voip_disable_camera">Camera</string>
-    <string name="rc_voip_enable_camera">Camera</string>
+    <string name="rc_voip_disable_camera">Turn off camera</string>
+    <string name="rc_voip_enable_camera">Turn on camera</string>
     <string name="rc_voip_participant_users">Members</string>
     <string name="rc_voip_mo_cancel">Cancelled</string>
     <string name="rc_voip_mo_reject">Declined</string>
@@ -37,7 +46,7 @@
     <string name="rc_voip_mt_reject">Declined</string>
     <string name="rc_voip_mt_no_response">No answer</string>
     <string name="rc_voip_call_time_length">Duration&#160;</string>
-    <string name="rc_voip_mt_busy">The other user may be busy now. Try again later.</string>
+    <string name="rc_voip_mt_busy">The other user may be busy now.</string>
     <string name="rc_voip_message_audio">[Voice Call]</string>
     <string name="rc_voip_message_video">[Video Call]</string>
     <string name="rc_voip_switch_to_audio">Switch to voice call</string>
@@ -48,4 +57,16 @@
     <string name="rc_audio_call_on_going">Tap to continue as voice call in progress</string>
     <string name="rc_video_call_on_going">Tap to continue as video call is on</string>
     <string name="rc_voip_over_limit">Up to %d members</string>
+    <string name="rc_voip_connecting">Connecting...</string>
+    <string name="rc_voip_unstable_call_connection">Unstable call connection</string>
+    <string name="rc_voip_add_member">Select Members</string>
+    <string name="rc_voip_engine_notfound">If the RongCloud RTC service is not opened, please open it;If the service has been opened, please re-install the application after 1-2 hours.</string>
+
+    <string name="rc_select_contact">Select contacts</string>
+    <string name="rc_search">Search</string>
+    <string name="rc_background_start_actvity_deny">Your system turned off \"Display pop-up windows while running in the background\" permission,
+Please turn it on in the application permission management page of \"Settings\"</string>
+
+    <string name="rc_voip_audio_refuse">Voice call rejected</string>
+    <string name="rc_voip_video_refuse">Video call rejected</string>
 </resources>

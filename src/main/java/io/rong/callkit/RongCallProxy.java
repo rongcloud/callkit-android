@@ -2,6 +2,7 @@ package io.rong.callkit;
 
 import android.view.SurfaceView;
 
+import java.util.HashMap;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -117,58 +118,56 @@ public class RongCallProxy implements IRongCallListener {
     }
 
     @Override
-    public void onWhiteBoardURL(String url) {
+    public void onRemoteMicrophoneDisabled(String userId, boolean disabled) {
         if (mCallListener != null) {
-            mCallListener.onWhiteBoardURL(url);
+            mCallListener.onRemoteMicrophoneDisabled(userId, disabled);
         }
     }
 
     @Override
-    public void onNetWorkLossRate(int lossRate) {
+    public void onNetworkSendLost(int lossRate, int delay) {
         if (mCallListener != null) {
-            mCallListener.onNetWorkLossRate(lossRate);
+            mCallListener.onNetworkSendLost(lossRate, delay);
         }
     }
 
     @Override
-    public void onNotifySharingScreen(String userId, boolean isSharing) {
+    public void onFirstRemoteVideoFrame(String userId, int height, int width) {
         if (mCallListener != null) {
-            mCallListener.onNotifySharingScreen(userId, isSharing);
+            mCallListener.onFirstRemoteVideoFrame(userId, height,width);
         }
     }
 
     @Override
-    public void onNotifyDegradeNormalUserToObserver(String userId) {
+    public void onAudioLevelSend(String audioLevel) {
         if (mCallListener != null) {
-            mCallListener.onNotifyDegradeNormalUserToObserver(userId);
+            mCallListener.onAudioLevelSend(audioLevel);
+        }
+    }
+
+    public void onRemoteUserPublishVideoStream(String userId, String streamId, String tag, SurfaceView surfaceView) {
+        if (mCallListener != null) {
+            mCallListener.onRemoteUserPublishVideoStream(userId, streamId, tag, surfaceView);
         }
     }
 
     @Override
-    public void onNotifyAnswerObserverRequestBecomeNormalUser(String userId, long status) {
+    public void onAudioLevelReceive(HashMap<String, String> audioLevel) {
         if (mCallListener != null) {
-            mCallListener.onNotifyAnswerObserverRequestBecomeNormalUser(userId, status);
+            mCallListener.onAudioLevelReceive(audioLevel);
+        }
+    }
+
+    public void onRemoteUserUnpublishVideoStream(String userId, String streamId, String tag) {
+        if (mCallListener != null) {
+            mCallListener.onRemoteUserUnpublishVideoStream(userId, streamId, tag);
         }
     }
 
     @Override
-    public void onNotifyUpgradeObserverToNormalUser() {
+    public void onNetworkReceiveLost(String userId, int lossRate) {
         if (mCallListener != null) {
-            mCallListener.onNotifyUpgradeObserverToNormalUser();
-        }
-    }
-
-    @Override
-    public void onNotifyHostControlUserDevice(String userId, int dType, int isOpen) {
-        if (mCallListener != null) {
-            mCallListener.onNotifyHostControlUserDevice(userId, dType, isOpen);
-        }
-    }
-
-    @Override
-    public void onNotifyAnswerUpgradeObserverToNormalUser(String userId, SurfaceView remoteVideo) {
-        if (mCallListener != null) {
-            mCallListener.onNotifyAnswerUpgradeObserverToNormalUser(userId,remoteVideo);
+            mCallListener.onNetworkReceiveLost(userId, lossRate);
         }
     }
 

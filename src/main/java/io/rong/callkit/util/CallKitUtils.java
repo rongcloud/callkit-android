@@ -3,8 +3,11 @@ package io.rong.callkit.util;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -94,8 +97,8 @@ public class CallKitUtils {
      */
     public static double div(double vl1, double vl2) {
 
-        BigDecimal b1 = new BigDecimal(vl1);
-        BigDecimal b2 = new BigDecimal(vl2);
+        BigDecimal b1 = BigDecimal.valueOf(vl1);
+        BigDecimal b2 = BigDecimal.valueOf(vl2);
         //4 表示表示需要精确到小数点以后几位。当发生除不尽的情况时，参数指定精度，以后的数字四舍五入。
         return b1.divide(b2, 4, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
@@ -107,7 +110,7 @@ public class CallKitUtils {
      * @return
      */
     public static int getInt(double number) {
-        BigDecimal bd = new BigDecimal(number).setScale(0, BigDecimal.ROUND_HALF_UP);
+        BigDecimal bd = BigDecimal.valueOf(number).setScale(0, BigDecimal.ROUND_HALF_UP);
         return Integer.parseInt(bd.toString());
     }
 
@@ -146,7 +149,11 @@ public class CallKitUtils {
     }
 
     public static String[] getCallpermissions() {
-        String[] permissions = new String[]{Manifest.permission.PROCESS_OUTGOING_CALLS, Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.INTERNET, Manifest.permission.READ_PHONE_STATE, Manifest.permission.MODIFY_AUDIO_SETTINGS, Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN};
+        String[] permissions = new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.INTERNET, Manifest.permission.MODIFY_AUDIO_SETTINGS,
+                Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN,
+        Manifest.permission.READ_PHONE_STATE,Manifest.permission.READ_CALL_LOG};
         return permissions;
     }
 
@@ -172,5 +179,29 @@ public class CallKitUtils {
         stringBuffer.append(val1);
         stringBuffer.append(val2);
         return stringBuffer.toString();
+    }
+
+
+    /**
+     * 是否是debug状态
+     * @param context
+     * @return
+     */
+    public static boolean isDebug(Context context) {
+        try {
+            ApplicationInfo info = context.getApplicationInfo();
+            return (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if (networkInfo == null || !networkInfo.isConnected() || !networkInfo.isAvailable()) {
+            return false;
+        }
+        return true;
     }
 }

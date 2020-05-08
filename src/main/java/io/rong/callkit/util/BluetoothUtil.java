@@ -16,8 +16,6 @@ import android.net.NetworkInfo;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.bailingcloud.bailingvideo.engine.binstack.util.FinLog;
-
 import org.w3c.dom.Text;
 
 import java.lang.reflect.Method;
@@ -288,5 +286,31 @@ public class BluetoothUtil {
         }
         RLog.i(TAG,"isSupportBluetooth = "+bool);
         return bool;
+    }
+
+    public static void startBlueToothSco(Context context) {
+        AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        if (am != null) {
+            if (am.getMode() != AudioManager.MODE_IN_COMMUNICATION) {
+                am.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            }
+            if (!am.isBluetoothScoOn()) {
+                am.startBluetoothSco();
+                am.setBluetoothScoOn(false);
+            }
+        }
+    }
+
+    public static void stopBlueToothSco(Context context) {
+        AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        if (am != null) {
+//            if (am.getMode() != AudioManager.MODE_IN_COMMUNICATION) {
+//                am.setMode(AudioManager.MODE_IN_COMMUNICATION);
+//            }
+            if (am.isBluetoothScoOn()) {
+                am.stopBluetoothSco();
+                am.setBluetoothScoOn(false);
+            }
+        }
     }
 }

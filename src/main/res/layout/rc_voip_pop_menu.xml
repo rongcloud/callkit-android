@@ -7,7 +7,7 @@
 
     <LinearLayout
         android:id="@+id/voipItemAdd"
-        android:layout_width="120dp"
+        android:layout_width="160dp"
         android:layout_height="40dp"
         android:orientation="horizontal">
 
@@ -35,6 +35,7 @@
         android:id="@+id/voipItemWhiteboard"
         android:layout_width="120dp"
         android:layout_height="40dp"
+        android:visibility="gone"
         android:orientation="horizontal">
 
         <ImageView

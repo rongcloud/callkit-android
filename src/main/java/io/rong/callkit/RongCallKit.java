@@ -10,7 +10,9 @@ import java.util.ArrayList;
 
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
+import io.rong.calllib.RongCallMissedListener;
 import io.rong.calllib.RongCallSession;
+import io.rong.imkit.manager.InternalModuleManager;
 import io.rong.imkit.utilities.PermissionCheckUtil;
 import io.rong.imlib.RongIMClient;
 import io.rong.imlib.model.Conversation;
@@ -117,9 +119,10 @@ public class RongCallKit {
     }
 
     /**
-     *  发起的多人通话，不依赖群、讨论组等
+     * 发起的多人通话，不依赖群、讨论组等
+     *
      * @param context
-     * @param userIds 邀请的成员
+     * @param userIds    邀请的成员
      * @param oberverIds 邀请的以观察者身份加入房间的成员
      * @param mediaType
      */
@@ -205,7 +208,7 @@ public class RongCallKit {
      */
     public static boolean isInVoipCall(Context context) {
         RongCallSession callSession = RongCallClient.getInstance().getCallSession();
-        if (callSession != null && callSession.getActiveTime() > 0) {
+        if (callSession != null && callSession.getStartTime() > 0) {
             Toast.makeText(context,
                     callSession.getMediaType() == RongCallCommon.CallMediaType.AUDIO ?
                             context.getResources().getString(R.string.rc_voip_call_audio_start_fail) :
@@ -285,5 +288,31 @@ public class RongCallKit {
      */
     public static RongCallCustomerHandlerListener getCustomerHandlerListener() {
         return customerHandlerListener;
+    }
+
+
+    public static void setRongCallMissedListener(final RongCallMissedListener rongCallMissedListener) {
+        RongCallModule.setMissedCallListener(rongCallMissedListener);
+    }
+
+
+    /**
+     * 防止 voip 通话页面被会话列表、会话页面或者开发者 app 层页面覆盖。
+     * 使用 maven 接入 callkit 的开发者在 app 层主页面的 onCreate 调用此方法即可。
+     * 针对导入 callkit 源码的开发者，不使用会话列表和会话页面我们建议在
+     * {@link RongCallModule#onCreate(Context)}方法中设置 mViewLoaded 为 true 即可。
+     */
+    public static void onViewCreated() {
+        InternalModuleManager.getInstance().onLoaded();
+    }
+
+    /**
+     * 忽略 voip 来电，不弹出来电界面，直接挂断。
+     *
+     * @param ignore  true 时忽略来电，false 恢复默认值接收来电，弹出来电界面。
+     *                此接口针对音视频会议过程中不能被 voip 打断等的细分场景
+     */
+    public static void ignoreIncomingCall(boolean ignore) {
+        RongCallModule.ignoreIncomingCall(ignore);
     }
 }

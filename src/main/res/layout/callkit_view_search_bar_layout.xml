@@ -36,7 +36,7 @@
         android:layout_toRightOf="@id/iv_icon"
         android:layout_toStartOf="@id/iv_clear"
         android:background="@null"
-        android:hint="搜索"
+        android:hint="@string/rc_search"
         android:textColorHint="@color/callkit_search_text_color_hint"
         android:imeOptions="actionSearch"
         android:inputType="text"

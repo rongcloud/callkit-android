@@ -2,6 +2,7 @@ package io.rong.callkit;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -200,6 +201,8 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
                 imageView.setAvatar(userInfo.getPortraitUri());
                 if (enableTitle) {
                     TextView textView = (TextView)child.findViewById(R.id.rc_user_name);
+                    textView.setLines(1);
+                    textView.setEllipsize(TextUtils.TruncateAt.END);
                     textView.setText(userInfo.getName());
                 }
             }

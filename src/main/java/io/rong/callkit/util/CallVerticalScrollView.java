@@ -2,6 +2,7 @@ package io.rong.callkit.util;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -185,6 +186,8 @@ public class CallVerticalScrollView extends ScrollView implements ICallScrollVie
                 imageView.setAvatar(userInfo.getPortraitUri());
                 if (enableTitle) {
                     TextView textView = (TextView)child.findViewById(R.id.rc_user_name);
+                    textView.setLines(1);
+                    textView.setEllipsize(TextUtils.TruncateAt.END);
                     textView.setText(userInfo.getName());
                 }
             }
