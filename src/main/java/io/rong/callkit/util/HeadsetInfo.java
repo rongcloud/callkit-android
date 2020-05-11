@@ -1,9 +1,6 @@
 package io.rong.callkit.util;
 
-/**
- * Created by Dengxudong on 2018/8/23.
- */
-
+/** Created by Dengxudong on 2018/8/23. */
 public class HeadsetInfo {
     private boolean isInsert;
     private HeadsetType type;
@@ -29,15 +26,10 @@ public class HeadsetInfo {
         this.type = type;
     }
 
-
     public enum HeadsetType {
-        /**
-         * 有线耳机
-         */
+        /** 有线耳机 */
         WiredHeadset(0),
-        /**
-         * 蓝牙耳机
-         */
+        /** 蓝牙耳机 */
         BluetoothA2dp(1);
 
         int value;

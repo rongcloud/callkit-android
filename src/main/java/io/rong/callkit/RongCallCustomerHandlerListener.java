@@ -1,15 +1,12 @@
 package io.rong.callkit;
 
-
 import android.content.Context;
 import android.content.Intent;
 import android.view.SurfaceView;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallSession;
+import java.util.ArrayList;
+import java.util.List;
 
 public interface RongCallCustomerHandlerListener {
 
@@ -21,7 +18,8 @@ public interface RongCallCustomerHandlerListener {
 
     void onCallConnected(RongCallSession callSession, SurfaceView localVideo);
 
-    void onCallDisconnected(RongCallSession callSession, RongCallCommon.CallDisconnectedReason reason);
+    void onCallDisconnected(
+            RongCallSession callSession, RongCallCommon.CallDisconnectedReason reason);
 
-    void onCallMissed(RongCallSession callSession ,RongCallCommon.CallDisconnectedReason reason);
+    void onCallMissed(RongCallSession callSession, RongCallCommon.CallDisconnectedReason reason);
 }

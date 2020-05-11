@@ -8,13 +8,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
 
+import io.rong.callkit.RongCallModule;
+
 public class ActivityStartCheckUtils {
     public interface ActivityStartResultCallback {
         void onStartActivityResult(boolean isActivityStarted);
     }
 
-    private static final int TIME_DELAY = 1000;
-    private static ActivityStartCheckUtils sInstance;
+    private static final int TIME_DELAY = 3000;
     private boolean mPostDelayIsRunning;
     private String mClassName;
     private Handler mHandler = new Handler();
@@ -22,18 +23,15 @@ public class ActivityStartCheckUtils {
     private Context mAppContext;
     private ActivityStartResultCallback activityStartResultCallback;
 
-    private ActivityStartCheckUtils() {
+    private static class SingletonHolder {
+
+      static ActivityStartCheckUtils sInstance = new ActivityStartCheckUtils();
     }
 
+    private ActivityStartCheckUtils() {}
+
     public static ActivityStartCheckUtils getInstance() {
-        if (sInstance == null) {
-            synchronized (ActivityStartCheckUtils.class) {
-                if (sInstance == null) {
-                    sInstance = new ActivityStartCheckUtils();
-                }
-            }
-        }
-        return sInstance;
+     return SingletonHolder.sInstance;
     }
 
     public void registerActivityLifecycleCallbacks(Context context) {
@@ -41,47 +39,38 @@ public class ActivityStartCheckUtils {
         mAppContext = context.getApplicationContext();
         Application application = (Application) mAppContext;
 
-        if (application == null)
-            return;
+        if (application == null) return;
 
-        application.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
-            @Override
-            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+        application.registerActivityLifecycleCallbacks(
+                new Application.ActivityLifecycleCallbacks() {
+                    @Override
+                    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {}
 
-            }
+                    @Override
+                    public void onActivityStarted(Activity activity) {}
 
-            @Override
-            public void onActivityStarted(Activity activity) {
+                    @Override
+                    public void onActivityResumed(Activity activity) {
+                        topActivity = activity;
+                        handleIncomingCallNotify();
+                    }
 
-            }
+                    @Override
+                    public void onActivityPaused(Activity activity) {}
 
-            @Override
-            public void onActivityResumed(Activity activity) {
-                topActivity = activity;
-            }
+                    @Override
+                    public void onActivityStopped(Activity activity) {
+                        if (topActivity == activity) {
+                            topActivity = null;
+                        }
+                    }
 
-            @Override
-            public void onActivityPaused(Activity activity) {
+                    @Override
+                    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {}
 
-            }
-
-            @Override
-            public void onActivityStopped(Activity activity) {
-                if (topActivity == activity) {
-                    topActivity = null;
-                }
-            }
-
-            @Override
-            public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-
-            }
-
-            @Override
-            public void onActivityDestroyed(Activity activity) {
-
-            }
-        });
+                    @Override
+                    public void onActivityDestroyed(Activity activity) {}
+                });
     }
 
     public String getTopActivity() {
@@ -92,7 +81,11 @@ public class ActivityStartCheckUtils {
         return topActivity.getClass().getSuperclass().getSimpleName();
     }
 
-    public void startActivity(Context context, Intent intent, String className, ActivityStartResultCallback callback) {
+    public void startActivity(
+            Context context,
+            Intent intent,
+            String className,
+            ActivityStartResultCallback callback) {
         if (context == null || intent == null || TextUtils.isEmpty(className)) {
             return;
         }
@@ -117,14 +110,30 @@ public class ActivityStartCheckUtils {
         return result;
     }
 
-    private Runnable mRunnable = new Runnable() {
-        @Override
-        public void run() {
-            mPostDelayIsRunning = false;
-            boolean isOnTop = isActivityOnTop();
-            if (activityStartResultCallback != null) {
-                activityStartResultCallback.onStartActivityResult(isOnTop);
-            }
+    private Runnable mRunnable =
+            new Runnable() {
+                @Override
+                public void run() {
+                    mPostDelayIsRunning = false;
+                    boolean isOnTop = isActivityOnTop();
+                    if (activityStartResultCallback != null) {
+                        activityStartResultCallback.onStartActivityResult(isOnTop);
+                    }
+                }
+            };
+
+    /**
+     * Android 10 以上禁止后台启动 Activity
+     * callKit 适配方案是后台来电时弹通知栏通知，但是如果用户不点击通知栏，
+     * 通过桌面图标打开应用，需要增加一种补偿机制启动来电界面
+     */
+    private void handleIncomingCallNotify() {
+        if (mAppContext != null && IncomingCallExtraHandleUtil.needNotify()) {
+            IncomingCallExtraHandleUtil.removeNotification(mAppContext);
+            mAppContext.startActivity(RongCallModule.createVoIPIntent(mAppContext,
+                    IncomingCallExtraHandleUtil.getCallSession(),
+                    IncomingCallExtraHandleUtil.isCheckPermissions()));
+            IncomingCallExtraHandleUtil.clear();
         }
-    };
+    }
 }

@@ -9,35 +9,30 @@ import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 
-/**
- * Created by dengxudong on 2018/5/18.
- */
-
+/** Created by dengxudong on 2018/5/18. */
 public class BlurBitmapUtil {
 
-    private static BlurBitmapUtil sInstance;
+    private static class SingletonHolder {
 
-    private BlurBitmapUtil() {}
+        static BlurBitmapUtil sInstance = new BlurBitmapUtil();
+    }
+
+    private BlurBitmapUtil() {
+    }
 
     public static BlurBitmapUtil instance() {
-        if (sInstance == null) {
-            synchronized (BlurBitmapUtil.class) {
-                if (sInstance == null) {
-                    sInstance = new BlurBitmapUtil();
-                }
-            }
-        }
-        return sInstance;
+        return SingletonHolder.sInstance;
     }
     /**
-     * @param context   上下文对象
-     * @param image     需要模糊的图片
-     * @param outWidth  输入出的宽度
+     * @param context 上下文对象
+     * @param image 需要模糊的图片
+     * @param outWidth 输入出的宽度
      * @param outHeight 输出的高度
      * @return 模糊处理后的Bitmap
      */
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    public Bitmap blurBitmap(Context context, Bitmap image, float blurRadius, int outWidth, int outHeight) {
+    public Bitmap blurBitmap(
+            Context context, Bitmap image, float blurRadius, int outWidth, int outHeight) {
         // 将缩小后的图片做为预渲染的图片
         Bitmap inputBitmap = Bitmap.createScaledBitmap(image, outWidth, outHeight, false);
         // 创建一张渲染后的输出图片

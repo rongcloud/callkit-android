@@ -4,39 +4,30 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
-
+import io.rong.callkit.util.ICallScrollView;
+import io.rong.imkit.widget.AsyncImageView;
+import io.rong.imlib.model.UserInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.rong.callkit.util.ICallScrollView;
-import io.rong.imkit.widget.AsyncImageView;
-import io.rong.imlib.model.Group;
-import io.rong.imlib.model.UserInfo;
-
-/**
- * Created by weiqinxiao on 16/3/25.
- * coming 横向显示
- * 多人语音_被叫
- */
+/** Created by weiqinxiao on 16/3/25. coming 横向显示 多人语音_被叫 */
 public class CallUserGridView extends HorizontalScrollView implements ICallScrollView {
     private Context context;
     private boolean enableTitle;
     private LinearLayout linearLayout;
 
     private static int CHILDREN_PER_LINE = 5;
-    private final static int CHILDREN_SPACE = 13;
+    private static final int CHILDREN_SPACE = 13;
 
     private int portraitSize;
-    private boolean isHorizontal=true;
+    private boolean isHorizontal = true;
 
     public CallUserGridView(Context context) {
         super(context);
@@ -45,10 +36,10 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
 
     public CallUserGridView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                R.styleable.CallUserGridView);
-        isHorizontal=a.getBoolean(R.styleable.CallUserGridView_CallGridViewOrientation,true);
-        CHILDREN_PER_LINE=a.getInteger(R.styleable.CallUserGridView_CallGridViewChildrenPerLine,4);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CallUserGridView);
+        isHorizontal = a.getBoolean(R.styleable.CallUserGridView_CallGridViewOrientation, true);
+        CHILDREN_PER_LINE =
+                a.getInteger(R.styleable.CallUserGridView_CallGridViewChildrenPerLine, 4);
         init(context);
         a.recycle();
     }
@@ -56,15 +47,17 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
     private void init(Context context) {
         this.context = context;
         linearLayout = new LinearLayout(context);
-        linearLayout.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        linearLayout.setLayoutParams(
+                new LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         linearLayout.setOrientation(LinearLayout.HORIZONTAL);
-//        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+        //        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
         addView(linearLayout);
     }
 
     public int dip2pix(int dipValue) {
         float scale = getResources().getDisplayMetrics().density;
-        return (int)(dipValue * scale + 0.5f);
+        return (int) (dipValue * scale + 0.5f);
     }
 
     public int getScreenWidth() {
@@ -88,7 +81,7 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
         LinearLayout lastContainer = null;
         int i;
         for (i = 0; i < containerCount; i++) {
-            LinearLayout container = (LinearLayout)linearLayout.getChildAt(i);
+            LinearLayout container = (LinearLayout) linearLayout.getChildAt(i);
             if (container.getChildCount() < CHILDREN_PER_LINE) {
                 lastContainer = container;
                 break;
@@ -96,29 +89,36 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
         }
         if (lastContainer == null) {
             lastContainer = new LinearLayout(context);
-            lastContainer.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT));
+            lastContainer.setLayoutParams(
+                    new LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT));
             lastContainer.setGravity(Gravity.CENTER_HORIZONTAL);
             lastContainer.setPadding(0, dip2pix(CHILDREN_SPACE), 0, 0);
             linearLayout.addView(lastContainer);
         }
 
-        LinearLayout child = (LinearLayout)LayoutInflater.from(context).inflate(R.layout.rc_voip_user_info, null);
-        child.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        LinearLayout child =
+                (LinearLayout)
+                        LayoutInflater.from(context).inflate(R.layout.rc_voip_user_info, null);
+        child.setLayoutParams(
+                new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        if(containerCount==0){
+        if (containerCount == 0) {
             child.setPadding(dip2pix(15), 0, dip2pix(CHILDREN_SPACE), 0);
-        }else{
+        } else {
             child.setPadding(0, 0, dip2pix(CHILDREN_SPACE), 0);
         }
         child.setTag(childId);
         if (portraitSize > 0) {
-            child.findViewById(R.id.rc_user_portrait_layout).setLayoutParams(new LinearLayout.LayoutParams(portraitSize, portraitSize));
+            child.findViewById(R.id.rc_user_portrait_layout)
+                    .setLayoutParams(new LinearLayout.LayoutParams(portraitSize, portraitSize));
         }
-        AsyncImageView imageView = (AsyncImageView)child.findViewById(R.id.rc_user_portrait);
-        TextView name = (TextView)child.findViewById(R.id.rc_user_name);
+        AsyncImageView imageView = (AsyncImageView) child.findViewById(R.id.rc_user_portrait);
+        TextView name = (TextView) child.findViewById(R.id.rc_user_name);
         name.setVisibility(enableTitle ? VISIBLE : GONE);
-        TextView stateV = (TextView)child.findViewById(R.id.rc_voip_member_state);
+        TextView stateV = (TextView) child.findViewById(R.id.rc_voip_member_state);
         stateV.setVisibility(enableTitle ? VISIBLE : GONE);
         if (state != null) {
             stateV.setText(state);
@@ -134,7 +134,6 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
         }
         lastContainer.addView(child);
     }
-
 
     @Override
     public void setScrollViewOverScrollMode(int mode) {
@@ -197,10 +196,11 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
             LinearLayout container = (LinearLayout) linearLayout.getChildAt(i);
             LinearLayout child = (LinearLayout) container.findViewWithTag(childId);
             if (child != null) {
-                AsyncImageView imageView = (AsyncImageView)child.findViewById(R.id.rc_user_portrait);
+                AsyncImageView imageView =
+                        (AsyncImageView) child.findViewById(R.id.rc_user_portrait);
                 imageView.setAvatar(userInfo.getPortraitUri());
                 if (enableTitle) {
-                    TextView textView = (TextView)child.findViewById(R.id.rc_user_name);
+                    TextView textView = (TextView) child.findViewById(R.id.rc_user_name);
                     textView.setLines(1);
                     textView.setEllipsize(TextUtils.TruncateAt.END);
                     textView.setText(userInfo.getName());
@@ -216,7 +216,7 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
             LinearLayout container = (LinearLayout) linearLayout.getChildAt(i);
             LinearLayout child = (LinearLayout) container.findViewWithTag(childId);
             if (child != null) {
-                TextView textView = (TextView)child.findViewById(R.id.rc_voip_member_state);
+                TextView textView = (TextView) child.findViewById(R.id.rc_voip_member_state);
                 textView.setText(state);
             }
         }
@@ -229,7 +229,7 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
             LinearLayout container = (LinearLayout) linearLayout.getChildAt(i);
             LinearLayout child = (LinearLayout) container.findViewWithTag(childId);
             if (child != null) {
-                TextView textView = (TextView)child.findViewById(R.id.rc_voip_member_state);
+                TextView textView = (TextView) child.findViewById(R.id.rc_voip_member_state);
                 textView.setVisibility(visible ? VISIBLE : GONE);
             }
         }

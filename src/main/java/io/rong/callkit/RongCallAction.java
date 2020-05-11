@@ -1,8 +1,6 @@
 package io.rong.callkit;
 
-/**
- * Created by weiqinxiao on 16/3/15.
- */
+/** Created by weiqinxiao on 16/3/15. */
 public enum RongCallAction {
     ACTION_OUTGOING_CALL(1, "ACTION_OUTGOING_CALL"),
     ACTION_INCOMING_CALL(2, "ACTION_INCOMING_CALL"),
@@ -11,6 +9,7 @@ public enum RongCallAction {
 
     int value;
     String msg;
+
     RongCallAction(int v, String msg) {
         this.value = v;
         this.msg = msg;
