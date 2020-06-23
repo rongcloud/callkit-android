@@ -57,10 +57,12 @@ public class CallFloatBoxView {
     private static final String TAG = "CallFloatBoxView";
     private static TextView showFBCallTime = null;
     private static FrameLayout remoteVideoContainer = null;
+    private static boolean activityResuming = false;
 
     public static void showFB(Context context, Bundle bundle) {
         Log.i("audioTag", "CallKitUtils.isDial=" + CallKitUtils.isDial);
         setExcludeFromRecents(context, true);
+        activityResuming = false;
         if (CallKitUtils.isDial) {
             CallFloatBoxView.showFloatBoxToCall(context, bundle);
         } else {
@@ -506,7 +508,9 @@ public class CallFloatBoxView {
                     int newOffsetY = params.y;
                     if (Math.abs(oldOffsetX - newOffsetX) <= 20
                             && Math.abs(oldOffsetY - newOffsetY) <= 20) {
-                        onClickToResume();
+                        if (!CallKitUtils.isFastDoubleClick()) {
+                            onClickToResume();
+                        }
                     } else {
                         tag = 0;
                     }
@@ -557,7 +561,9 @@ public class CallFloatBoxView {
                             int newOffsetY = params.y;
                             if (Math.abs(oldOffsetX - newOffsetX) <= 20
                                     && Math.abs(oldOffsetY - newOffsetY) <= 20) {
-                                onClickToResume();
+                                if (!CallKitUtils.isFastDoubleClick()) {
+                                    onClickToResume();
+                                }
                             } else {
                                 tag = 0;
                             }
@@ -866,6 +872,10 @@ public class CallFloatBoxView {
             RLog.d(TAG, "onClickToResume mBundle is null");
             return;
         }
+        if (activityResuming) {
+            return;
+        }
+        activityResuming = true;
         boolean muteCamera = mBundle.getBoolean("muteCamera");
         if (mBundle.getInt("mediaType") == RongCallCommon.CallMediaType.VIDEO.getValue()
                 && !isDial
@@ -889,6 +899,7 @@ public class CallFloatBoxView {
                         new ActivityStartCheckUtils.ActivityStartResultCallback() {
                             @Override
                             public void onStartActivityResult(boolean isActivityStarted) {
+                                activityResuming = false;
                                 if (isActivityStarted) {
                                     mBundle = null;
                                 } else {

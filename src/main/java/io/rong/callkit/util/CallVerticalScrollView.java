@@ -23,7 +23,7 @@ public class CallVerticalScrollView extends ScrollView implements ICallScrollVie
     private boolean enableTitle;
     private LinearLayout linearLayout;
     private static int CHILDREN_PER_LINE = 4;
-    private static final int CHILDREN_SPACE = 24;
+    private static final int CHILDREN_SPACE = 18;
 
     private int portraitSize;
 

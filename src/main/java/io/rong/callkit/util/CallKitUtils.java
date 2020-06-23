@@ -21,6 +21,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import io.rong.callkit.R;
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 /** Created by dengxudong on 2018/5/17. */
 public class CallKitUtils {
@@ -37,6 +39,8 @@ public class CallKitUtils {
     public static boolean speakerphoneState = false;
 
     public static StringBuffer stringBuffer = null;
+
+    private static Map<String, Long> mapLastClickTime = new HashMap<>();
 
     public static Drawable BackgroundDrawable(int drawable, Context context) {
         return ContextCompat.getDrawable(context, drawable);
@@ -157,7 +161,6 @@ public class CallKitUtils {
                     Manifest.permission.BLUETOOTH,
                     Manifest.permission.BLUETOOTH_ADMIN,
                     Manifest.permission.READ_PHONE_STATE,
-                    Manifest.permission.READ_CALL_LOG
                 };
         return permissions;
     }
@@ -209,5 +212,28 @@ public class CallKitUtils {
             return false;
         }
         return true;
+    }
+
+    /**
+     * double click
+     *
+     * @return
+     */
+    public static boolean isFastDoubleClick() {
+        return isFastDoubleClick("Default");
+    }
+
+    public static boolean isFastDoubleClick(String eventType) {
+        Long lastClickTime = mapLastClickTime.get(eventType);
+        if (lastClickTime == null) {
+            lastClickTime = 0l;
+        }
+        long curTime = System.currentTimeMillis();
+        long timeD = curTime - lastClickTime;
+        if (timeD > 0 && timeD < 800) {
+            return true;
+        }
+        mapLastClickTime.put(eventType, curTime);
+        return false;
     }
 }

@@ -7,7 +7,7 @@ import android.view.SurfaceView;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
-import cn.rongcloud.rtc.engine.view.RongRTCVideoView;
+import cn.rongcloud.rtc.api.stream.RCRTCVideoView;
 import cn.rongcloud.rtc.utils.FinLog;
 
 /** Created by Administrator on 2017/3/30. */
@@ -31,16 +31,16 @@ public class ContainerLayout extends RelativeLayout {
                 "---xx-- add view "
                         + videoView.toString()
                         + " Height: "
-                        + ((RongRTCVideoView) videoView).rotatedFrameHeight
+                        + ((RCRTCVideoView) videoView).rotatedFrameHeight
                         + " Width: "
-                        + ((RongRTCVideoView) videoView).rotatedFrameWidth);
-        super.addView(videoView, getBigContainerParams((RongRTCVideoView) videoView));
+                        + ((RCRTCVideoView) videoView).rotatedFrameWidth);
+        super.addView(videoView, getBigContainerParams((RCRTCVideoView) videoView));
         currentView = videoView;
-        ((RongRTCVideoView) videoView)
+        ((RCRTCVideoView) videoView)
                 .setOnSizeChangedListener(
-                        new RongRTCVideoView.OnSizeChangedListener() {
+                        new RCRTCVideoView.OnSizeChangedListener() {
                             @Override
-                            public void onChanged(RongRTCVideoView.Size size) {
+                            public void onChanged(RCRTCVideoView.Size size) {
                                 try {
                                     ContainerLayout.this.removeAllViews();
                                     FinLog.d(
@@ -48,14 +48,14 @@ public class ContainerLayout extends RelativeLayout {
                                             "---xx-- change view "
                                                     + videoView.toString()
                                                     + " Height: "
-                                                    + ((RongRTCVideoView) videoView)
+                                                    + ((RCRTCVideoView) videoView)
                                                             .rotatedFrameHeight
                                                     + " Width: "
-                                                    + ((RongRTCVideoView) videoView)
+                                                    + ((RCRTCVideoView) videoView)
                                                             .rotatedFrameWidth);
                                     ContainerLayout.this.addView(
                                             videoView,
-                                            getBigContainerParams((RongRTCVideoView) videoView));
+                                            getBigContainerParams((RCRTCVideoView) videoView));
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -64,7 +64,7 @@ public class ContainerLayout extends RelativeLayout {
     }
 
     @NonNull
-    private LayoutParams getBigContainerParams(RongRTCVideoView videoView) {
+    private LayoutParams getBigContainerParams(RCRTCVideoView videoView) {
         LayoutParams layoutParams = null;
         if (!isNeedFillScrren) {
             if (screenHeight > screenWidth) { // V
@@ -102,7 +102,7 @@ public class ContainerLayout extends RelativeLayout {
 
     @Override
     public void removeAllViews() {
-        if (currentView != null) ((RongRTCVideoView) currentView).setOnSizeChangedListener(null);
+        if (currentView != null) ((RCRTCVideoView) currentView).setOnSizeChangedListener(null);
         super.removeAllViews();
     }
 

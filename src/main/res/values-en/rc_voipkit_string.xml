@@ -47,6 +47,7 @@
     <string name="rc_voip_mt_no_response">No answer</string>
     <string name="rc_voip_call_time_length">Duration&#160;</string>
     <string name="rc_voip_mt_busy">The other user may be busy now.</string>
+    <string name="rc_voip_mt_busy_toast">The other user may be busy now, Try again later.</string>
     <string name="rc_voip_message_audio">[Voice Call]</string>
     <string name="rc_voip_message_video">[Video Call]</string>
     <string name="rc_voip_switch_to_audio">Switch to voice call</string>
@@ -60,7 +61,7 @@
     <string name="rc_voip_connecting">Connecting...</string>
     <string name="rc_voip_unstable_call_connection">Unstable call connection</string>
     <string name="rc_voip_add_member">Select Members</string>
-    <string name="rc_voip_engine_notfound">If the RongCloud RTC service is not opened, please open it;If the service has been opened, please re-install the application after 1-2 hours.</string>
+    <string name="rc_voip_engine_notfound">Audio and video services are turned off</string>
 
     <string name="rc_select_contact">Select contacts</string>
     <string name="rc_search">Search</string>

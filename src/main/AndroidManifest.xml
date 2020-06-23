@@ -13,8 +13,6 @@
 
     <!--读取电话的状态信息的权限-->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <!--读取通话记录的权限-->
-    <uses-permission android:name="android.permission.READ_CALL_LOG" />
 
     <application>
 

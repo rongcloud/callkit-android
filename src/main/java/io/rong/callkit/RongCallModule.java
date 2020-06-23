@@ -120,10 +120,11 @@ public class RongCallModule implements IExternalModule {
                                     multiCallEndMessage.setMediaType(RongIMClient.MediaType.VIDEO);
                                 }
                                 RongIM.getInstance()
-                                        .insertMessage(
+                                        .insertIncomingMessage(
                                                 callSession.getConversationType(),
                                                 callSession.getTargetId(),
                                                 callSession.getCallerUserId(),
+                                                null,
                                                 multiCallEndMessage,
                                                 insertTime,
                                                 null);

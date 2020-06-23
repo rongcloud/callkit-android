@@ -34,7 +34,7 @@ public class RongCallKit {
      * 发起单人通话。
      *
      * @param context 上下文
-     * @param targetId 会话 id
+     * @param targetId 目标会话 id ，单人通话为对方 UserId ,群组通话为 GroupId ，如果实现的是不基于群组的通话，那此参数无意义，传 null 即可
      * @param mediaType 会话媒体类型
      */
     public static void startSingleCall(Context context, String targetId, CallMediaType mediaType) {
@@ -61,7 +61,7 @@ public class RongCallKit {
      *
      * @param context 上下文
      * @param conversationType 会话类型
-     * @param targetId 会话 id
+     * @param targetId 目标会话 id ，单人通话为对方 UserId ,群组通话为 GroupId ，如果实现的是不基于群组的通话，那此参数无意义，传 null 即可
      * @param mediaType 会话媒体类型
      * @param userIds 参与者 id 列表
      */
@@ -96,7 +96,7 @@ public class RongCallKit {
      *
      * @param context 上下文
      * @param conversationType 会话类型
-     * @param targetId 会话 id
+     * @param targetId 目标会话 id ，单人通话为对方 UserId ,群组通话为 GroupId ，如果实现的是不基于群组的通话，那此参数无意义，传 null 即可
      * @param mediaType 通话的媒体类型：CALL_MEDIA_TYPE_AUDIO， CALL_MEDIA_TYPE_VIDEO
      * @return 返回当前会话用户列表提供者对象
      */

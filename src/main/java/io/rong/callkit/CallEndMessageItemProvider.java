@@ -120,6 +120,10 @@ public class CallEndMessageItemProvider
             case OTHER_DEVICE_HAD_ACCEPTED:
                 msgContent = v.getResources().getString(R.string.rc_voip_call_other);
                 break;
+            case SERVICE_NOT_OPENED:
+            case REMOTE_ENGINE_UNSUPPORTED:
+                msgContent = v.getResources().getString(R.string.rc_voip_engine_notfound);
+                break;
         }
 
         holder.message.setText(msgContent);

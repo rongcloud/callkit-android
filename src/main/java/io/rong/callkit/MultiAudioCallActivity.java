@@ -60,6 +60,9 @@ public class MultiAudioCallActivity extends BaseCallActivity {
     boolean shouldShowFloat = true;
     boolean startForCheckPermissions = false;
     private boolean handFree = false;
+    private boolean muted = false;
+    private final String KEY_MUTED = "muted";
+    private final String KEY_HAND_FREE = "handFree";
 
     @Override
     @TargetApi(23)
@@ -149,7 +152,8 @@ public class MultiAudioCallActivity extends BaseCallActivity {
     public void onRestoreFloatBox(Bundle bundle) {
         super.onRestoreFloatBox(bundle);
         if (bundle != null) {
-            handFree = bundle.getBoolean("handFree");
+            handFree = bundle.getBoolean(KEY_HAND_FREE);
+            muted = bundle.getBoolean(KEY_MUTED);
             audioContainer.addView(outgoingLayout);
             String str = (String) SPUtils.get(MultiAudioCallActivity.this, "ICallScrollView", "");
 
@@ -221,7 +225,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         ArrayList<String> invitedList = new ArrayList<>();
 
         if (callAction.equals(RongCallAction.ACTION_INCOMING_CALL)) {
-            callSession = intent.getParcelableExtra("callSession");
+            callSession = RongCallClient.getInstance().getCallSession();
             TextView name = (TextView) incomingLayout.findViewById(R.id.rc_user_name);
             AsyncImageView userPortrait =
                     (AsyncImageView) incomingLayout.findViewById(R.id.rc_voip_user_portrait);
@@ -452,7 +456,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         String text = null;
         switch (reason) {
             case REMOTE_BUSY_LINE:
-                text = getString(R.string.rc_voip_mt_busy);
+                text = getString(R.string.rc_voip_mt_busy_toast);
                 break;
             case REMOTE_CANCEL:
                 text = getString(R.string.rc_voip_mt_cancel);
@@ -534,8 +538,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        RongCallClient.getInstance().setEnableLocalAudio(v.isSelected());
-                        v.setSelected(!v.isSelected());
+                        onMuteButtonClick(v);
                     }
                 });
 
@@ -545,8 +548,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        RongCallClient.getInstance().setEnableSpeakerphone(!v.isSelected());
-                        v.setSelected(!v.isSelected());
+                        onHandFreeButtonClick(v);
                     }
                 });
 
@@ -667,6 +669,11 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                     }
                 });
 
+        RongCallClient.getInstance().setEnableLocalAudio(!muted);
+        if (muteV != null) {
+            muteV.setSelected(muted);
+        }
+
         AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         if (audioManager.isWiredHeadsetOn() || BluetoothUtil.hasBluetoothA2dpConnected()) {
             handFree = false;
@@ -713,10 +720,11 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         multiCallEndMessage.setMediaType(RongIMClient.MediaType.AUDIO);
         long serverTime = System.currentTimeMillis() - RongIMClient.getInstance().getDeltaTime();
         RongIM.getInstance()
-                .insertMessage(
+                .insertIncomingMessage(
                         callSession.getConversationType(),
                         callSession.getTargetId(),
                         callSession.getCallerUserId(),
+                        null,
                         multiCallEndMessage,
                         serverTime,
                         null);
@@ -801,6 +809,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
     public void onMuteButtonClick(View view) {
         RongCallClient.getInstance().setEnableLocalAudio(view.isSelected());
         view.setSelected(!view.isSelected());
+        muted = view.isSelected();
     }
 
     @Override
@@ -811,7 +820,8 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         if (shouldShowFloat) {
             intentAction = getIntent().getAction();
             bundle.putInt("mediaType", RongCallCommon.CallMediaType.AUDIO.getValue());
-            bundle.putBoolean("handFree", handFree);
+            bundle.putBoolean(KEY_HAND_FREE, handFree);
+            bundle.putBoolean(KEY_MUTED, muted);
         }
         return intentAction;
     }

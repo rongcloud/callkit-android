@@ -32,9 +32,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import cn.rongcloud.rtc.CenterManager;
 import cn.rongcloud.rtc.core.RendererCommon;
-import cn.rongcloud.rtc.engine.view.RongRTCVideoView;
+import cn.rongcloud.rtc.api.stream.RCRTCVideoView;
 import cn.rongcloud.rtc.utils.FinLog;
-import io.rong.blink.Utils;
 import io.rong.callkit.util.BluetoothUtil;
 import io.rong.callkit.util.CallKitUtils;
 import io.rong.callkit.util.HeadsetInfo;
@@ -44,6 +43,7 @@ import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallSession;
 import io.rong.calllib.StreamProfile;
+import io.rong.calllib.Utils;
 import io.rong.calllib.message.MultiCallEndMessage;
 import io.rong.common.RLog;
 import io.rong.imkit.RongContext;
@@ -395,7 +395,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         RongCallClient.getInstance().setEnableLocalVideo(true);
         localView = localVideo;
         callRinging(RingingMode.Outgoing);
-        ((RongRTCVideoView) localView)
+        ((RCRTCVideoView) localView)
                 .setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_BALANCED);
         //        localView.setZOrderOnTop(true);
         //        localView.setZOrderMediaOverlay(true);
@@ -464,11 +464,16 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         }
         addRemoteVideo(singleRemoteView, remoteVideo, userId);
         singleRemoteView.findViewById(R.id.user_status).setVisibility(View.GONE);
+        singleRemoteView.findViewById(R.id.user_name).setVisibility(View.GONE);
     }
 
     @Override
     public void onRemoteUserLeft(String userId, RongCallCommon.CallDisconnectedReason reason) {
-        super.onRemoteUserLeft(userId, reason);
+        //通话过程中 toast "通话结束"有些突兀，所以只有远端忙线和拒绝时我们提醒用户
+        if (reason.equals(RongCallCommon.CallDisconnectedReason.REMOTE_BUSY_LINE) ||
+            reason.equals(RongCallCommon.CallDisconnectedReason.REMOTE_REJECT)) {
+            super.onRemoteUserLeft(userId, reason);
+        }
         String delUserid = userId;
         // incomming state
         if (participantPortraitContainer != null
@@ -521,6 +526,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         View singleRemoteView = addSingleRemoteView(streamId, 1);
         singleRemoteView.findViewById(R.id.user_status).setVisibility(View.GONE);
         singleRemoteView.findViewById(R.id.user_portrait).setVisibility(View.GONE);
+        singleRemoteView.findViewById(R.id.user_name).setVisibility(View.GONE);
         addRemoteVideo(singleRemoteView, surfaceView, streamId);
     }
 
@@ -772,9 +778,9 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         }
         video.setTag(CallKitUtils.getStitchedContent(userId, REMOTE_FURFACEVIEW_TAG));
         if (TextUtils.equals(CenterManager.RONG_TAG, streamTag)) {
-            ((RongRTCVideoView) video).setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
+            ((RCRTCVideoView) video).setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
         } else {
-            ((RongRTCVideoView) video).setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);
+            ((RCRTCVideoView) video).setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);
         }
         remoteVideoView.addView(
                 video,
@@ -814,13 +820,16 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         singleRemoteView.setTag(CallKitUtils.getStitchedContent(userId, REMOTE_VIEW_TAG));
         TextView userStatus = (TextView) singleRemoteView.findViewById(R.id.user_status);
         CallKitUtils.textViewShadowLayer(userStatus, MultiVideoCallActivity.this);
-
+        TextView nameView = (TextView) singleRemoteView.findViewById(R.id.user_name);
         AsyncImageView userPortraitView =
                 (AsyncImageView) singleRemoteView.findViewById(R.id.user_portrait);
         if (userInfo != null) {
             if (userInfo.getPortraitUri() != null) {
                 userPortraitView.setAvatar(
-                        userInfo.getPortraitUri().toString(), R.drawable.rc_default_portrait);
+                    userInfo.getPortraitUri().toString(), R.drawable.rc_default_portrait);
+            }
+            if (!TextUtils.isEmpty(userInfo.getName())) {
+                nameView.setText(userInfo.getName());
             }
         }
         LinearLayout.LayoutParams params =
@@ -851,10 +860,14 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         CallKitUtils.textViewShadowLayer(userStatus, MultiVideoCallActivity.this);
         AsyncImageView userPortraitView =
                 (AsyncImageView) singleRemoteView.findViewById(R.id.user_portrait);
+        TextView nameView = (TextView) singleRemoteView.findViewById(R.id.user_name);
         if (userInfo != null) {
             if (userInfo.getPortraitUri() != null) {
                 userPortraitView.setAvatar(
                         userInfo.getPortraitUri().toString(), R.drawable.rc_default_portrait);
+            }
+            if (!TextUtils.isEmpty(userInfo.getName())) {
+                nameView.setText(userInfo.getName());
             }
         }
         LinearLayout.LayoutParams params =
@@ -896,10 +909,11 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         multiCallEndMessage.setReason(reason);
         long serverTime = System.currentTimeMillis() - RongIMClient.getInstance().getDeltaTime();
         RongIM.getInstance()
-                .insertMessage(
+                .insertIncomingMessage(
                         callSession.getConversationType(),
                         callSession.getTargetId(),
                         callSession.getCallerUserId(),
+                        null,
                         multiCallEndMessage,
                         serverTime,
                         null);
@@ -1403,7 +1417,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
      */
     public void onSwitchRemoteUsers(View view) {
         String from = (String) view.getTag();
-        Log.i("bugtags", "from = " + from);
+        Log.i(TAG, "from = " + from);
         if (from == null) return;
         String to = (String) localView.getTag();
         to = to.substring(0, to.length() - REMOTE_FURFACEVIEW_TAG.length());
@@ -1608,11 +1622,11 @@ public class MultiVideoCallActivity extends BaseCallActivity {
 
     public void onEventMainThread(HeadsetInfo headsetInfo) {
         if (headsetInfo == null || !BluetoothUtil.isForground(MultiVideoCallActivity.this)) {
-            FinLog.v("bugtags", "MultiVideoCallActivity 不在前台！");
+            FinLog.v(TAG, "MultiVideoCallActivity 不在前台！");
             return;
         }
         Log.i(
-                "bugtags",
+            TAG,
                 "Insert="
                         + headsetInfo.isInsert()
                         + ",headsetInfo.getType="

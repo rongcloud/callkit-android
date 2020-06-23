@@ -58,6 +58,9 @@ public class MultiCallEndMessageProvider
             } else if (content.getMediaType() == RongIMClient.MediaType.VIDEO) {
                 msg = context.getResources().getString(R.string.rc_voip_video_refuse);
             }
+        } else if (content.getReason() == RongCallCommon.CallDisconnectedReason.SERVICE_NOT_OPENED
+            || content.getReason() == RongCallCommon.CallDisconnectedReason.REMOTE_ENGINE_UNSUPPORTED) {
+            msg = context.getResources().getString(R.string.rc_voip_engine_notfound);
         } else {
             if (content.getMediaType() == RongIMClient.MediaType.AUDIO) {
                 msg = context.getResources().getString(R.string.rc_voip_audio_no_response);

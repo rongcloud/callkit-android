@@ -4,6 +4,8 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
@@ -13,6 +15,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.AssetFileDescriptor;
+import android.graphics.Color;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -35,6 +38,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import cn.rongcloud.rtc.api.stream.RCRTCVideoStreamConfig;
+import cn.rongcloud.rtc.api.stream.RCRTCVideoStreamConfig.Builder;
+import cn.rongcloud.rtc.base.RCRTCParamsType.RCRTCVideoResolution;
+import cn.rongcloud.rtc.base.RCRTCParamsType.RCRTCVideoFps;
+import io.rong.push.notification.RongNotificationInterface;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -430,13 +438,12 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     @Override
     public void onError(RongCallCommon.CallErrorCode errorCode) {
         AudioPlayManager.getInstance().setInVoipMode(false);
-        if (RongCallCommon.CallErrorCode.ENGINE_NOT_FOUND.getValue() == errorCode.getValue()
-                && isDebug(BaseCallActivity.this)) {
+        if (RongCallCommon.CallErrorCode.ENGINE_NOT_FOUND.getValue() == errorCode.getValue()) {
             Toast.makeText(
-                            this,
-                            getResources().getString(R.string.rc_voip_engine_notfound),
-                            Toast.LENGTH_LONG)
-                    .show();
+                this,
+                getResources().getString(R.string.rc_voip_engine_notfound),
+                Toast.LENGTH_SHORT)
+                .show();
             finish();
         }
     }
@@ -613,7 +620,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
                 text = getString(R.string.rc_voip_mo_no_response);
                 break;
             case REMOTE_BUSY_LINE:
-                text = getString(R.string.rc_voip_mt_busy);
+                text = getString(R.string.rc_voip_mt_busy_toast);
                 break;
             case REMOTE_CANCEL:
                 text = getString(R.string.rc_voip_mt_cancel);
@@ -624,18 +631,21 @@ public class BaseCallActivity extends BaseNoActionBarActivity
             case REMOTE_NO_RESPONSE:
                 text = getString(R.string.rc_voip_mt_no_response);
                 break;
+            case NETWORK_ERROR:
+                if (!CallKitUtils.isNetworkAvailable(this)) {
+                    text = getString(R.string.rc_voip_call_network_error);
+                } else {
+                    text = getString(R.string.rc_voip_call_terminalted);
+                }
+                break;
             case REMOTE_HANGUP:
             case HANGUP:
-            case NETWORK_ERROR:
             case INIT_VIDEO_ERROR:
                 text = getString(R.string.rc_voip_call_terminalted);
                 break;
             case OTHER_DEVICE_HAD_ACCEPTED:
                 text = getString(R.string.rc_voip_call_other);
                 break;
-                //                case CONN_USER_BLOCKED:
-                //                text = getString(R.string.rc_voip_call_conn_user_blocked);
-                //                break;
         }
         if (text != null) {
             showShortToast(text);
@@ -677,13 +687,35 @@ public class BaseCallActivity extends BaseNoActionBarActivity
         intent.putExtra("callAction", RongCallAction.ACTION_RESUME_CALL.getName());
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(this, 1000, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationUtil.showNotification(
+        showNotification(
                 this,
                 title,
                 content,
                 pendingIntent,
-                CALL_NOTIFICATION_ID,
-                Notification.DEFAULT_LIGHTS);
+                CALL_NOTIFICATION_ID);
+    }
+
+    private void showNotification(Context context,String title,String content,PendingIntent pendingIntent,int notificationId){
+        Notification notification = RongNotificationInterface
+            .createNotification(context, title, pendingIntent, content, RongNotificationInterface.SoundType.SILENT);
+        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            int importance = NotificationManager.IMPORTANCE_LOW;
+            String channelName = context.getResources().getString(context.getResources().getIdentifier("rc_notification_channel_name", "string", context.getPackageName()));
+            NotificationChannel notificationChannel = new NotificationChannel("rc_notification_id", channelName, importance);
+            notificationChannel.enableLights(false);
+            notificationChannel.setLightColor(Color.GREEN);
+            notificationChannel.enableVibration(false);
+            notificationChannel.setSound(null, null);
+            nm.createNotificationChannel(notificationChannel);
+        }
+        if (notification != null) {
+            io.rong.push.common.RLog
+                .i(TAG, "sendNotification() real notify! notificationId: " + notificationId +
+                    " notification: " + notification.toString());
+            nm.notify(notificationId, notification);
+        }
     }
 
     @TargetApi(23)
@@ -852,16 +884,25 @@ public class BaseCallActivity extends BaseNoActionBarActivity
      * 必须在{@link RongCallClient#startCall} 和 {@link RongCallClient#acceptCall(String)}之前设置 <br>
      */
     public void audioVideoConfig() {
-        RongRTCConfig.Builder configBuilder = new RongRTCConfig.Builder();
-        configBuilder.setVideoResolution(RongRTCConfig.RongRTCVideoResolution.RESOLUTION_480_640);
-        configBuilder.setVideoFps(RongRTCConfig.RongRTCVideoFps.Fps_15);
-        configBuilder.setMaxRate(1000);
-        configBuilder.setMinRate(350);
-        /*
-         * 设置建立 Https 连接时，是否使用自签证书。
-         * 公有云用户无需调用此方法，私有云用户使用自签证书时调用此方法设置
-         */
-        // configBuilder.enableHttpsSelfCertificate(true);
-        RongCallClient.getInstance().setRTCConfig(configBuilder);
+//        RongRTCConfig.Builder configBuilder = new RongRTCConfig.Builder();
+//        configBuilder.setVideoResolution(RCRTCVideoResolution.RESOLUTION_480_640);
+//        configBuilder.setVideoFps(RCRTCVideoFps.Fps_15);
+//        configBuilder.setMaxRate(1000);
+//        configBuilder.setMinRate(350);
+//        /*
+//         * 设置建立 Https 连接时，是否使用自签证书。
+//         * 公有云用户无需调用此方法，私有云用户使用自签证书时调用此方法设置
+//         */
+//        // configBuilder.enableHttpsSelfCertificate(true);
+//        RongCallClient.getInstance().setRTCConfig(configBuilder);
+
+        Builder builder = Builder.create()
+            .setVideoResolution(RCRTCVideoResolution.RESOLUTION_480_640)
+            .setVideoFps(RCRTCVideoFps.Fps_15)
+            .setMaxRate(1000)
+            .setMinRate(350);
+        RongCallClient.getInstance().setVideoConfig(builder);
+
+
     }
 }
