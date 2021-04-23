@@ -26,4 +26,8 @@ public interface ICallScrollView {
     void updateChildInfo(String childId, UserInfo userInfo);
 
     int dip2pix(int dipValue);
+
+    View getChildAtIndex(int index);
+
+    int getChildrenSpace();
 }

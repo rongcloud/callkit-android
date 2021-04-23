@@ -5,12 +5,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
+import io.rong.callkit.util.CallKitBuildVar;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallMissedListener;
 import io.rong.calllib.RongCallSession;
-import io.rong.imkit.manager.InternalModuleManager;
-import io.rong.imkit.utilities.PermissionCheckUtil;
+import io.rong.imkit.utils.PermissionCheckUtil;
 import io.rong.imlib.RongIMClient;
 import io.rong.imlib.model.Conversation;
 import java.util.ArrayList;
@@ -52,6 +52,7 @@ public class RongCallKit {
             intent.putExtra("targetId", targetId);
             intent.putExtra("callAction", RongCallAction.ACTION_OUTGOING_CALL.getName());
             intent.setPackage(context.getPackageName());
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         }
     }
@@ -86,6 +87,7 @@ public class RongCallKit {
             intent.putExtra("callAction", RongCallAction.ACTION_OUTGOING_CALL.getName());
             intent.setPackage(context.getPackageName());
             intent.putStringArrayListExtra("invitedUsers", userIds);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         }
     }
@@ -121,6 +123,7 @@ public class RongCallKit {
                 intent.putExtra("callAction", RongCallAction.ACTION_OUTGOING_CALL.getName());
                 intent.setPackage(context.getPackageName());
                 intent.putStringArrayListExtra("invitedUsers", userIds);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
             }
         };
@@ -153,6 +156,7 @@ public class RongCallKit {
         intent.putStringArrayListExtra("invitedUsers", userIds);
         intent.putStringArrayListExtra("observerUsers", oberverIds);
         intent.setPackage(context.getPackageName());
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
 
@@ -180,6 +184,7 @@ public class RongCallKit {
         intent.putExtra("callAction", RongCallAction.ACTION_OUTGOING_CALL.getName());
         intent.putStringArrayListExtra("invitedUsers", userIds);
         intent.setPackage(context.getPackageName());
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
 
@@ -312,14 +317,14 @@ public class RongCallKit {
         RongCallModule.setMissedCallListener(rongCallMissedListener);
     }
 
-    /**
-     * 防止 voip 通话页面被会话列表、会话页面或者开发者 app 层页面覆盖。 使用 maven 接入 callkit 的开发者在 app 层主页面的 onCreate 调用此方法即可。
-     * 针对导入 callkit 源码的开发者，不使用会话列表和会话页面我们建议在 {@link RongCallModule#onCreate(Context)}方法中设置
-     * mViewLoaded 为 true 即可。
-     */
-    public static void onViewCreated() {
-        InternalModuleManager.getInstance().onLoaded();
-    }
+    //TODO 由于最新CallKit中已经将 RongCallModule#mViewLoaded 默认值改为true，所以不在需要此方法
+//    /**
+//     * 防止 voip 通话页面被会话列表、会话页面或者开发者 app 层页面覆盖。 使用 maven 接入 callkit 的开发者在 app 层主页面的 onCreate 调用此方法即可。
+//     * 针对导入 callkit 源码的开发者，不使用会话列表和会话页面我们建议在 {@link RongCallModule#onCreate(Context)}方法中设置
+//     * mViewLoaded 为 true 即可。
+//     */
+//    public static void onViewCreated() {
+//    }
 
     /**
      * 忽略 voip 来电，不弹出来电界面，直接挂断。
@@ -328,5 +333,13 @@ public class RongCallKit {
      */
     public static void ignoreIncomingCall(boolean ignore) {
         RongCallModule.ignoreIncomingCall(ignore);
+    }
+
+    public static void setMainPageActivityClass(String[] className) {
+        RongCallModule.setMainPageActivity(className);
+    }
+
+    public static String getVersion() {
+        return CallKitBuildVar.SDK_VERSION;
     }
 }

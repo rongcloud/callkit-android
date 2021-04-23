@@ -3,6 +3,7 @@ package io.rong.callkit;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -14,13 +15,20 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.request.RequestOptions;
+
 import cn.rongcloud.rtc.utils.FinLog;
 import io.rong.callkit.util.BluetoothUtil;
 import io.rong.callkit.util.CallKitUtils;
 import io.rong.callkit.util.CallVerticalScrollView;
+import io.rong.callkit.util.DefaultPushConfig;
 import io.rong.callkit.util.HeadsetInfo;
 import io.rong.callkit.util.ICallScrollView;
 import io.rong.callkit.util.RingingMode;
@@ -31,18 +39,24 @@ import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallSession;
 import io.rong.calllib.message.MultiCallEndMessage;
 import io.rong.common.RLog;
-import io.rong.imkit.RongContext;
-import io.rong.imkit.RongIM;
-import io.rong.imkit.utilities.PermissionCheckUtil;
-import io.rong.imkit.widget.AsyncImageView;
+import io.rong.imkit.IMCenter;
+import io.rong.imkit.userinfo.RongUserInfoManager;
+import io.rong.imkit.utils.PermissionCheckUtil;
+import io.rong.imlib.IRongCoreCallback;
+import io.rong.imlib.IRongCoreEnum;
+import io.rong.imlib.RongCoreClient;
 import io.rong.imlib.RongIMClient;
+import io.rong.imlib.discussion.base.RongDiscussionClient;
+import io.rong.imlib.discussion.model.Discussion;
 import io.rong.imlib.model.Conversation;
-import io.rong.imlib.model.Discussion;
+import io.rong.imlib.model.Group;
 import io.rong.imlib.model.UserInfo;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+
+import static io.rong.callkit.CallSelectMemberActivity.DISCONNECT_ACTION;
 
 /** <a href="http://support.rongcloud.cn/kb/Njcy">如何实现不基于于群组的voip</a> */
 public class MultiAudioCallActivity extends BaseCallActivity {
@@ -135,7 +149,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                 } else {
                     if (startForCheckPermissions) {
                         startForCheckPermissions = false;
-                        Toast.makeText(this, "打设置相关权限", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.rc_voip_relevant_permissions), Toast.LENGTH_SHORT).show();
                         RongCallClient.getInstance().onPermissionDenied();
                     } else {
                         finish();
@@ -193,13 +207,13 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                     if (item.getCallStatus().equals(RongCallCommon.CallStatus.CONNECTED)) {
                         memberContainer.addChild(
                                 item.getUserId(),
-                                RongContext.getInstance().getUserInfoFromCache(item.getUserId()));
+                                RongUserInfoManager.getInstance().getUserInfo(item.getUserId()));
                         memberContainer.updateChildState(item.getUserId(), false);
                     } else {
                         String state = getString(R.string.rc_voip_call_connecting);
                         memberContainer.addChild(
                                 item.getUserId(),
-                                RongContext.getInstance().getUserInfoFromCache(item.getUserId()),
+                                RongUserInfoManager.getInstance().getUserInfo(item.getUserId()),
                                 state);
                     }
                 }
@@ -226,23 +240,11 @@ public class MultiAudioCallActivity extends BaseCallActivity {
 
         if (callAction.equals(RongCallAction.ACTION_INCOMING_CALL)) {
             callSession = RongCallClient.getInstance().getCallSession();
-            TextView name = (TextView) incomingLayout.findViewById(R.id.rc_user_name);
-            AsyncImageView userPortrait =
-                    (AsyncImageView) incomingLayout.findViewById(R.id.rc_voip_user_portrait);
-            UserInfo userInfo =
-                    RongContext.getInstance().getUserInfoFromCache(callSession.getCallerUserId());
-            if (userInfo != null && userInfo.getName() != null) name.setText(userInfo.getName());
-            else name.setText(callSession.getCallerUserId());
-            if (userInfo != null && userInfo.getPortraitUri() != null) {
-                userPortrait.setAvatar(userInfo.getPortraitUri());
-                userPortrait.setVisibility(View.VISIBLE);
-            }
+            UserInfo userInfo = RongUserInfoManager.getInstance().getUserInfo(callSession.getCallerUserId());
+            setTopContainerUserView(callSession.getCallerUserId());
 
-            name.setTag(callSession.getCallerUserId() + "callerName");
             audioContainer.addView(incomingLayout);
-            memberContainer =
-                    (CallUserGridView)
-                            audioContainer.findViewById(R.id.rc_voip_members_container_gridView);
+            memberContainer = (CallUserGridView) audioContainer.findViewById(R.id.rc_voip_members_container_gridView);
             SPUtils.put(MultiAudioCallActivity.this, "ICallScrollView", "CallUserGridView");
 
             memberContainer.setChildPortraitSize(memberContainer.dip2pix(55));
@@ -250,7 +252,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
             for (CallUserProfile profile : list) {
                 if (!profile.getUserId().equals(callSession.getCallerUserId())) {
                     invitedList.add(profile.getUserId());
-                    userInfo = RongContext.getInstance().getUserInfoFromCache(profile.getUserId());
+                    userInfo = RongUserInfoManager.getInstance().getUserInfo(profile.getUserId());
                     memberContainer.addChild(profile.getUserId(), userInfo);
                 }
             }
@@ -306,7 +308,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                 if (!userIds.get(i).equals(RongIMClient.getInstance().getCurrentUserId())) {
                     invitedList.add(userIds.get(i));
                     UserInfo userInfo =
-                            RongContext.getInstance().getUserInfoFromCache(userIds.get(i));
+                            RongUserInfoManager.getInstance().getUserInfo(userIds.get(i));
                     memberContainer.addChild(
                             userIds.get(i), userInfo, getString(R.string.rc_voip_call_connecting));
                 }
@@ -317,6 +319,14 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                 params.height = CallKitUtils.dp2px(200, MultiAudioCallActivity.this);
                 linear_scrollviewTag.setLayoutParams(params);
             }
+
+            String groupName = "";
+            Group group = RongUserInfoManager.getInstance().getGroupInfo(targetId);
+            if (group != null && !TextUtils.isEmpty(group.getName())) {
+                groupName = group.getName();
+            }
+            RongCallClient.getInstance().setPushConfig(DefaultPushConfig.getInviteConfig(this, true, false, groupName), DefaultPushConfig.getHangupConfig(this, false, groupName));
+
             RongCallClient.getInstance()
                     .startCall(
                             conversationType,
@@ -335,7 +345,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                     || BluetoothUtil.isWiredHeadsetOn(MultiAudioCallActivity.this)) {
                 HeadsetInfo headsetInfo =
                         new HeadsetInfo(true, HeadsetInfo.HeadsetType.BluetoothA2dp);
-                onEventMainThread(headsetInfo);
+                onHeadsetPlugUpdate(headsetInfo);
             }
         }
     }
@@ -422,7 +432,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         regisHeadsetPlugReceiver();
         if (BluetoothUtil.hasBluetoothA2dpConnected() || BluetoothUtil.isWiredHeadsetOn(this)) {
             HeadsetInfo headsetInfo = new HeadsetInfo(true, HeadsetInfo.HeadsetType.BluetoothA2dp);
-            onEventMainThread(headsetInfo);
+            onHeadsetPlugUpdate(headsetInfo);
         }
     }
 
@@ -431,7 +441,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         super.onRemoteUserInvited(userId, mediaType);
         memberContainer.addChild(
                 userId,
-                RongContext.getInstance().getUserInfoFromCache(userId),
+                RongUserInfoManager.getInstance().getUserInfo(userId),
                 getString(R.string.rc_voip_call_connecting));
     }
 
@@ -446,13 +456,15 @@ public class MultiAudioCallActivity extends BaseCallActivity {
             memberContainer.updateChildState(userId, false);
         } else {
             memberContainer.addChild(
-                    userId, RongContext.getInstance().getUserInfoFromCache(userId));
+                    userId, RongUserInfoManager.getInstance().getUserInfo(userId));
         }
     }
 
     @Override
-    public void onRemoteUserLeft(
-            final String userId, RongCallCommon.CallDisconnectedReason reason) {
+    public void onRemoteUserLeft(final String userId, RongCallCommon.CallDisconnectedReason reason) {
+        if (isTopContainerUserExit(userId)) {
+            return;
+        }
         String text = null;
         switch (reason) {
             case REMOTE_BUSY_LINE:
@@ -475,7 +487,51 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         if (text != null && memberContainer != null) {
             memberContainer.updateChildState(userId, text);
         }
-        if (memberContainer != null) memberContainer.removeChild(userId);
+        if (memberContainer != null) {
+            memberContainer.removeChild(userId);
+        }
+    }
+
+    private boolean isTopContainerUserExit(String userId) {
+        if (CallKitUtils.callConnected) {
+            return false;
+        }
+        if (callSession != null && TextUtils.equals(callSession.getInviterUserId(), userId) && memberContainer != null) {
+            if (((LinearLayout) memberContainer.getChildAtIndex(0)) != null && ((LinearLayout) memberContainer.getChildAtIndex(0)).getChildAt(0) != null
+                && ((LinearLayout) memberContainer.getChildAtIndex(0)).getChildAt(0).getTag() != null) {
+                LinearLayout firstView = (LinearLayout) ((LinearLayout) memberContainer.getChildAtIndex(0)).getChildAt(0);
+                String firstUserId = (String) firstView.getTag();
+                setTopContainerUserView(firstUserId);
+
+                memberContainer.removeChild(firstUserId);
+
+                LinearLayout linearLayout = (LinearLayout) ((LinearLayout) memberContainer.getChildAtIndex(0)).getChildAt(0);
+                linearLayout.setPadding(memberContainer.dip2pix(15), 0, memberContainer.dip2pix(memberContainer.getChildrenSpace()), 0);
+                linearLayout.requestLayout();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void setTopContainerUserView(String userId) {
+        TextView name = (TextView) incomingLayout.findViewById(R.id.rc_user_name);
+        ImageView userPortrait = (ImageView) incomingLayout.findViewById(R.id.rc_voip_user_portrait);
+        UserInfo userInfo = RongUserInfoManager.getInstance().getUserInfo(userId);
+        if (userInfo != null && userInfo.getName() != null) {
+            name.setText(userInfo.getName());
+        } else {
+            name.setText(userId);
+        }
+        if (userInfo != null && userInfo.getPortraitUri() != null) {
+            Glide.with(this)
+                    .load(userInfo.getPortraitUri())
+                    .placeholder(R.drawable.rc_default_portrait)
+                    .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                    .into(userPortrait);
+            userPortrait.setVisibility(View.VISIBLE);
+        }
+        name.setTag(userId + "callerName");
     }
 
     /**
@@ -511,7 +567,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
             for (CallUserProfile profile : callSession.getParticipantProfileList()) {
                 if (!profile.getUserId().equals(callSession.getSelfUserId())) {
                     UserInfo userInfo =
-                            RongContext.getInstance().getUserInfoFromCache(profile.getUserId());
+                            RongUserInfoManager.getInstance().getUserInfo(profile.getUserId());
                     String state =
                             profile.getCallStatus().equals(RongCallCommon.CallStatus.CONNECTED)
                                     ? null
@@ -565,10 +621,10 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                         if (callSession
                                 .getConversationType()
                                 .equals(Conversation.ConversationType.DISCUSSION)) {
-                            RongIMClient.getInstance()
+                            RongDiscussionClient.getInstance()
                                     .getDiscussion(
                                             callSession.getTargetId(),
-                                            new RongIMClient.ResultCallback<Discussion>() {
+                                            new IRongCoreCallback.ResultCallback<Discussion>() {
                                                 @Override
                                                 public void onSuccess(Discussion discussion) {
                                                     Intent intent =
@@ -611,7 +667,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                                                 }
 
                                                 @Override
-                                                public void onError(RongIMClient.ErrorCode e) {}
+                                                public void onError(IRongCoreEnum.CoreErrorCode e) {}
                                             });
                         } else if (callSession
                                 .getConversationType()
@@ -719,24 +775,16 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         multiCallEndMessage.setReason(reason);
         multiCallEndMessage.setMediaType(RongIMClient.MediaType.AUDIO);
         long serverTime = System.currentTimeMillis() - RongIMClient.getInstance().getDeltaTime();
-        RongIM.getInstance()
-                .insertIncomingMessage(
-                        callSession.getConversationType(),
-                        callSession.getTargetId(),
-                        callSession.getCallerUserId(),
-                        null,
-                        multiCallEndMessage,
-                        serverTime,
-                        null);
+        IMCenter.getInstance().insertIncomingMessage(callSession.getConversationType(), callSession.getTargetId(), callSession.getCallerUserId(), null, multiCallEndMessage, serverTime, null);
         cancelTime();
         stopRing();
-        postRunnableDelay(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        finish();
-                    }
-                });
+        postRunnableDelay(new Runnable() {
+            @Override
+            public void run() {
+                finish();
+            }
+        });
+        sendBroadcast(new Intent(DISCONNECT_ACTION));
     }
 
     @Override
@@ -761,6 +809,12 @@ public class MultiAudioCallActivity extends BaseCallActivity {
             }
 
         } else if (requestCode == REQUEST_CODE_ADD_MEMBER) {
+            if (resultCode == RESULT_OK) {
+                if (data.getBooleanExtra("remote_hangup", false)) {
+                    RLog.d(TAG, "Remote exit, end the call.");
+                    return;
+                }
+            }
             if (callSession.getEndTime() != 0) {
                 finish();
                 return;
@@ -835,7 +889,8 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         super.onMinimizeClick(view);
     }
 
-    public void onEventMainThread(UserInfo userInfo) {
+    @Override
+    public void onUserUpdate(UserInfo userInfo) {
         if (isFinishing()) {
             return;
         }
@@ -853,7 +908,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         }
     }
 
-    public void onEventMainThread(HeadsetInfo headsetInfo) {
+    public void onHeadsetPlugUpdate(HeadsetInfo headsetInfo) {
         if (headsetInfo == null || !BluetoothUtil.isForground(MultiAudioCallActivity.this)) {
             FinLog.v("bugtags", "MultiAudioCallActivity 不在前台！");
             return;
@@ -901,7 +956,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.i("bugtags", "MultiAudioCallActivity->onEventMainThread Error=" + e.getMessage());
+            Log.i("bugtags", "MultiAudioCallActivity->onHeadsetPlugUpdate Error=" + e.getMessage());
         }
     }
 }

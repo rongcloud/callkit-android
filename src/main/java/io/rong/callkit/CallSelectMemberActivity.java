@@ -1,9 +1,10 @@
 package io.rong.callkit;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -25,26 +26,31 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.request.RequestOptions;
+
 import io.rong.callkit.util.CallKitSearchBarListener;
 import io.rong.callkit.util.CallKitSearchBarView;
 import io.rong.callkit.util.CallKitUtils;
 import io.rong.callkit.util.CallSelectMemberSerializable;
 import io.rong.calllib.RongCallCommon;
 import io.rong.common.RLog;
-import io.rong.imkit.RongContext;
-import io.rong.imkit.RongIM;
-import io.rong.imkit.mention.RongMentionManager;
-import io.rong.imkit.model.GroupUserInfo;
-import io.rong.imkit.userInfoCache.RongUserInfoManager;
-import io.rong.imkit.widget.AsyncImageView;
+import io.rong.imkit.feature.mention.RongMentionManager;
+import io.rong.imkit.userinfo.RongUserInfoManager;
+import io.rong.imkit.userinfo.model.GroupUserInfo;
 import io.rong.imlib.model.Conversation;
+import io.rong.imlib.model.Group;
 import io.rong.imlib.model.UserInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class CallSelectMemberActivity extends BaseNoActionBarActivity {
+public class CallSelectMemberActivity extends BaseNoActionBarActivity implements RongUserInfoManager.UserDataObserver {
     private static final String TAG = "CallSelectMemberActivity";
+    public static final String DISCONNECT_ACTION = "call_disconnect";
     ArrayList<String> selectedMember;
     private boolean isFirstDialog = true;
     /** 已经选择的观察者列表 */
@@ -125,7 +131,7 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity {
                 if (getUserInfo(userid) == null) {
                     userInfoIndex.put(userid, index);
                 }
-                // 当获取到的userInfo为空时，记录下当前index，并给userInfoArrayList增加一个空元素，等到异步结果(onEventMainThread)回来后，根据index，把正确的数据插入回原来位置
+                // 当获取到的userInfo为空时，记录下当前index，并给userInfoArrayList增加一个空元素，等到异步结果(onHeadsetPlugUpdate)回来后，根据index，把正确的数据插入回原来位置
                 userInfoArrayList.add(getUserInfo(userid));
 
             } else {
@@ -139,6 +145,17 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity {
     private static final String CALLSELECTMEMBERSERIALIZABLE_KEY =
             "CALLSELECTMEMBERSERIALIZABLEKEY";
 
+    private BroadcastReceiver disconnectBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (TextUtils.equals(intent.getAction(), DISCONNECT_ACTION)) {
+                if (!isFinishing()) {
+                    setActivityResult(true);
+                }
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -148,7 +165,7 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity {
                         WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_call_select_member2);
-        RongContext.getInstance().getEventBus().register(this);
+        RongUserInfoManager.getInstance().addUserDataObserver(this);
 
         initTopBar();
 
@@ -264,7 +281,7 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity {
                         .getGroupMembersProvider()
                         .getGroupMembers(
                                 groupId,
-                                new RongIM.IGroupMemberCallback() {
+                                new RongMentionManager.IGroupMemberCallback() {
                                     @Override
                                     public void onGetGroupMembersResult(List<UserInfo> userInfos) {
                                         if (userInfos == null || userInfos.size() == 0) {
@@ -298,11 +315,7 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent intent = new Intent();
-                        intent.putStringArrayListExtra("invited", selectedMember);
-                        intent.putStringArrayListExtra("observers", observerMember);
-                        setResult(RESULT_OK, intent);
-                        CallSelectMemberActivity.this.finish();
+                        setActivityResult(false);
                     }
                 });
 
@@ -330,8 +343,7 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity {
                             startSearchMember(content);
                         } else {
                             Toast.makeText(
-                                            CallSelectMemberActivity.this,
-                                            "暂无数据提供搜索！",
+                                            CallSelectMemberActivity.this, getString(R.string.rc_voip_search_no_member),
                                             Toast.LENGTH_SHORT)
                                     .show();
                         }
@@ -349,6 +361,13 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity {
                         }
                     }
                 });
+        registerDisconnectBroadcastReceiver();
+    }
+
+    private void registerDisconnectBroadcastReceiver() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(DISCONNECT_ACTION);
+        registerReceiver(disconnectBroadcastReceiver, intentFilter);
     }
 
     private void startSearchMember(String searchEditContent) {
@@ -386,8 +405,40 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity {
 
     @Override
     protected void onDestroy() {
-        RongContext.getInstance().getEventBus().unregister(this);
         super.onDestroy();
+        RongUserInfoManager.getInstance().removeUserDataObserver(this);
+        unregisterReceiver(disconnectBroadcastReceiver);
+    }
+
+    @Override
+    public void onUserUpdate(UserInfo userInfo) {
+        if (mList != null && userInfo != null) {
+            synchronized (listLock) {
+                int index = userInfoIndex.get(userInfo.getUserId());
+                if (index >= 0 && index < userInfoArrayList.size()) {
+                    userInfoIndex.remove(userInfo.getUserId());
+                    userInfoArrayList.remove(index);
+                    userInfoArrayList.add(index, userInfo);
+                }
+                Message message = new Message();
+                message.obj = GROUPMEMBERSRESULT_KEY;
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList(GROUPMEMBERSRESULT_KEY, userInfoArrayList);
+                bundle.putInt("conversationType", conversationType.getValue());
+                message.setData(bundle);
+                mHandler.sendMessage(message);
+            }
+        }
+    }
+
+    @Override
+    public void onGroupUpdate(Group group) {
+
+    }
+
+    @Override
+    public void onGroupUserInfoUpdate(GroupUserInfo groupUserInfo) {
+
     }
 
     class ListAdapter extends BaseAdapter {
@@ -427,7 +478,7 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity {
                         LayoutInflater.from(CallSelectMemberActivity.this)
                                 .inflate(R.layout.rc_voip_listitem_select_member, null);
                 holder.checkbox = (ImageView) convertView.findViewById(R.id.rc_checkbox);
-                holder.portrait = (AsyncImageView) convertView.findViewById(R.id.rc_user_portrait);
+                holder.portrait = (ImageView) convertView.findViewById(R.id.rc_user_portrait);
                 holder.name = (TextView) convertView.findViewById(R.id.rc_user_name);
                 convertView.setTag(holder);
             }
@@ -440,7 +491,10 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity {
                 holder.checkbox.setClickable(false);
                 holder.checkbox.setEnabled(true);
                 holder.name.setText("");
-                holder.portrait.setAvatar(Uri.EMPTY);
+                Glide.with(holder.portrait)
+                        .load(R.drawable.rc_default_portrait)
+                        .apply(RequestOptions.bitmapTransform(new CenterCrop()))
+                        .into(holder.portrait);
                 holder.checkbox.setTag("");
                 return convertView;
             }
@@ -477,29 +531,27 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity {
             } else {
                 holder.name.setText(displayName);
             }
-            holder.portrait.setAvatar(mUserInfo.getPortraitUri());
+            Glide.with(holder.portrait)
+                    .load(mUserInfo.getPortraitUri())
+                    .placeholder(R.drawable.rc_default_portrait)
+                    .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                    .into(holder.portrait);
             return convertView;
         }
     }
 
-    public void onEventMainThread(UserInfo userInfo) {
-        if (mList != null && userInfo != null) {
-            synchronized (listLock) {
-                int index = userInfoIndex.get(userInfo.getUserId());
-                if (index >= 0 && index < userInfoArrayList.size()) {
-                    userInfoIndex.remove(userInfo.getUserId());
-                    userInfoArrayList.remove(index);
-                    userInfoArrayList.add(index, userInfo);
-                }
-                Message message = new Message();
-                message.obj = GROUPMEMBERSRESULT_KEY;
-                Bundle bundle = new Bundle();
-                bundle.putParcelableArrayList(GROUPMEMBERSRESULT_KEY, userInfoArrayList);
-                bundle.putInt("conversationType", conversationType.getValue());
-                message.setData(bundle);
-                mHandler.sendMessage(message);
-            }
-        }
+    /**
+     * 结束页面前设置值
+     *
+     * @param val 是否是远端挂断，如果是则关闭该页面
+     */
+    private void setActivityResult(boolean val) {
+        Intent intent = new Intent();
+        intent.putExtra("remote_hangup", val);
+        intent.putStringArrayListExtra("invited", selectedMember);
+        intent.putStringArrayListExtra("observers", observerMember);
+        setResult(RESULT_OK, intent);
+        CallSelectMemberActivity.this.finish();
     }
 
     @Override
@@ -508,8 +560,9 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity {
     }
 
     class ViewHolder {
+
         ImageView checkbox;
-        AsyncImageView portrait;
+        ImageView portrait;
         TextView name;
     }
 
@@ -724,7 +777,7 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity {
         if (TextUtils.isEmpty(userid)) {
             return null;
         }
-        return RongContext.getInstance().getUserInfoFromCache(userid);
+        return RongUserInfoManager.getInstance().getUserInfo(userid);
     }
 
     private int getTotalSelectedNumber() {

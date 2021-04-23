@@ -4,22 +4,27 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+
 import io.rong.callkit.util.CallKitUtils;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallSession;
 import io.rong.common.RLog;
-import io.rong.imkit.RongExtension;
-import io.rong.imkit.RongIM;
-import io.rong.imkit.plugin.IPluginModule;
-import io.rong.imkit.plugin.IPluginRequestPermissionResultCallback;
-import io.rong.imkit.utilities.PermissionCheckUtil;
+import io.rong.imkit.conversation.extension.RongExtension;
+import io.rong.imkit.conversation.extension.component.plugin.IPluginModule;
+import io.rong.imkit.conversation.extension.component.plugin.IPluginRequestPermissionResultCallback;
+import io.rong.imkit.utils.PermissionCheckUtil;
+import io.rong.imlib.IRongCoreCallback;
+import io.rong.imlib.IRongCoreEnum;
+import io.rong.imlib.RongCoreClient;
 import io.rong.imlib.RongIMClient;
+import io.rong.imlib.discussion.base.RongDiscussionClient;
+import io.rong.imlib.discussion.model.Discussion;
 import io.rong.imlib.model.Conversation;
-import io.rong.imlib.model.Discussion;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -43,7 +48,7 @@ public class VideoPlugin implements IPluginModule, IPluginRequestPermissionResul
     }
 
     @Override
-    public void onClick(Fragment currentFragment, final RongExtension extension) {
+    public void onClick(Fragment currentFragment, RongExtension extension, int index) {
         context = currentFragment.getActivity().getApplicationContext();
         conversationType = extension.getConversationType();
         targetId = extension.getTargetId();
@@ -89,10 +94,10 @@ public class VideoPlugin implements IPluginModule, IPluginRequestPermissionResul
             intent.setPackage(context.getPackageName());
             context.getApplicationContext().startActivity(intent);
         } else if (conversationType.equals(Conversation.ConversationType.DISCUSSION)) {
-            RongIM.getInstance()
+            RongDiscussionClient.getInstance()
                     .getDiscussion(
                             targetId,
-                            new RongIMClient.ResultCallback<Discussion>() {
+                            new IRongCoreCallback.ResultCallback<Discussion>() {
                                 @Override
                                 public void onSuccess(Discussion discussion) {
 
@@ -114,7 +119,7 @@ public class VideoPlugin implements IPluginModule, IPluginRequestPermissionResul
                                 }
 
                                 @Override
-                                public void onError(RongIMClient.ErrorCode e) {
+                                public void onError(IRongCoreEnum.CoreErrorCode e) {
                                     RLog.d(TAG, "get discussion errorCode = " + e.getValue());
                                 }
                             });
@@ -158,14 +163,12 @@ public class VideoPlugin implements IPluginModule, IPluginRequestPermissionResul
             int requestCode,
             @NonNull String[] permissions,
             @NonNull int[] grantResults) {
-        if (PermissionCheckUtil.checkPermissions(fragment.getActivity(), permissions)) {
+        Context context = fragment.getContext();
+        if (PermissionCheckUtil.checkPermissions(context, permissions)) {
             startVideoActivity(extension);
         } else {
-            extension.showRequestPermissionFailedAlter(
-                    PermissionCheckUtil.getNotGrantedPermissionMsg(
-                            context, permissions, grantResults));
+            PermissionCheckUtil.showRequestPermissionFailedAlter(context, permissions, grantResults);
         }
-
         return true;
     }
 }

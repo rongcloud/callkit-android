@@ -29,7 +29,7 @@ public class BluetoothUtil {
     public static boolean hasBluetoothA2dpConnected() {
         boolean bool = false;
         BluetoothAdapter mAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mAdapter.isEnabled()) {
+        if (mAdapter != null && mAdapter.isEnabled()) {
             int a2dp = mAdapter.getProfileConnectionState(BluetoothProfile.A2DP);
             if (a2dp == BluetoothProfile.STATE_CONNECTED) {
                 bool = true;

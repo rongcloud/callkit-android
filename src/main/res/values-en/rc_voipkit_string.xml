@@ -10,7 +10,7 @@
     <string name="rc_voip_call_no_response">No answer</string>
     <string name="rc_voip_call_hangup">Cancelled</string>
     <string name="rc_voip_call_network_error">Network connection is not reachable, please check it</string>
-    <string name="rc_voip_call_interrupt">Cancelled</string>
+    <string name="rc_voip_call_interrupt">Interrupt</string>
     <string name="rc_voip_call_terminalted">Call ended</string>
     <string name="rc_voip_call_started">Call started</string>
     <string name="rc_voip_select_member">Select members</string>
@@ -70,4 +70,11 @@ Please turn it on in the application permission management page of \"Settings\"<
 
     <string name="rc_voip_audio_refuse">Voice call rejected</string>
     <string name="rc_voip_video_refuse">Video call rejected</string>
+    <string name="rc_voip_relevant_permissions">Please set the relevant permissions</string>
+    <string name="rc_voip_loading_whiteboard">Whiteboard loading...</string>
+    <string name="rc_voip_web_page_cetificate_invalid">The web page certificate you visited is invalid, Do you want to continue your visit?</string>
+    <string name="rc_voip_im_connection_abnormal">IM connection is abnormal. Please check the network and try again</string>
+    <string name="rc_voip_search_no_member">There are no data available to search!</string>
+
+    <string name="rc_voip_call_terminalted_notify">[Call ended]</string>
 </resources>

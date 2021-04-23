@@ -11,8 +11,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.request.RequestOptions;
+
 import io.rong.callkit.R;
-import io.rong.imkit.widget.AsyncImageView;
 import io.rong.imlib.model.UserInfo;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,9 +44,7 @@ public class CallVerticalScrollView extends ScrollView implements ICallScrollVie
     private void init(Context context) {
         this.context = context;
         linearLayout = new LinearLayout(context);
-        linearLayout.setLayoutParams(
-                new LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        linearLayout.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         addView(linearLayout);
     }
@@ -50,6 +52,16 @@ public class CallVerticalScrollView extends ScrollView implements ICallScrollVie
     public int dip2pix(int dipValue) {
         float scale = getResources().getDisplayMetrics().density;
         return (int) (dipValue * scale + 0.5f);
+    }
+
+    @Override
+    public View getChildAtIndex(int index) {
+        return linearLayout.getChildAt(index);
+    }
+
+    @Override
+    public int getChildrenSpace() {
+        return CHILDREN_PER_LINE;
     }
 
     public int getScreenWidth() {
@@ -103,7 +115,7 @@ public class CallVerticalScrollView extends ScrollView implements ICallScrollVie
             child.findViewById(R.id.rc_user_portrait_layout)
                     .setLayoutParams(new LinearLayout.LayoutParams(portraitSize, portraitSize));
         }
-        AsyncImageView imageView = (AsyncImageView) child.findViewById(R.id.rc_user_portrait);
+        ImageView imageView = (ImageView) child.findViewById(R.id.rc_user_portrait);
         TextView name = (TextView) child.findViewById(R.id.rc_user_name);
         name.setVisibility(enableTitle ? VISIBLE : GONE);
         TextView stateV = (TextView) child.findViewById(R.id.rc_voip_member_state);
@@ -115,7 +127,11 @@ public class CallVerticalScrollView extends ScrollView implements ICallScrollVie
         }
 
         if (userInfo != null) {
-            imageView.setAvatar(userInfo.getPortraitUri());
+            Glide.with(this)
+                    .load(userInfo.getPortraitUri())
+                    .placeholder(R.drawable.rc_default_portrait)
+                    .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                    .into(imageView);
             name.setText(userInfo.getName() == null ? userInfo.getUserId() : userInfo.getName());
         } else {
             name.setText(childId);
@@ -184,9 +200,13 @@ public class CallVerticalScrollView extends ScrollView implements ICallScrollVie
             LinearLayout container = (LinearLayout) linearLayout.getChildAt(i);
             LinearLayout child = (LinearLayout) container.findViewWithTag(childId);
             if (child != null) {
-                AsyncImageView imageView =
-                        (AsyncImageView) child.findViewById(R.id.rc_user_portrait);
-                imageView.setAvatar(userInfo.getPortraitUri());
+                ImageView imageView =
+                        (ImageView) child.findViewById(R.id.rc_user_portrait);
+                Glide.with(this)
+                        .load(userInfo.getPortraitUri())
+                        .placeholder(R.drawable.rc_default_portrait)
+                        .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                        .into(imageView);
                 if (enableTitle) {
                     TextView textView = (TextView) child.findViewById(R.id.rc_user_name);
                     textView.setLines(1);

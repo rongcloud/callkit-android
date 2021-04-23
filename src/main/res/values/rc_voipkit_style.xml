@@ -16,4 +16,14 @@
         <item name="android:layout_height">65dp</item>
         <item name="android:scaleType">centerCrop</item>
     </style>
+
+    <style name="RCTheme.Notification" parent="RCTheme.TextView">
+        <item name="android:background">@drawable/rc_corner_style</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:paddingLeft">4dp</item>
+        <item name="android:paddingRight">4dp</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+        <item name="android:textColor">@color/rc_text_color_primary_inverse</item>
+    </style>
 </resources>

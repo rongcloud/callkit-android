@@ -164,7 +164,7 @@ public class CallPromptDialog extends AlertDialog {
     }
 
     private int gePopupWidth() {
-        int distanceToBorder = (int) mContext.getResources().getDimension(R.dimen.rc_dimen_size_40);
+        int distanceToBorder = (int) mContext.getResources().getDimension(R.dimen.callkit_dimen_size_40);
         return getScreenWidth() - 2 * (distanceToBorder);
     }
 

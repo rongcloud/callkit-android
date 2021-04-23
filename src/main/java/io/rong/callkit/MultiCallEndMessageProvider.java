@@ -7,101 +7,84 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import java.util.List;
+
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.message.MultiCallEndMessage;
-import io.rong.imkit.model.ProviderTag;
-import io.rong.imkit.model.UIMessage;
-import io.rong.imkit.widget.provider.IContainerItemProvider;
+import io.rong.imkit.conversation.messgelist.provider.BaseNotificationMessageItemProvider;
+import io.rong.imkit.model.UiMessage;
+import io.rong.imkit.widget.adapter.IViewProviderListener;
+import io.rong.imkit.widget.adapter.ViewHolder;
 import io.rong.imlib.RongIMClient;
+import io.rong.imlib.model.MessageContent;
 
-@ProviderTag(
-        messageContent = MultiCallEndMessage.class,
-        showPortrait = false,
-        showProgress = false,
-        showWarning = false,
-        centerInHorizontal = true,
-        showSummaryWithName = false)
 public class MultiCallEndMessageProvider
-        extends IContainerItemProvider.MessageProvider<MultiCallEndMessage> {
+        extends BaseNotificationMessageItemProvider<MultiCallEndMessage> {
 
-    protected static class ViewHolder {
-        TextView textView;
+    @Override
+    protected ViewHolder onCreateMessageContentViewHolder(ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.rc_voip_msg_multi_call_end, parent, false);
+        return new ViewHolder(parent.getContext(), v);
     }
 
     @Override
-    public View newView(Context context, ViewGroup group) {
-        View v = LayoutInflater.from(context).inflate(R.layout.rc_voip_msg_multi_call_end, null);
-        ViewHolder holder = new ViewHolder();
-        holder.textView = v.findViewById(R.id.rc_msg);
-        v.setTag(holder);
-        return v;
-    }
-
-    @Override
-    public void bindView(View v, int position, MultiCallEndMessage content, UIMessage message) {
-        Context context = v.getContext();
+    protected void bindMessageContentViewHolder(ViewHolder holder,ViewHolder parentHolder, MultiCallEndMessage multiCallEndMessage, UiMessage uiMessage, int position, List<UiMessage> list, IViewProviderListener<UiMessage> listener) {
+        Context context = holder.getContext();
         String msg = "";
-        if (content.getReason()
-                == RongCallCommon.CallDisconnectedReason.OTHER_DEVICE_HAD_ACCEPTED) {
+        RongCallCommon.CallDisconnectedReason reason = multiCallEndMessage.getReason();
+        RongIMClient.MediaType mediaType = multiCallEndMessage.getMediaType();
+        if (reason == RongCallCommon.CallDisconnectedReason.OTHER_DEVICE_HAD_ACCEPTED) {
             msg = context.getResources().getString(R.string.rc_voip_call_other);
-        } else if (content.getReason() == RongCallCommon.CallDisconnectedReason.REMOTE_HANGUP
-                || content.getReason() == RongCallCommon.CallDisconnectedReason.HANGUP) {
-            if (content.getMediaType() == RongIMClient.MediaType.AUDIO) {
+        } else if (reason == RongCallCommon.CallDisconnectedReason.REMOTE_HANGUP
+                || reason == RongCallCommon.CallDisconnectedReason.HANGUP) {
+            if (mediaType == RongIMClient.MediaType.AUDIO) {
                 msg = context.getResources().getString(R.string.rc_voip_audio_ended);
-            } else if (content.getMediaType() == RongIMClient.MediaType.VIDEO) {
+            } else if (mediaType == RongIMClient.MediaType.VIDEO) {
                 msg = context.getResources().getString(R.string.rc_voip_video_ended);
             }
-        } else if (content.getReason() == RongCallCommon.CallDisconnectedReason.REMOTE_REJECT
-                || content.getReason() == RongCallCommon.CallDisconnectedReason.REJECT) {
-            if (content.getMediaType() == RongIMClient.MediaType.AUDIO) {
+        } else if (reason == RongCallCommon.CallDisconnectedReason.REMOTE_REJECT
+                || reason == RongCallCommon.CallDisconnectedReason.REJECT) {
+            if (mediaType == RongIMClient.MediaType.AUDIO) {
                 msg = context.getResources().getString(R.string.rc_voip_audio_refuse);
-            } else if (content.getMediaType() == RongIMClient.MediaType.VIDEO) {
+            } else if (mediaType == RongIMClient.MediaType.VIDEO) {
                 msg = context.getResources().getString(R.string.rc_voip_video_refuse);
             }
-        } else if (content.getReason() == RongCallCommon.CallDisconnectedReason.SERVICE_NOT_OPENED
-            || content.getReason() == RongCallCommon.CallDisconnectedReason.REMOTE_ENGINE_UNSUPPORTED) {
+        } else if (reason == RongCallCommon.CallDisconnectedReason.SERVICE_NOT_OPENED
+                || reason == RongCallCommon.CallDisconnectedReason.REMOTE_ENGINE_UNSUPPORTED) {
             msg = context.getResources().getString(R.string.rc_voip_engine_notfound);
         } else {
-            if (content.getMediaType() == RongIMClient.MediaType.AUDIO) {
+            if (mediaType == RongIMClient.MediaType.AUDIO) {
                 msg = context.getResources().getString(R.string.rc_voip_audio_no_response);
-            } else if (content.getMediaType() == RongIMClient.MediaType.VIDEO) {
+            } else if (mediaType == RongIMClient.MediaType.VIDEO) {
                 msg = context.getResources().getString(R.string.rc_voip_video_no_response);
             }
         }
-        ViewHolder holder = (ViewHolder) v.getTag();
-        holder.textView.setText(msg);
+        TextView tv = holder.getView(R.id.rc_msg);
+        tv.setText(msg);
     }
 
     @Override
-    public Spannable getContentSummary(Context context, MultiCallEndMessage message) {
-        String msg = "";
+    protected boolean isMessageViewType(MessageContent messageContent) {
+        return messageContent instanceof MultiCallEndMessage;
+    }
 
-        if (message.getReason() == RongCallCommon.CallDisconnectedReason.NO_RESPONSE) {
-            if (message.getMediaType() == RongIMClient.MediaType.AUDIO) {
+    @Override
+    public Spannable getSummarySpannable(Context context, MultiCallEndMessage multiCallEndMessage) {
+        String msg = "";
+        if (multiCallEndMessage.getReason() == RongCallCommon.CallDisconnectedReason.NO_RESPONSE) {
+            if (multiCallEndMessage.getMediaType() == RongIMClient.MediaType.AUDIO) {
                 msg = context.getResources().getString(R.string.rc_voip_audio_no_response);
-            } else if (message.getMediaType() == RongIMClient.MediaType.VIDEO) {
+            } else if (multiCallEndMessage.getMediaType() == RongIMClient.MediaType.VIDEO) {
                 msg = context.getResources().getString(R.string.rc_voip_video_no_response);
             }
         } else {
-            if (message.getMediaType() == RongIMClient.MediaType.AUDIO) {
+            if (multiCallEndMessage.getMediaType() == RongIMClient.MediaType.AUDIO) {
                 msg = context.getResources().getString(R.string.rc_voip_message_audio);
-            } else if (message.getMediaType() == RongIMClient.MediaType.VIDEO) {
+            } else if (multiCallEndMessage.getMediaType() == RongIMClient.MediaType.VIDEO) {
                 msg = context.getResources().getString(R.string.rc_voip_message_video);
             }
         }
         return new SpannableString(msg);
     }
-
-    @Override
-    public Spannable getContentSummary(MultiCallEndMessage data) {
-        return null;
-    }
-
-    @Override
-    public void onItemClick(
-            View view, int position, MultiCallEndMessage content, UIMessage message) {}
-
-    @Override
-    public void onItemLongClick(
-            View view, int position, MultiCallEndMessage content, UIMessage message) {}
 }

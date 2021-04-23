@@ -9,16 +9,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.request.RequestOptions;
+
 import io.rong.callkit.util.ICallScrollView;
-import io.rong.imkit.widget.AsyncImageView;
 import io.rong.imlib.model.UserInfo;
 import java.util.ArrayList;
 import java.util.List;
 
 /** Created by weiqinxiao on 16/3/25. coming 横向显示 多人语音_被叫 */
 public class CallUserGridView extends HorizontalScrollView implements ICallScrollView {
+
     private Context context;
     private boolean enableTitle;
     private LinearLayout linearLayout;
@@ -28,6 +34,11 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
 
     private int portraitSize;
     private boolean isHorizontal = true;
+
+    @Override
+    public int getChildrenSpace() {
+        return CHILDREN_SPACE;
+    }
 
     public CallUserGridView(Context context) {
         super(context);
@@ -115,7 +126,7 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
             child.findViewById(R.id.rc_user_portrait_layout)
                     .setLayoutParams(new LinearLayout.LayoutParams(portraitSize, portraitSize));
         }
-        AsyncImageView imageView = (AsyncImageView) child.findViewById(R.id.rc_user_portrait);
+        ImageView imageView = (ImageView) child.findViewById(R.id.rc_user_portrait);
         TextView name = (TextView) child.findViewById(R.id.rc_user_name);
         name.setVisibility(enableTitle ? VISIBLE : GONE);
         TextView stateV = (TextView) child.findViewById(R.id.rc_voip_member_state);
@@ -127,7 +138,11 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
         }
 
         if (userInfo != null) {
-            imageView.setAvatar(userInfo.getPortraitUri());
+            Glide.with(this)
+                    .load(userInfo.getPortraitUri())
+                    .placeholder(R.drawable.rc_default_portrait)
+                    .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                    .into(imageView);
             name.setText(userInfo.getName() == null ? userInfo.getUserId() : userInfo.getName());
         } else {
             name.setText(childId);
@@ -196,9 +211,13 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
             LinearLayout container = (LinearLayout) linearLayout.getChildAt(i);
             LinearLayout child = (LinearLayout) container.findViewWithTag(childId);
             if (child != null) {
-                AsyncImageView imageView =
-                        (AsyncImageView) child.findViewById(R.id.rc_user_portrait);
-                imageView.setAvatar(userInfo.getPortraitUri());
+                ImageView imageView =
+                        (ImageView) child.findViewById(R.id.rc_user_portrait);
+                Glide.with(this)
+                        .load(userInfo.getPortraitUri())
+                        .placeholder(R.drawable.rc_default_portrait)
+                        .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                        .into(imageView);
                 if (enableTitle) {
                     TextView textView = (TextView) child.findViewById(R.id.rc_user_name);
                     textView.setLines(1);
@@ -233,5 +252,10 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
                 textView.setVisibility(visible ? VISIBLE : GONE);
             }
         }
+    }
+
+    @Override
+    public View getChildAtIndex(int index) {
+        return linearLayout.getChildAt(index);
     }
 }

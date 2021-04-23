@@ -11,8 +11,8 @@
         android:id="@+id/callkit_callhang_up_left"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        android:layout_marginLeft="72.5dp">
+        android:layout_gravity="start"
+        android:layout_marginStart="72.5dp">
 
         <ImageView
             android:id="@+id/rc_voip_call_hang_up"
@@ -33,9 +33,9 @@
 
     <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginRight="72.5dp"
+        android:layout_marginEnd="72.5dp"
         android:layout_height="wrap_content">
 
         <ImageView

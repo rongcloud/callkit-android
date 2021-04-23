@@ -4,23 +4,28 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+
 import io.rong.callkit.util.CallKitUtils;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallSession;
 import io.rong.common.RLog;
-import io.rong.imkit.RongExtension;
-import io.rong.imkit.RongIM;
-import io.rong.imkit.plugin.IPluginModule;
-import io.rong.imkit.plugin.IPluginRequestPermissionResultCallback;
-import io.rong.imkit.utilities.PermissionCheckUtil;
+import io.rong.imkit.conversation.extension.RongExtension;
+import io.rong.imkit.conversation.extension.component.plugin.IPluginModule;
+import io.rong.imkit.conversation.extension.component.plugin.IPluginRequestPermissionResultCallback;
+import io.rong.imkit.utils.PermissionCheckUtil;
+import io.rong.imlib.IRongCoreCallback;
+import io.rong.imlib.IRongCoreEnum;
+import io.rong.imlib.RongCoreClient;
 import io.rong.imlib.RongIMClient;
+import io.rong.imlib.discussion.base.RongDiscussionClient;
+import io.rong.imlib.discussion.model.Discussion;
 import io.rong.imlib.model.Conversation;
-import io.rong.imlib.model.Discussion;
 import java.util.ArrayList;
 
 /** Created by weiqinxiao on 16/8/16. */
@@ -44,7 +49,7 @@ public class AudioPlugin implements IPluginModule, IPluginRequestPermissionResul
     }
 
     @Override
-    public void onClick(final Fragment currentFragment, final RongExtension extension) {
+    public void onClick(Fragment currentFragment, RongExtension extension, int index) {
         context = currentFragment.getActivity().getApplicationContext();
         conversationType = extension.getConversationType();
         targetId = extension.getTargetId();
@@ -101,10 +106,10 @@ public class AudioPlugin implements IPluginModule, IPluginRequestPermissionResul
             intent.setPackage(context.getPackageName());
             context.startActivity(intent);
         } else if (conversationType.equals(Conversation.ConversationType.DISCUSSION)) {
-            RongIM.getInstance()
+            RongDiscussionClient.getInstance()
                     .getDiscussion(
                             targetId,
-                            new RongIMClient.ResultCallback<Discussion>() {
+                            new IRongCoreCallback.ResultCallback<Discussion>() {
                                 @Override
                                 public void onSuccess(Discussion discussion) {
                                     Intent intent =
@@ -125,7 +130,7 @@ public class AudioPlugin implements IPluginModule, IPluginRequestPermissionResul
                                 }
 
                                 @Override
-                                public void onError(RongIMClient.ErrorCode e) {
+                                public void onError(IRongCoreEnum.CoreErrorCode e) {
                                     RLog.d(TAG, "get discussion errorCode = " + e.getValue());
                                 }
                             });
@@ -169,12 +174,11 @@ public class AudioPlugin implements IPluginModule, IPluginRequestPermissionResul
             int requestCode,
             @NonNull String[] permissions,
             @NonNull int[] grantResults) {
-        if (PermissionCheckUtil.checkPermissions(fragment.getActivity(), permissions)) {
+        Context context = fragment.getContext();
+        if (PermissionCheckUtil.checkPermissions(context, permissions)) {
             startAudioActivity(fragment, extension);
         } else {
-            extension.showRequestPermissionFailedAlter(
-                    PermissionCheckUtil.getNotGrantedPermissionMsg(
-                            fragment.getContext(), permissions, grantResults));
+            PermissionCheckUtil.showRequestPermissionFailedAlter(context, permissions, grantResults);
         }
         return true;
     }

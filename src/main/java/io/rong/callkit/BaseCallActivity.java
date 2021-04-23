@@ -9,6 +9,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -27,7 +28,6 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
@@ -38,31 +38,37 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import cn.rongcloud.rtc.api.stream.RCRTCVideoStreamConfig;
 import cn.rongcloud.rtc.api.stream.RCRTCVideoStreamConfig.Builder;
 import cn.rongcloud.rtc.base.RCRTCParamsType.RCRTCVideoResolution;
 import cn.rongcloud.rtc.base.RCRTCParamsType.RCRTCVideoFps;
+import cn.rongcloud.rtc.utils.FinLog;
+import io.rong.callkit.util.HeadsetInfo;
+import io.rong.calllib.PublishCallBack;
+import io.rong.imkit.notification.NotificationUtil;
+import io.rong.imkit.userinfo.RongUserInfoManager;
+import io.rong.imkit.userinfo.model.GroupUserInfo;
+import io.rong.imkit.utils.PermissionCheckUtil;
+import io.rong.imlib.model.Group;
+import io.rong.imlib.model.UserInfo;
 import io.rong.push.notification.RongNotificationInterface;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import cn.rongcloud.rtc.RongRTCConfig;
 import io.rong.callkit.util.BluetoothUtil;
 import io.rong.callkit.util.CallKitUtils;
-import io.rong.callkit.util.HeadsetPlugReceiver;
 import io.rong.callkit.util.RingingMode;
 import io.rong.calllib.IRongCallListener;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallSession;
 import io.rong.common.RLog;
-import io.rong.imkit.RongContext;
 import io.rong.imkit.manager.AudioPlayManager;
 import io.rong.imkit.manager.AudioRecordManager;
-import io.rong.imkit.utilities.PermissionCheckUtil;
-import io.rong.imkit.utils.NotificationUtil;
 
 import static io.rong.callkit.CallFloatBoxView.showFB;
 import static io.rong.callkit.util.CallKitUtils.isDebug;
@@ -70,7 +76,7 @@ import static io.rong.callkit.util.CallKitUtils.isDial;
 
 /** Created by weiqinxiao on 16/3/9. */
 public class BaseCallActivity extends BaseNoActionBarActivity
-        implements IRongCallListener, PickupDetector.PickupDetectListener {
+        implements IRongCallListener, PickupDetector.PickupDetectListener, RongUserInfoManager.UserDataObserver {
 
     private static final String TAG = "BaseCallActivity";
     private static final String MEDIAPLAYERTAG = "MEDIAPLAYERTAG";
@@ -107,6 +113,12 @@ public class BaseCallActivity extends BaseNoActionBarActivity
 
     /** 判断是拨打界面还是接听界面 */
     private boolean isIncoming;
+    /**
+     * 融云 SDK 默认麦克风、摄像头流唯一标识，和 RongCallClient#publishCustomVideoStream(tag, PublishCallBack) 方法中 tag 用法一致;
+     * 用户发布自定义视频流唯一标示，不允许带下划线，不能为 “RongCloudRTC”;
+     * @see RongCallClient#publishCustomVideoStream(String, PublishCallBack)
+     */
+    public static final String RONG_TAG_CALL = "RongCloudRTC";
 
     RelativeLayout.LayoutParams mLargeLayoutParams =
             new RelativeLayout.LayoutParams(
@@ -205,8 +217,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
 
         AudioPlayManager.getInstance().stopPlay();
         AudioRecordManager.getInstance().destroyRecord();
-        RongContext.getInstance().getEventBus().register(this);
-
+        RongUserInfoManager.getInstance().addUserDataObserver(this);
         initMp();
 
         // 注册 BroadcastReceiver 监听情景模式的切换
@@ -311,7 +322,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
 
     public void onIncomingCallRinging() {
         isIncoming = true;
-        int ringerMode = NotificationUtil.getRingerMode(this);
+        int ringerMode = NotificationUtil.getInstance().getRingerMode(this);
         if (ringerMode != AudioManager.RINGER_MODE_SILENT) {
             if (ringerMode == AudioManager.RINGER_MODE_VIBRATE) {
                 startVibrator();
@@ -369,8 +380,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
 
     protected void startVibrator() {
         if (mVibrator == null) {
-            mVibrator =
-                    (Vibrator) RongContext.getInstance().getSystemService(Context.VIBRATOR_SERVICE);
+            mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         } else {
             mVibrator.cancel();
         }
@@ -399,7 +409,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
 
         AudioPlayManager.getInstance().setInVoipMode(false);
         stopRing();
-        NotificationUtil.clearNotification(this, BaseCallActivity.CALL_NOTIFICATION_ID);
+        NotificationUtil.getInstance().clearNotification(this, BaseCallActivity.CALL_NOTIFICATION_ID);
         RongCallProxy.getInstance().setCallListener(null);
         BluetoothUtil.stopBlueToothSco(this);
     }
@@ -483,8 +493,10 @@ public class BaseCallActivity extends BaseNoActionBarActivity
                                     : getString(R.string.rc_video_call_on_going));
                     if (!isFinishing()) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            RLog.d(TAG, "BaseCallActivity onStop finishAndRemoveTask()");
                             finishAndRemoveTask();
                         } else {
+                            RLog.d(TAG, "BaseCallActivity onStop finish()");
                             finish();
                         }
                     }
@@ -512,7 +524,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
                 RongCallProxy.getInstance().setCallListener(this);
                 if (shouldRestoreFloat) {
                     CallFloatBoxView.hideFloatBox();
-                    NotificationUtil.clearNotification(this, BaseCallActivity.CALL_NOTIFICATION_ID);
+                    NotificationUtil.getInstance().clearNotification(this, BaseCallActivity.CALL_NOTIFICATION_ID);
                 }
                 long activeTime = session.getActiveTime();
                 time = activeTime == 0 ? 0 : (System.currentTimeMillis() - activeTime) / 1000;
@@ -546,7 +558,21 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     protected void onDestroy() {
         try {
             RLog.d(TAG, "BaseCallActivity onDestroy");
-            RongContext.getInstance().getEventBus().unregister(this);
+            RongUserInfoManager.getInstance().removeUserDataObserver(this);
+            //            RongUserInfoManager.getInstance().remove
+
+
+
+
+
+
+
+
+
+
+
+
+
             handler.removeCallbacks(updateTimeRunnable);
             unregisterReceiver(mRingModeReceiver);
             if (mMediaPlayer != null) {
@@ -697,7 +723,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
 
     private void showNotification(Context context,String title,String content,PendingIntent pendingIntent,int notificationId){
         Notification notification = RongNotificationInterface
-            .createNotification(context, title, pendingIntent, content, RongNotificationInterface.SoundType.SILENT);
+            .createNotification(context, title, pendingIntent, content, RongNotificationInterface.SoundType.SILENT, true);
         NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -737,6 +763,21 @@ public class BaseCallActivity extends BaseNoActionBarActivity
             }
         }
         return result;
+    }
+
+    @Override
+    public void onUserUpdate(UserInfo info) {
+
+    }
+
+    @Override
+    public void onGroupUpdate(Group group) {
+
+    }
+
+    @Override
+    public void onGroupUserInfoUpdate(GroupUserInfo groupUserInfo) {
+
     }
 
     private class UpdateTimeRunnable implements Runnable {
@@ -831,10 +872,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     public void onRequestPermissionsResult(
             int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (!PermissionCheckUtil.checkPermissions(this, permissions)) {
-            PermissionCheckUtil.showRequestPermissionFailedAlter(
-                    this,
-                    PermissionCheckUtil.getNotGrantedPermissionMsg(
-                            this, permissions, grantResults));
+            PermissionCheckUtil.showRequestPermissionFailedAlter(this, permissions, grantResults);
         }
     }
 
@@ -905,4 +943,53 @@ public class BaseCallActivity extends BaseNoActionBarActivity
 
 
     }
+
+    protected void onHeadsetPlugUpdate(HeadsetInfo headsetInfo) {
+
+    }
+
+
+    public class HeadsetPlugReceiver extends BroadcastReceiver {
+
+        private final String TAG = HeadsetPlugReceiver.class.getSimpleName();
+        // 动态注册了监听有线耳机之后 默认会调用一次有限耳机拔出
+        public boolean FIRST_HEADSET_PLUG_RECEIVER = false;
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            HeadsetInfo headsetInfo = null;
+            if ("android.intent.action.HEADSET_PLUG".equals(action)) {
+                int state = -1;
+                if (FIRST_HEADSET_PLUG_RECEIVER) {
+                    if (intent.hasExtra("state")) {
+                        state = intent.getIntExtra("state", -1);
+                    }
+                    if (state == 1) {
+                        headsetInfo = new HeadsetInfo(true, HeadsetInfo.HeadsetType.WiredHeadset);
+                    } else if (state == 0) {
+                        headsetInfo = new HeadsetInfo(false, HeadsetInfo.HeadsetType.WiredHeadset);
+                    }
+                } else {
+                    FIRST_HEADSET_PLUG_RECEIVER = true;
+                }
+            } else if (BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {
+                int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, -1);
+                switch (state) {
+                    case BluetoothProfile.STATE_DISCONNECTED:
+                        headsetInfo = new HeadsetInfo(false, HeadsetInfo.HeadsetType.BluetoothA2dp);
+                        break;
+                    case BluetoothProfile.STATE_CONNECTED:
+                        headsetInfo = new HeadsetInfo(true, HeadsetInfo.HeadsetType.BluetoothA2dp);
+                        break;
+                }
+            }
+            if (null != headsetInfo) { // onHandFreeButtonClick
+                onHeadsetPlugUpdate(headsetInfo);
+            } else {
+                FinLog.e(TAG, "HeadsetPlugReceiver headsetInfo=null !");
+            }
+        }
+    }
+
 }
