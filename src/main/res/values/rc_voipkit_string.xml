@@ -74,6 +74,7 @@
     <string name="rc_voip_unstable_call_connection">当前通话连接质量不佳</string>
     <string name="rc_voip_connecting">连接中...</string>
     <string name="rc_voip_engine_notfound">音视频服务已关闭</string>
+    <string name="rc_voip_mo_rejected_by_blocklist">已被对方加入黑名单</string>
 
     <string name="rc_select_contact">选择联系人</string>
     <string name="rc_search">搜索</string>

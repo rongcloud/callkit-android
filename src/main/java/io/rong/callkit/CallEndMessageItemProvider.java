@@ -87,6 +87,9 @@ public class CallEndMessageItemProvider extends BaseMessageItemProvider<CallSTer
             case REMOTE_ENGINE_UNSUPPORTED:
                 msgContent = view.getResources().getString(R.string.rc_voip_engine_notfound);
                 break;
+            case REJECTED_BY_BLACKLIST:
+                msgContent = view.getResources().getString(R.string.rc_voip_mo_rejected_by_blocklist);
+                break;
              default:
                  String mo_reject = view.getResources().getString(R.string.rc_voip_mo_reject);
                  String mt_reject = view.getResources().getString(R.string.rc_voip_mt_reject);
@@ -97,9 +100,11 @@ public class CallEndMessageItemProvider extends BaseMessageItemProvider<CallSTer
                      if (val) {
                          msgContent = view.getResources().getString(R.string.rc_voip_call_time_length);
                          msgContent += extra;
-                     } else {
-                         msgContent = callSTerminateMessage.getReason() == HANGUP ? mo_reject : mt_reject;
+                     }else {
+                         msgContent = view.getResources().getString(R.string.rc_voip_call_time_length);
                      }
+                 } else {
+                     msgContent = callSTerminateMessage.getReason() == HANGUP ? mo_reject : mt_reject;
                  }
                  break;
         }

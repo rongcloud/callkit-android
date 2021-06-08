@@ -30,13 +30,13 @@ import io.rong.callkit.util.BluetoothUtil;
 import io.rong.callkit.util.CallKitUtils;
 import io.rong.calllib.CallUserProfile;
 import io.rong.calllib.IRongCallListener;
+import io.rong.calllib.ReportUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallSession;
 import io.rong.calllib.message.CallSTerminateMessage;
 import io.rong.common.RLog;
 import io.rong.imkit.IMCenter;
-import io.rong.imkit.RongIM;
 import io.rong.imkit.manager.AudioPlayManager;
 import io.rong.imkit.notification.NotificationUtil;
 import io.rong.imlib.RongIMClient;
@@ -45,7 +45,6 @@ import io.rong.message.InformationNotificationMessage;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
-import io.rong.calllib.ReportUtil;
 
 /** Created by weiqinxiao on 16/3/17. */
 public class CallFloatBoxView {
@@ -130,6 +129,9 @@ public class CallFloatBoxView {
             } else {
                 mediaIconV.setImageResource(R.drawable.rc_voip_float_video);
             }
+        }else {
+            //视频悬浮窗下，不需要UI显示时间，但是时间值也需要同步更新
+            setupTime(null);
         }
         RongCallClient.getInstance()
                 .setVoIPCallListener(
@@ -625,15 +627,11 @@ public class CallFloatBoxView {
                                 switch (reason) {
                                     case HANGUP:
                                     case REMOTE_HANGUP:
-                                        //                        if (mTime >= 3600) {
-                                        //                            extra =
-                                        // String.format("%d:%02d:%02d", mTime / 3600, (mTime %
-                                        // 3600) / 60, (mTime % 60));
-                                        //                        } else {
-                                        //                            extra =
-                                        // String.format("%02d:%02d", (mTime % 3600) / 60, (mTime %
-                                        // 60));
-                                        //                        }
+                                        if (mTime >= 3600) {
+                                            extra = String.format("%d:%02d:%02d", mTime / 3600, (mTime % 3600) / 60, (mTime % 60));
+                                        } else {
+                                            extra = String.format("%02d:%02d", (mTime % 3600) / 60, (mTime % 60));
+                                        }
                                         break;
                                 }
 
@@ -957,6 +955,10 @@ public class CallFloatBoxView {
 
     private static void setupTime(final TextView timeView) {
         final Handler handler = new Handler(Looper.getMainLooper());
+        if (timer != null){
+            timer.cancel();
+            timer = null;
+        }
         TimerTask task =
                 new TimerTask() {
                     @Override
@@ -966,20 +968,12 @@ public class CallFloatBoxView {
                                     @Override
                                     public void run() {
                                         mTime++;
-                                        if (mTime >= 3600) {
-                                            timeView.setText(
-                                                    String.format(
-                                                            "%d:%02d:%02d",
-                                                            mTime / 3600,
-                                                            (mTime % 3600) / 60,
-                                                            (mTime % 60)));
-                                            timeView.setVisibility(View.VISIBLE);
-                                        } else {
-                                            timeView.setText(
-                                                    String.format(
-                                                            "%02d:%02d",
-                                                            (mTime % 3600) / 60, (mTime % 60)));
-                                            timeView.setVisibility(View.VISIBLE);
+                                        if (timeView != null) {
+                                            if (mTime >= 3600) {
+                                                timeView.setText(String.format("%d:%02d:%02d", mTime / 3600, (mTime % 3600) / 60, (mTime % 60))); timeView.setVisibility(View.VISIBLE);
+                                            } else {
+                                                timeView.setText(String.format("%02d:%02d", (mTime % 3600) / 60, (mTime % 60))); timeView.setVisibility(View.VISIBLE);
+                                            }
                                         }
                                     }
                                 });
