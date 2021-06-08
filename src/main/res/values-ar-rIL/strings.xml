@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="callkit_selected_contacts_count">تم إختيار %d جهات إتصال</string>
+    <string name="callkit_voip_ok">تم</string>
+    <string name="rc_voip_video">مكالمة فيديو</string>
+    <string name="rc_voip_audio">مكالمة صوتية</string>
+    <string name="rc_voip_call_waiting">في انتظار الاستجابة...</string>
+    <string name="rc_voip_call_connecting">جاري الاتصال</string>
+    <string name="rc_voip_call_busy">الخط مشغول</string>
+    <string name="rc_voip_call_no_response">لايوجد اجابة</string>
+    <string name="rc_voip_call_hangup">تم الإلغاء</string>
+    <string name="rc_voip_call_network_error">لا يمكن الوصول الى الشبكة , يرجى التحقق من اتصال الشبكة والمحاولة مرة أخرى .</string>
+    <string name="rc_voip_call_interrupt">تم الإلغاء</string>
+    <string name="rc_voip_call_terminalted">تم إنهاء الاتصال</string>
+    <string name="rc_voip_call_started">بدء الاتصال</string>
+    <string name="rc_voip_select_member">إختر الأعضاء</string>
+    <string name="rc_voip_call_audio_start_fail">مكالمة صوتية جارية , حاول مرة اخرى</string>
+    <string name="rc_voip_call_video_start_fail">مكالمة فيديو جارية , حاول مرة اخرى</string>
+    <string name="rc_voip_call_other">تم الرد على الأجهزة الأخرى .</string>
+
+    <string name="rc_voip_audio_call_inviting">يدعوك إلى مكالمة صوتية</string>
+    <string name="rc_voip_video_call_inviting">يدعوك إلى مكالمة فيديو</string>
+
+    <string name="rc_voip_notificatio_video_call_inviting">يدعوك الى مكالمة فيديو</string>
+    <string name="rc_voip_notificatio_audio_call_inviting">يدعوك إلى مكالمة صوتية</string>
+    <string name="rc_voip_notificatio_audio_call_inviting_general">لديك دعوة مكالمة صوتية</string>
+    <string name="rc_voip_notificatio_video_call_inviting_general">لديك دعوة مكالمة فيديو</string>
+
+
+    <string name="rc_voip_video_ended">تم إنهاء مكالمة الفيديو</string>
+    <string name="rc_voip_video_no_response">لا يوجد رد على مكالمة الفيديو</string>
+    <string name="rc_voip_audio_ended">تم إنهاء مكالمة الفيديو</string>
+    <string name="rc_voip_audio_no_response">لا يوجد رد على المكالمة الصوتية</string>
+    <string name="rc_voip_mute">صامت</string>
+    <string name="rc_voip_hangup">إنهاء المحادثة</string>
+    <string name="rc_voip_answer">قبول</string>
+    <string name="rc_voip_camera">كاميرا</string>
+    <string name="rc_voip_handfree">مكبر صوت</string>
+    <string name="rc_voip_disable_camera">اغلق الكاميرا</string>
+    <string name="rc_voip_enable_camera">تشغيل الكاميرا</string>
+    <string name="rc_voip_participant_users">اعضاء</string>
+    <string name="rc_voip_mo_cancel">تم الإلغاء</string>
+    <string name="rc_voip_mo_reject">رفض</string>
+    <string name="rc_voip_mo_no_response">لا يوجد إجابة</string>
+    <string name="rc_voip_mt_cancel">تم الإلغاء</string>
+    <string name="rc_voip_mt_reject">رفض</string>
+    <string name="rc_voip_mt_no_response">لايوجد اجابة</string>
+    <string name="rc_voip_call_time_length">المدة&#160;</string>
+    <string name="rc_voip_mt_busy">قد يكون المستخدم الآخر مشغول الآن.</string>
+    <string name="rc_voip_mt_busy_toast">قد يكون المستخدم الآخر مشغول الآن , حاول مرة اخرى .</string>
+    <string name="rc_voip_message_audio">[مكالمة صوتية]</string>
+    <string name="rc_voip_message_video">[مكالمة فيديو]</string>
+    <string name="rc_voip_switch_to_audio">حول إلى مكالمة صوتية </string>
+    <string name="rc_voip_remote_switched_to_audio">المستخدم الآخر حول المكالمة الى مكالمة صوتية .</string>
+    <string name="rc_voip_switched_to_audio">حول إلى مكالمة صوتية .</string>
+    <string name="rc_voip_float_window_not_allowed">يرجى تفعيل خاصية النوافذ العائمة .</string>
+    <string name="rc_call_on_going">جاري تنفيذ المكالمة</string>
+    <string name="rc_audio_call_on_going">مكالمة صوتية جارية , اضغط للاستمرار</string>
+    <string name="rc_video_call_on_going">مكالمة فيديو جارية , اضغط للاستمرار</string>
+    <string name="rc_voip_over_limit">Up to %d اعضاء</string>
+    <string name="rc_voip_connecting">جاري الاتصال...</string>
+    <string name="rc_voip_unstable_call_connection">اتصال غير مستقر</string>
+    <string name="rc_voip_add_member">اختر الأعضاء</string>
+    <string name="rc_voip_engine_notfound">خدمات الصوت والفيديو غير مفعله</string>
+
+    <string name="rc_select_contact">اختر جهات اتصال</string>
+    <string name="rc_search">بحث</string>
+    <string name="rc_background_start_actvity_deny">تم إغلاق التطبيق، يرجى تفعيل تصريح عرض نوافذ منبثقة في الخلفية من صفحة الإعدادات"</string>
+
+    <string name="rc_voip_audio_refuse">المكالمة الصوتية مرفوضة</string>
+    <string name="rc_voip_video_refuse">مكالمة الفيديو مرفوضة</string>
+</resources>
