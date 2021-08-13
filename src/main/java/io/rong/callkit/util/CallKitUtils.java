@@ -22,6 +22,9 @@ import androidx.core.app.AppOpsManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import io.rong.callkit.R;
+import io.rong.calllib.RongCallCommon;
+import io.rong.imlib.model.Message;
+
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -241,5 +244,14 @@ public class CallKitUtils {
             userName = stringBuffer.toString();
         }
         return userName;
+    }
+
+    public static Message.ReceivedStatus getReceivedStatus(RongCallCommon.CallDisconnectedReason reason) {
+        //己方超时未接听或是对方取消通话时，应插入未读消息
+        if (reason == RongCallCommon.CallDisconnectedReason.REMOTE_CANCEL || reason == RongCallCommon.CallDisconnectedReason.NO_RESPONSE) {
+            return new Message.ReceivedStatus(0);
+        }
+        //默认是已读状态
+        return new Message.ReceivedStatus(1);
     }
 }

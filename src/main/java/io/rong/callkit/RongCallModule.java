@@ -12,6 +12,7 @@ import android.text.TextUtils;
 
 import androidx.fragment.app.Fragment;
 
+import io.rong.callkit.util.CallKitUtils;
 import io.rong.calllib.ReportUtil;
 import java.util.ArrayList;
 import java.util.List;
@@ -105,15 +106,15 @@ public class RongCallModule implements IExtensionModule {
                                 message.setDirection("MT");
                                 io.rong.imlib.model.Message.ReceivedStatus receivedStatus =
                                     new io.rong.imlib.model.Message.ReceivedStatus(0);
-                                RongIM.getInstance()
-                                    .insertIncomingMessage(
-                                        Conversation.ConversationType.PRIVATE,
-                                        callSession.getTargetId(),
-                                        senderId,
-                                        receivedStatus,
-                                        message,
-                                        insertTime,
-                                        null);
+                                IMCenter.getInstance()
+                                        .insertIncomingMessage(
+                                                Conversation.ConversationType.PRIVATE,
+                                                callSession.getTargetId(),
+                                                senderId,
+                                                CallKitUtils.getReceivedStatus(reason),
+                                                message,
+                                                insertTime,
+                                                null);
                             }
                         } else if (callSession.getConversationType()
                             == Conversation.ConversationType.GROUP) {
@@ -126,15 +127,15 @@ public class RongCallModule implements IExtensionModule {
                                 == RongCallCommon.CallMediaType.VIDEO) {
                                 multiCallEndMessage.setMediaType(RongIMClient.MediaType.VIDEO);
                             }
-                            RongIM.getInstance()
+                            IMCenter.getInstance()
                                 .insertIncomingMessage(
-                                    callSession.getConversationType(),
-                                    callSession.getTargetId(),
-                                    callSession.getCallerUserId(),
-                                    null,
-                                    multiCallEndMessage,
-                                    insertTime,
-                                    null);
+                                        callSession.getConversationType(),
+                                        callSession.getTargetId(),
+                                        callSession.getCallerUserId(),
+                                        CallKitUtils.getReceivedStatus(reason),
+                                        multiCallEndMessage,
+                                        insertTime,
+                                        null);
                         }
                     }
                     if (missedListener != null) {

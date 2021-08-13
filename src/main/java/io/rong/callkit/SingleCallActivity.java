@@ -934,14 +934,12 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                                 null);
             } else {
                 message.setDirection("MT");
-                io.rong.imlib.model.Message.ReceivedStatus receivedStatus =
-                        new io.rong.imlib.model.Message.ReceivedStatus(0);
                 IMCenter.getInstance()
                         .insertIncomingMessage(
                                 Conversation.ConversationType.PRIVATE,
                                 callSession.getTargetId(),
                                 senderId,
-                                receivedStatus,
+                                CallKitUtils.getReceivedStatus(reason),
                                 message,
                                 serverTime,
                                 null);

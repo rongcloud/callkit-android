@@ -248,16 +248,12 @@ public class CallFloatBoxView {
                                                                 serverTime,
                                                                 null);
                                             } else {
-                                                io.rong.imlib.model.Message.ReceivedStatus
-                                                        receivedStatus =
-                                                                new io.rong.imlib.model.Message
-                                                                        .ReceivedStatus(0);
                                                 IMCenter.getInstance()
                                                         .insertIncomingMessage(
                                                                 Conversation.ConversationType.GROUP,
                                                                 callProfile.getTargetId(),
                                                                 senderId,
-                                                                receivedStatus,
+                                                                CallKitUtils.getReceivedStatus(reason),
                                                                 informationNotificationMessage,
                                                                 serverTime,
                                                                 null);

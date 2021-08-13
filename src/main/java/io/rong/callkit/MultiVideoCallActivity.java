@@ -859,7 +859,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                     .load(userInfo.getPortraitUri())
                     .placeholder(R.drawable.rc_default_portrait)
                     .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                    .into(userPortrait);
+                    .into(userPortraitView);
             }
         }
         if (video.getParent() != null) {
@@ -918,7 +918,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                         .load(userInfo.getPortraitUri())
                         .placeholder(R.drawable.rc_default_portrait)
                         .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                        .into(userPortrait);
+                        .into(userPortraitView);
             }
             if (!TextUtils.isEmpty(userInfo.getName())) {
                 nameView.setText(userInfo.getName());
@@ -959,7 +959,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                         .load(userInfo.getPortraitUri())
                         .placeholder(R.drawable.rc_default_portrait)
                         .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                        .into(userPortrait);
+                        .into(userPortraitView);
             }
             if (!TextUtils.isEmpty(userInfo.getName())) {
                 nameView.setText(userInfo.getName());
@@ -1003,15 +1003,14 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         multiCallEndMessage.setMediaType(RongIMClient.MediaType.VIDEO);
         multiCallEndMessage.setReason(reason);
         long serverTime = System.currentTimeMillis() - RongIMClient.getInstance().getDeltaTime();
-        io.rong.imlib.model.Message.ReceivedStatus receivedStatus = new io.rong.imlib.model.Message.ReceivedStatus(reason == CallDisconnectedReason.HANGUP ? 1 : 0);
         IMCenter.getInstance().insertIncomingMessage( //
-            callSession.getConversationType(),//
-            callSession.getTargetId(),//
-            callSession.getCallerUserId(),//
-            receivedStatus, //
-            multiCallEndMessage,//
-            serverTime,//
-            null);//
+                callSession.getConversationType(),//
+                callSession.getTargetId(),//
+                callSession.getCallerUserId(),//
+                CallKitUtils.getReceivedStatus(reason), //
+                multiCallEndMessage,//
+                serverTime,//
+                null);//
         cancelTime();
         stopRing();
         postRunnableDelay(new Runnable() {
@@ -1209,7 +1208,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                                 .load(userInfo.getPortraitUri())
                                 .placeholder(R.drawable.rc_default_portrait)
                                 .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                                .into(userPortrait);
+                                .into(portraitView);
                     }
                     portraitContainer1 =
                             (LinearLayout)
@@ -1538,7 +1537,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                         .load(toUserInfo.getPortraitUri())
                         .placeholder(R.drawable.rc_default_portrait)
                         .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                        .into(userPortrait);
+                        .into(userPortraitView);
             }
         }
         fromView.setZOrderOnTop(false);
@@ -1621,7 +1620,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                         .load(userInfo.getPortraitUri())
                         .placeholder(R.drawable.rc_default_portrait)
                         .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                        .into(userPortrait);
+                        .into(portraitView);
             }
         }
         if (remoteViewContainer.getVisibility() == View.VISIBLE) {
@@ -1635,7 +1634,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                         .load(userInfo.getPortraitUri())
                         .placeholder(R.drawable.rc_default_portrait)
                         .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                        .into(userPortrait);
+                        .into(portraitView);
             }
         }
         if (topContainer.getVisibility() == View.VISIBLE) {

@@ -3,6 +3,7 @@ package io.rong.callkit;
 import android.text.TextUtils;
 import android.view.SurfaceView;
 
+import io.rong.callkit.util.CallKitUtils;
 import io.rong.calllib.ReportUtil;
 import io.rong.callkit.util.IncomingCallExtraHandleUtil;
 import io.rong.calllib.IRongCallListener;
@@ -258,17 +259,15 @@ public class RongCallProxy implements IRongCallListener {
                             null);
                 } else {
                     message.setDirection("MT");
-                    io.rong.imlib.model.Message.ReceivedStatus receivedStatus =
-                        new io.rong.imlib.model.Message.ReceivedStatus(0);
                     IMCenter.getInstance()
                         .insertIncomingMessage(
-                            Conversation.ConversationType.PRIVATE,
-                            callSession.getTargetId(),
-                            senderId,
-                            receivedStatus,
-                            message,
-                            insertTime,
-                            null);
+                                Conversation.ConversationType.PRIVATE,
+                                callSession.getTargetId(),
+                                senderId,
+                                CallKitUtils.getReceivedStatus(reason),
+                                message,
+                                insertTime,
+                                null);
                 }
             } else if (callSession.getConversationType()
                 == Conversation.ConversationType.GROUP) {
@@ -283,13 +282,13 @@ public class RongCallProxy implements IRongCallListener {
                 }
                 IMCenter.getInstance()
                     .insertIncomingMessage(
-                        callSession.getConversationType(),
-                        callSession.getTargetId(),
-                        callSession.getCallerUserId(),
-                        null,
-                        multiCallEndMessage,
-                        insertTime,
-                        null);
+                            callSession.getConversationType(),
+                            callSession.getTargetId(),
+                            callSession.getCallerUserId(),
+                            CallKitUtils.getReceivedStatus(reason),
+                            multiCallEndMessage,
+                            insertTime,
+                            null);
             }
         }
     }

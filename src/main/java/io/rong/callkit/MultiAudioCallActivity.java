@@ -775,7 +775,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         multiCallEndMessage.setReason(reason);
         multiCallEndMessage.setMediaType(RongIMClient.MediaType.AUDIO);
         long serverTime = System.currentTimeMillis() - RongIMClient.getInstance().getDeltaTime();
-        IMCenter.getInstance().insertIncomingMessage(callSession.getConversationType(), callSession.getTargetId(), callSession.getCallerUserId(), null, multiCallEndMessage, serverTime, null);
+        IMCenter.getInstance().insertIncomingMessage(callSession.getConversationType(), callSession.getTargetId(), callSession.getCallerUserId(), CallKitUtils.getReceivedStatus(reason), multiCallEndMessage, serverTime, null);
         cancelTime();
         stopRing();
         postRunnableDelay(new Runnable() {
