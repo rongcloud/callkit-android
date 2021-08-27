@@ -40,8 +40,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import cn.rongcloud.rtc.api.stream.RCRTCVideoStreamConfig;
+import cn.rongcloud.rtc.api.RCRTCAudioRouteManager;
+import cn.rongcloud.rtc.api.RCRTCEngine;
+import cn.rongcloud.rtc.api.callback.IRCRTCAudioRouteListener;
 import cn.rongcloud.rtc.api.stream.RCRTCVideoStreamConfig.Builder;
+import cn.rongcloud.rtc.audioroute.RCAudioRouteType;
 import cn.rongcloud.rtc.base.RCRTCParamsType.RCRTCVideoResolution;
 import cn.rongcloud.rtc.base.RCRTCParamsType.RCRTCVideoFps;
 import cn.rongcloud.rtc.utils.FinLog;
@@ -71,7 +74,6 @@ import io.rong.imkit.manager.AudioPlayManager;
 import io.rong.imkit.manager.AudioRecordManager;
 
 import static io.rong.callkit.CallFloatBoxView.showFB;
-import static io.rong.callkit.util.CallKitUtils.isDebug;
 import static io.rong.callkit.util.CallKitUtils.isDial;
 
 /** Created by weiqinxiao on 16/3/9. */
@@ -305,8 +307,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
             mMediaPlayer.prepareAsync();
             final AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
             if (am != null) {
-                am.setSpeakerphoneOn(
-                        mode == RingingMode.Incoming || mode == RingingMode.Incoming_Custom);
+                RCRTCEngine.getInstance().enableSpeaker(mode == RingingMode.Incoming || mode == RingingMode.Incoming_Custom);
                 // 设置此值可在拨打时控制响铃音量
                 am.setMode(AudioManager.MODE_IN_COMMUNICATION);
                 // 设置拨打时响铃音量默认值
@@ -460,6 +461,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
 
     @Override
     public void onCallConnected(RongCallSession callProfile, SurfaceView localVideo) {
+        registerAudioRouteTypeChange();
         if (RongCallKit.getCustomerHandlerListener() != null) {
             RongCallKit.getCustomerHandlerListener().onCallConnected(callProfile, localVideo);
         }
@@ -473,6 +475,20 @@ public class BaseCallActivity extends BaseNoActionBarActivity
         AudioPlayManager.getInstance().setInVoipMode(true);
         AudioRecordManager.getInstance().destroyRecord();
     }
+
+    private void registerAudioRouteTypeChange() {
+        RCRTCAudioRouteManager.getInstance().setOnAudioRouteChangedListener(new IRCRTCAudioRouteListener() {
+            @Override
+            public void onRouteChanged(RCAudioRouteType type) {
+                resetHandFreeStatus(type);
+            }
+        });
+    }
+
+    protected void resetHandFreeStatus(RCAudioRouteType type){
+
+    }
+
 
     @Override
     protected void onStop() {
@@ -596,7 +612,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
             Log.i(MEDIAPLAYERTAG, "--- onDestroy IllegalStateException---");
         }
         super.onDestroy();
-        unRegisterHeadsetplugReceiver();
+//        unRegisterHeadsetplugReceiver();
         if (wakeLock != null && wakeLock.isHeld()) {
             wakeLock.release();
         }
@@ -612,7 +628,8 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     }
 
     @Override
-    public void onRemoteCameraDisabled(String userId, boolean muted) {}
+    public void onRemoteCameraDisabled(String userId, boolean disabled) {
+    }
 
     @Override
     public void onRemoteMicrophoneDisabled(String userId, boolean disabled) {}

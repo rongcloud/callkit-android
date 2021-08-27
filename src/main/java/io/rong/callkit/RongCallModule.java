@@ -12,6 +12,7 @@ import android.text.TextUtils;
 
 import androidx.fragment.app.Fragment;
 
+import cn.rongcloud.rtc.api.RCRTCAudioRouteManager;
 import io.rong.callkit.util.CallKitUtils;
 import io.rong.calllib.ReportUtil;
 import java.util.ArrayList;
@@ -27,7 +28,6 @@ import io.rong.calllib.message.CallSTerminateMessage;
 import io.rong.calllib.message.MultiCallEndMessage;
 import io.rong.common.RLog;
 import io.rong.imkit.IMCenter;
-import io.rong.imkit.RongIM;
 import io.rong.imkit.config.RongConfigCenter;
 import io.rong.imkit.conversation.extension.IExtensionModule;
 import io.rong.imkit.conversation.extension.RongExtension;
@@ -292,6 +292,7 @@ public class RongCallModule implements IExtensionModule {
         RongConfigCenter.conversationConfig().addMessageProvider(new CallEndMessageItemProvider());
         RongConfigCenter.conversationConfig().addMessageProvider(new MultiCallEndMessageProvider());
         initMissedCallListener();
+        RCRTCAudioRouteManager.getInstance().init(context);
 
         IRongReceivedCallListener callListener =
             new IRongReceivedCallListener() {

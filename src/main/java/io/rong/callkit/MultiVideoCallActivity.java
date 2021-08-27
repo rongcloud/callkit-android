@@ -7,7 +7,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.net.http.SslError;
@@ -32,6 +31,10 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import cn.rongcloud.rtc.api.RCRTCAudioRouteManager;
+import cn.rongcloud.rtc.api.RCRTCEngine;
+import cn.rongcloud.rtc.audioroute.RCAudioRouteType;
 import cn.rongcloud.rtc.base.RCRTCStream;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
@@ -47,7 +50,6 @@ import io.rong.callkit.util.RingingMode;
 import io.rong.calllib.CallUserProfile;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
-import io.rong.calllib.RongCallCommon.CallDisconnectedReason;
 import io.rong.calllib.RongCallSession;
 import io.rong.calllib.StreamProfile;
 import io.rong.calllib.Utils;
@@ -58,7 +60,6 @@ import io.rong.imkit.userinfo.RongUserInfoManager;
 import io.rong.imkit.utils.PermissionCheckUtil;
 import io.rong.imlib.IRongCoreCallback;
 import io.rong.imlib.IRongCoreEnum;
-import io.rong.imlib.RongCoreClient;
 import io.rong.imlib.RongIMClient;
 import io.rong.imlib.discussion.base.RongDiscussionClient;
 import io.rong.imlib.discussion.model.Discussion;
@@ -425,11 +426,6 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         localViewUserId = RongIMClient.getInstance().getCurrentUserId();
         localView.setTag(CallKitUtils.getStitchedContent(localViewUserId, REMOTE_FURFACEVIEW_TAG));
 
-        regisHeadsetPlugReceiver();
-        if (BluetoothUtil.hasBluetoothA2dpConnected() || BluetoothUtil.isWiredHeadsetOn(this)) {
-            HeadsetInfo headsetInfo = new HeadsetInfo(true, HeadsetInfo.HeadsetType.BluetoothA2dp);
-            onHeadsetPlugUpdate(headsetInfo);
-        }
     }
 
     @Override
@@ -762,24 +758,22 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         signalView.setVisibility(View.VISIBLE);
 
         updateRemoteVideoViews(callSession);
+        RCRTCEngine.getInstance().enableSpeaker(true);
 
-        AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-        if (audioManager.isWiredHeadsetOn() || BluetoothUtil.hasBluetoothA2dpConnected()) {
-            RongCallClient.getInstance().setEnableSpeakerphone(false);
-            ImageView handFreeV = null;
-            if (null != bottomButtonContainer) {
-                handFreeV = bottomButtonContainer.findViewById(R.id.rc_voip_handfree_btn);
-            }
-            if (handFreeV != null) {
-                handFreeV.setSelected(false);
-                handFreeV.setEnabled(false);
-                handFreeV.setClickable(false);
-            }
-        } else {
-            RongCallClient.getInstance().setEnableSpeakerphone(true);
-            View handFreeV = bottomButtonContainer.findViewById(R.id.rc_voip_handfree_btn);
-            if (handFreeV != null) {
-                handFreeV.setSelected(true);
+    }
+
+    protected void resetHandFreeStatus(RCAudioRouteType type){
+        ImageView handFreeV = null;
+        if (null != bottomButtonContainer) {
+            handFreeV = bottomButtonContainer.findViewById(R.id.rc_voip_handfree_btn);
+        }
+        if (handFreeV != null) {
+            // 耳机状态
+            if (type == RCAudioRouteType.HEADSET || type == RCAudioRouteType.HEADSET_BLUETOOTH) {
+//                handFreeV.setSelected(false);
+            } else {
+                // 非耳机状态
+                handFreeV.setSelected(type == RCAudioRouteType.SPEAKER_PHONE);
             }
         }
     }
@@ -1024,8 +1018,8 @@ public class MultiVideoCallActivity extends BaseCallActivity {
     }
 
     @Override
-    public void onRemoteCameraDisabled(String userId, boolean muted) {
-        if (!muted) {
+    public void onRemoteCameraDisabled(String userId, boolean disabled) {
+        if (disabled) {
             if (localViewUserId.equals(userId)) {
                 localView.setBackgroundColor(Color.TRANSPARENT);
             } else {
@@ -1291,15 +1285,6 @@ public class MultiVideoCallActivity extends BaseCallActivity {
             participantPortraitContainer.setVisibility(View.GONE);
             bottomButtonContainer.setVisibility(View.VISIBLE);
             rc_voip_multiVideoCall_minimize.setVisibility(View.GONE);
-        }
-        if (callAction.equals(RongCallAction.ACTION_INCOMING_CALL)) {
-            regisHeadsetPlugReceiver();
-            if (BluetoothUtil.hasBluetoothA2dpConnected()
-                    || BluetoothUtil.isWiredHeadsetOn(MultiVideoCallActivity.this)) {
-                HeadsetInfo headsetInfo =
-                        new HeadsetInfo(true, HeadsetInfo.HeadsetType.BluetoothA2dp);
-                onHeadsetPlugUpdate(headsetInfo);
-            }
         }
     }
 

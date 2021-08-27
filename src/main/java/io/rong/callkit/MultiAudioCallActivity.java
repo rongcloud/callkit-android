@@ -3,7 +3,6 @@ package io.rong.callkit;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -15,7 +14,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +22,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 
+import cn.rongcloud.rtc.api.RCRTCAudioRouteManager;
+import cn.rongcloud.rtc.api.RCRTCEngine;
+import cn.rongcloud.rtc.audioroute.RCAudioRouteType;
 import cn.rongcloud.rtc.utils.FinLog;
 import io.rong.callkit.util.BluetoothUtil;
 import io.rong.callkit.util.CallKitUtils;
@@ -44,7 +45,6 @@ import io.rong.imkit.userinfo.RongUserInfoManager;
 import io.rong.imkit.utils.PermissionCheckUtil;
 import io.rong.imlib.IRongCoreCallback;
 import io.rong.imlib.IRongCoreEnum;
-import io.rong.imlib.RongCoreClient;
 import io.rong.imlib.RongIMClient;
 import io.rong.imlib.discussion.base.RongDiscussionClient;
 import io.rong.imlib.discussion.model.Discussion;
@@ -339,15 +339,6 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         memberContainer.setScrollViewOverScrollMode(View.OVER_SCROLL_NEVER);
         createPickupDetector();
 
-        if (callAction.equals(RongCallAction.ACTION_INCOMING_CALL)) {
-            regisHeadsetPlugReceiver();
-            if (BluetoothUtil.hasBluetoothA2dpConnected()
-                    || BluetoothUtil.isWiredHeadsetOn(MultiAudioCallActivity.this)) {
-                HeadsetInfo headsetInfo =
-                        new HeadsetInfo(true, HeadsetInfo.HeadsetType.BluetoothA2dp);
-                onHeadsetPlugUpdate(headsetInfo);
-            }
-        }
     }
 
     @Override
@@ -368,7 +359,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
     }
 
     public void onHangupBtnClick(View view) {
-        unRegisterHeadsetplugReceiver();
+//        unRegisterHeadsetplugReceiver();
         if (callSession == null || isFinishing) {
             FinLog.e(
                     TAG,
@@ -429,11 +420,6 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         this.callSession = callSession;
         callRinging(RingingMode.Outgoing);
 
-        regisHeadsetPlugReceiver();
-        if (BluetoothUtil.hasBluetoothA2dpConnected() || BluetoothUtil.isWiredHeadsetOn(this)) {
-            HeadsetInfo headsetInfo = new HeadsetInfo(true, HeadsetInfo.HeadsetType.BluetoothA2dp);
-            onHeadsetPlugUpdate(headsetInfo);
-        }
     }
 
     @Override
@@ -729,28 +715,25 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         if (muteV != null) {
             muteV.setSelected(muted);
         }
+        RCRTCEngine.getInstance().enableSpeaker(false);
 
-        AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-        if (audioManager.isWiredHeadsetOn() || BluetoothUtil.hasBluetoothA2dpConnected()) {
-            handFree = false;
-            RongCallClient.getInstance().setEnableSpeakerphone(false);
-            View handFreeV = null;
-            if (null != outgoingLayout) {
-                handFreeV = outgoingLayout.findViewById(R.id.rc_voip_handfree_btn);
-            }
-            if (handFreeV != null) {
-                handFreeV.setSelected(false);
-                handFreeV.setEnabled(false);
-                handFreeV.setClickable(false);
-            }
-        } else {
-            RongCallClient.getInstance().setEnableSpeakerphone(handFree);
-            View handFreeV = outgoingLayout.findViewById(R.id.rc_voip_handfree_btn);
-            if (handFreeV != null) {
-                handFreeV.setSelected(handFree);
+        stopRing();
+    }
+
+    protected void resetHandFreeStatus(RCAudioRouteType type){
+        ImageView handFreeV = null;
+        if (null != outgoingLayout) {
+            handFreeV = outgoingLayout.findViewById(R.id.rc_voip_handfree_btn);
+        }
+        if (handFreeV != null) {
+            // 耳机状态
+            if (type == RCAudioRouteType.HEADSET || type == RCAudioRouteType.HEADSET_BLUETOOTH) {
+//                handFreeV.setSelected(false);
+            } else {
+                // 非耳机状态
+                handFreeV.setSelected(type == RCAudioRouteType.SPEAKER_PHONE);
             }
         }
-        stopRing();
     }
 
     @Override

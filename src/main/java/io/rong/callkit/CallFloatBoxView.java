@@ -420,8 +420,8 @@ public class CallFloatBoxView {
                             }
 
                             @Override
-                            public void onRemoteCameraDisabled(String userId, boolean muted) {
-                                ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, "userId|state|disabled|desc", userId, "onRemoteCameraDisabled", muted, TAG);
+                            public void onRemoteCameraDisabled(String userId, boolean disabled) {
+                                ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, "userId|state|disabled|desc", userId, "onRemoteCameraDisabled", disabled, TAG);
                             }
 
                             @Override
@@ -804,8 +804,8 @@ public class CallFloatBoxView {
                             }
 
                             @Override
-                            public void onRemoteCameraDisabled(String userId, boolean muted) {
-                                ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, "userId|state|disabled|desc", userId, "onRemoteCameraDisabled", muted, TAG);
+                            public void onRemoteCameraDisabled(String userId, boolean disabled) {
+                                ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, "userId|state|disabled|desc", userId, "onRemoteCameraDisabled", disabled, TAG);
                             }
 
                             @Override
