@@ -303,7 +303,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                             MultiAudioCallActivity.this));
 
             ImageView button = outgoingController.findViewById(R.id.rc_voip_call_mute_btn);
-            button.setEnabled(false);
+            button.setEnabled(true);
             for (int i = 0; i < userIds.size(); i++) {
                 if (!userIds.get(i).equals(RongIMClient.getInstance().getCurrentUserId())) {
                     invitedList.add(userIds.get(i));

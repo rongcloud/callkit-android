@@ -32,19 +32,24 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import cn.rongcloud.rtc.api.RCRTCAudioRouteManager;
-import cn.rongcloud.rtc.api.RCRTCEngine;
-import cn.rongcloud.rtc.audioroute.RCAudioRouteType;
-import cn.rongcloud.rtc.base.RCRTCStream;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
-import io.rong.callkit.util.DefaultPushConfig;
-import cn.rongcloud.rtc.core.RendererCommon;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+
+import cn.rongcloud.rtc.api.RCRTCEngine;
 import cn.rongcloud.rtc.api.stream.RCRTCVideoView;
+import cn.rongcloud.rtc.audioroute.RCAudioRouteType;
+import cn.rongcloud.rtc.base.RCRTCStream;
+import cn.rongcloud.rtc.core.RendererCommon;
 import cn.rongcloud.rtc.utils.FinLog;
 import io.rong.callkit.util.BluetoothUtil;
 import io.rong.callkit.util.CallKitUtils;
+import io.rong.callkit.util.DefaultPushConfig;
 import io.rong.callkit.util.HeadsetInfo;
 import io.rong.callkit.util.RingingMode;
 import io.rong.calllib.CallUserProfile;
@@ -66,10 +71,6 @@ import io.rong.imlib.discussion.model.Discussion;
 import io.rong.imlib.model.Conversation;
 import io.rong.imlib.model.Group;
 import io.rong.imlib.model.UserInfo;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
 
 import static io.rong.callkit.CallSelectMemberActivity.DISCONNECT_ACTION;
 
@@ -1019,7 +1020,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
 
     @Override
     public void onRemoteCameraDisabled(String userId, boolean disabled) {
-        if (disabled) {
+        if (!disabled) {
             if (localViewUserId.equals(userId)) {
                 localView.setBackgroundColor(Color.TRANSPARENT);
             } else {

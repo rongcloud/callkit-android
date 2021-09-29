@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import cn.rongcloud.rtc.api.RCRTCAudioRouteManager;
 import cn.rongcloud.rtc.api.RCRTCEngine;
 import cn.rongcloud.rtc.audioroute.RCAudioRouteType;
 import io.rong.callkit.util.BluetoothUtil;
@@ -372,7 +371,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             RelativeLayout layout = buttonLayout.findViewById(R.id.rc_voip_call_mute);
             layout.setVisibility(View.VISIBLE);
             ImageView button = buttonLayout.findViewById(R.id.rc_voip_call_mute_btn);
-            button.setEnabled(false);
+            button.setEnabled(true);
             buttonLayout.findViewById(R.id.rc_voip_handfree).setVisibility(View.VISIBLE);
         }
 

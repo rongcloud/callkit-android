@@ -55,6 +55,10 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
             checkPermissions = intent.getBooleanExtra("checkPermissions", false);
         }
 
+        if(!needShowNotification(context, message)){
+            return;
+        }
+
         if (TextUtils.equals(ACTION_CALLINVITEMESSAGE, action)) {
             if (callSession == null) {
                 RLog.e(TAG, "push:: callsession is null !!");
@@ -76,6 +80,23 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
             clearNotificationCache();
             handleNotificationClickEvent(context, message, callSession, checkPermissions);
         }
+    }
+
+    private boolean needShowNotification(Context context, PushNotificationMessage message) {
+        if (INVITE.equals(message.getObjectName()) && Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            // Android 10 以下允许后台运行，直接交由会话列表界面拉取消息
+            RLog.d(TAG, "handle VoIP event.");
+            Intent newIntent = new Intent();
+            newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            Uri uri = Uri.parse("rong://" + context.getPackageName()).buildUpon()
+                    .appendPath("conversationlist")
+                    .appendQueryParameter("isFromPush", "false").build();
+            newIntent.setData(uri);
+            newIntent.setPackage(context.getPackageName());
+            context.startActivity(newIntent);
+            return false;
+        }
+        return true;
     }
 
     private void handleNotificationClickEvent(Context context, PushNotificationMessage message, RongCallSession callSession, boolean checkPermissions) {
