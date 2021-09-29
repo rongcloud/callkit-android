@@ -29,8 +29,10 @@
 
     <string name="rc_voip_video_ended">Video call ended</string>
     <string name="rc_voip_video_no_response">Video call no answer</string>
+    <string name="rc_voip_video_cancel">Video call canceled</string>
     <string name="rc_voip_audio_ended">Voice call ended</string>
     <string name="rc_voip_audio_no_response">Voice call no answer</string>
+    <string name="rc_voip_audio_cancel">Voice call canceled</string>
     <string name="rc_voip_mute">Mute</string>
     <string name="rc_voip_hangup">Hang up</string>
     <string name="rc_voip_answer">Accept</string>

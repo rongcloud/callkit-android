@@ -8,13 +8,20 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
 
     <!--读取电话的状态信息的权限-->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application android:supportsRtl="true">
+        <meta-data
+            android:name="rc.callkit"
+            android:value="io.rong.callkit.util.CallKitBuildVar" />
 
         <!-- new voip config start -->
         <activity
@@ -67,6 +74,7 @@
             <intent-filter>
                 <action android:name="action.push.CallInviteMessage" />
                 <action android:name="action.push.CallInviteMessage.CLICKED"/>
+                <action android:name="action.push.voip.hangup.click"/>
             </intent-filter>
         </receiver>
 
@@ -77,6 +85,10 @@
                 <action android:name="android.intent.action.PHONE_STATE"/>
             </intent-filter>
         </receiver>
+
+        <service android:name=".RongIncomingCallService"
+            android:enabled="true"
+            android:exported="true"/>
     </application>
 
 </manifest>

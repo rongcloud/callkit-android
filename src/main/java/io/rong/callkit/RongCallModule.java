@@ -292,7 +292,6 @@ public class RongCallModule implements IExtensionModule {
         RongConfigCenter.conversationConfig().addMessageProvider(new CallEndMessageItemProvider());
         RongConfigCenter.conversationConfig().addMessageProvider(new MultiCallEndMessageProvider());
         initMissedCallListener();
-        RCRTCAudioRouteManager.getInstance().init(context);
 
         IRongReceivedCallListener callListener =
             new IRongReceivedCallListener() {
@@ -305,6 +304,7 @@ public class RongCallModule implements IExtensionModule {
                     } else {
                         mCallSession = callSession;
                     }
+                    RCRTCAudioRouteManager.getInstance().init(mContext.getApplicationContext());
                 }
 
                 @Override

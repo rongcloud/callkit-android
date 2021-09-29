@@ -293,7 +293,6 @@ public class CallFloatBoxView {
                                         mContext, BaseCallActivity.CALL_NOTIFICATION_ID);
                                 RongCallClient.getInstance()
                                         .setVoIPCallListener(RongCallProxy.getInstance());
-                                BluetoothUtil.stopBlueToothSco(mContext);
                             }
 
                             @Override
@@ -738,10 +737,6 @@ public class CallFloatBoxView {
                                         mContext, BaseCallActivity.CALL_NOTIFICATION_ID);
                                 RongCallClient.getInstance()
                                         .setVoIPCallListener(RongCallProxy.getInstance());
-                                AudioManager am =
-                                        (AudioManager)
-                                                mContext.getSystemService(Context.AUDIO_SERVICE);
-                                BluetoothUtil.stopBlueToothSco(mContext);
                             }
 
                             @Override

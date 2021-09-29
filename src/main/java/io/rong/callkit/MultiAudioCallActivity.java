@@ -1,5 +1,7 @@
 package io.rong.callkit;
 
+import static io.rong.callkit.CallSelectMemberActivity.DISCONNECT_ACTION;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
@@ -17,12 +19,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.CircleCrop;
-import com.bumptech.glide.request.RequestOptions;
-
-import cn.rongcloud.rtc.api.RCRTCAudioRouteManager;
 import cn.rongcloud.rtc.api.RCRTCEngine;
 import cn.rongcloud.rtc.audioroute.RCAudioRouteType;
 import cn.rongcloud.rtc.utils.FinLog;
@@ -55,8 +51,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-
-import static io.rong.callkit.CallSelectMemberActivity.DISCONNECT_ACTION;
 
 /** <a href="http://support.rongcloud.cn/kb/Njcy">如何实现不基于于群组的voip</a> */
 public class MultiAudioCallActivity extends BaseCallActivity {
@@ -110,7 +104,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                                 .inflate(
                                         R.layout.rc_voip_call_bottom_connected_button_layout, null);
         ImageView button = outgoingController.findViewById(R.id.rc_voip_call_mute_btn);
-        button.setEnabled(false);
+        button.setEnabled(true);
         incomingController =
                 (RelativeLayout)
                         LayoutInflater.from(this)
@@ -267,7 +261,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                             R.drawable.rc_voip_audio_answer_selector_new,
                             MultiAudioCallActivity.this));
 
-            onIncomingCallRinging();
+            onIncomingCallRinging(callSession);
         } else if (callAction.equals(RongCallAction.ACTION_OUTGOING_CALL)) {
             Conversation.ConversationType conversationType =
                     Conversation.ConversationType.valueOf(
@@ -510,11 +504,8 @@ public class MultiAudioCallActivity extends BaseCallActivity {
             name.setText(userId);
         }
         if (userInfo != null && userInfo.getPortraitUri() != null) {
-            Glide.with(this)
-                    .load(userInfo.getPortraitUri())
-                    .placeholder(R.drawable.rc_default_portrait)
-                    .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                    .into(userPortrait);
+            RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(), userInfo.getPortraitUri(),
+                    R.drawable.rc_default_portrait, userPortrait);
             userPortrait.setVisibility(View.VISIBLE);
         }
         name.setTag(userId + "callerName");

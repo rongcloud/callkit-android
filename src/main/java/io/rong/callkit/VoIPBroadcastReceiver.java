@@ -10,8 +10,13 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.text.TextUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import io.rong.callkit.util.CallRingingUtil;
 import io.rong.callkit.util.IncomingCallExtraHandleUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
@@ -26,8 +31,6 @@ import io.rong.push.common.PushConst;
 import io.rong.push.common.RLog;
 import io.rong.push.notification.PushNotificationMessage;
 import io.rong.push.notification.RongNotificationInterface;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 为解决在 Android 10 以上版本不再允许后台运行 Activity，音视频的离线推送呼叫消息将由通知栏的形式展示给用户
@@ -39,6 +42,7 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
     private static final String INVITE = "RC:VCInvite";
     public static final String ACTION_CALLINVITEMESSAGE = "action.push.CallInviteMessage";
     public final static String ACTION_CALLINVITEMESSAGE_CLICKED = "action.push.CallInviteMessage.CLICKED";
+    public static final String ACTION_CALL_HANGUP_CLICKED = "action.push.voip.hangup.click";
     private static final String TAG = "VoIPBroadcastReceiver";
     private static Map<String,Integer> notificationCache = new HashMap<>();
 
@@ -46,6 +50,19 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
         RLog.d(TAG, "onReceive.action:" + action);
+
+        // 通知栏挂断按钮事件响应
+        if (ACTION_CALL_HANGUP_CLICKED.equals(action)) {
+            RongCallSession session = intent.getParcelableExtra(RongIncomingCallService.KEY_CALL_SESSION);
+            stopIncomingService(context);
+            if (session == null) {
+                RongCallClient.getInstance().hangUpCall();
+            } else {
+                RongCallClient.getInstance().hangUpCall(session.getCallId());
+            }
+            return;
+        }
+
 
         PushNotificationMessage message = intent.getParcelableExtra(PushConst.MESSAGE);
         RongCallSession callSession = null;
@@ -79,6 +96,9 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
             IncomingCallExtraHandleUtil.clear();
             clearNotificationCache();
             handleNotificationClickEvent(context, message, callSession, checkPermissions);
+            if (callSession != null && intent.getBooleanExtra(RongIncomingCallService.KEY_NEED_AUTO_ANSWER, false)) {
+                CallRingingUtil.getInstance().setNeedAutoAnswerCallId(callSession.getCallId());
+            }
         }
     }
 
@@ -163,6 +183,22 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
         sendNotification(context, message, callSession, checkPermissions);
     }
 
+
+    private void startIncomingService(Context context, PushNotificationMessage message, RongCallSession callSession, boolean checkPermissions) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(RongIncomingCallService.KEY_MESSAGE, message);
+            bundle.putParcelable(RongIncomingCallService.KEY_CALL_SESSION, callSession);
+            bundle.putBoolean(RongIncomingCallService.KEY_CHECK_PERMISSIONS, checkPermissions);
+            CallRingingUtil.getInstance().startRingingService(context, bundle);
+        }
+    }
+
+
+    private void stopIncomingService(Context context) {
+        CallRingingUtil.getInstance().stopService(context);
+    }
+
     private void sendNotification(Context context, PushNotificationMessage message, RongCallSession callSession, boolean checkPermissions) {
         String objName = message.getObjectName();
         if (TextUtils.isEmpty(objName)) {
@@ -177,6 +213,16 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
                 + " messageObjectName: " + message.getObjectName()
                 + " notificationId: " + message.getNotificationId());
 
+        // Android 10 以上走新逻辑，通过服务启动
+        if (Build.VERSION.SDK_INT >= 29) {
+            if (INVITE.equals(objName)) {
+                startIncomingService(context, message, callSession, checkPermissions);
+            } else if (HANGUP.equals(objName)) {
+                stopIncomingService(context);
+                sendHangupNotification(context, message, callSession, checkPermissions);
+            }
+            return;
+        }
 
         if (objName.equals(INVITE) || objName.equals(HANGUP)) {
             content = message.getPushContent();
@@ -210,6 +256,28 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
                     notificationId = notificationCache.get(callSession.getCallId());
                     nm.notify(notificationId, notification);
                 }
+        }
+    }
+
+    private void sendHangupNotification(Context context, PushNotificationMessage message, RongCallSession callSession, boolean checkPermissions) {
+        try {
+            String content = context.getResources().getString(R.string.rc_voip_call_terminalted_notify);
+            String title = message.getPushTitle();
+            int notificationId = IncomingCallExtraHandleUtil.VOIP_NOTIFICATION_ID;
+            Notification notification = RongNotificationInterface.createNotification(context, title, createPendingIntent(context, message, callSession, checkPermissions, IncomingCallExtraHandleUtil.VOIP_REQUEST_CODE, false), content, RongNotificationInterface.SoundType.VOIP, message.isShowDetail());
+            if (notification == null) {
+                return;
+            }
+            NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            notification.flags |= Notification.FLAG_AUTO_CANCEL;
+            CallRingingUtil.getInstance().createNotificationChannel(context);
+            RLog.i(TAG, "sendNotification() real notify! notificationId: " + notificationId +
+                    " notification: " + notification.toString());
+            notification.defaults = Notification.DEFAULT_ALL;
+            notification.sound = null;
+            nm.notify(notificationId, notification);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

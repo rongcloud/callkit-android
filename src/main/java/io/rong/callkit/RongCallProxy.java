@@ -3,10 +3,12 @@ package io.rong.callkit;
 import android.text.TextUtils;
 import android.view.SurfaceView;
 
+import cn.rongcloud.rtc.api.RCRTCAudioRouteManager;
 import io.rong.callkit.util.CallKitUtils;
 import io.rong.calllib.ReportUtil;
 import io.rong.callkit.util.IncomingCallExtraHandleUtil;
 import io.rong.calllib.IRongCallListener;
+import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallSession;
 import io.rong.common.RLog;
@@ -56,6 +58,9 @@ public class RongCallProxy implements IRongCallListener {
         if (mCallListener != null) {
             mCallListener.onCallOutgoing(callSession, localVideo);
         }
+        if (RongCallClient.getInstance().getContext() != null) {
+            RCRTCAudioRouteManager.getInstance().init(RongCallClient.getInstance().getContext().getApplicationContext());
+        }
     }
 
     @Override
@@ -78,6 +83,8 @@ public class RongCallProxy implements IRongCallListener {
         } else { //android 10 后台来电，被叫端不响应，主叫挂断时 mCallListener 为空 ，需要生成通话记录
             insertCallLogMessage(callSession, reason);
         }
+        // 取消耳机监听
+        RCRTCAudioRouteManager.getInstance().unInit();
     }
 
     @Override

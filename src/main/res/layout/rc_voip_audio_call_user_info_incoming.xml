@@ -59,7 +59,7 @@
             android:visibility="gone"
             android:layout_marginTop="12dp"
             android:layout_height="wrap_content"
-            android:textColor="#66FFFFFF"
+            android:textColor="#FFFFFF"
             android:textSize="14sp" />
 
         <!--记录rc_voip_call_remind_info

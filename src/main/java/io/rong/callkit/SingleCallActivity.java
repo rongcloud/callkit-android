@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -21,10 +22,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.CircleCrop;
-import com.bumptech.glide.request.RequestOptions;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -34,7 +31,6 @@ import cn.rongcloud.rtc.audioroute.RCAudioRouteType;
 import io.rong.callkit.util.BluetoothUtil;
 import io.rong.callkit.util.CallKitUtils;
 import io.rong.callkit.util.DefaultPushConfig;
-import io.rong.callkit.util.GlideUtils;
 import io.rong.callkit.util.HeadsetInfo;
 import io.rong.callkit.util.RingingMode;
 import io.rong.calllib.CallUserProfile;
@@ -294,11 +290,8 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                         (ImageView)
                                 mUserInfoContainer.findViewById(R.id.rc_voip_user_portrait);
                 if (userPortrait != null && userInfo.getPortraitUri() != null) {
-                    Glide.with(this)
-                            .load(userInfo.getPortraitUri())
-                            .placeholder(R.drawable.rc_default_portrait)
-                            .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                            .into(userPortrait);
+                    RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),
+                            userInfo.getPortraitUri(),R.drawable.rc_default_portrait,userPortrait);
                 }
                 TextView userName =
                         (TextView) mUserInfoContainer.findViewById(R.id.rc_voip_user_name);
@@ -310,10 +303,8 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                 (ImageView) mUserInfoContainer.findViewById(R.id.iv_icoming_backgroud);
             if (iv_icoming_backgroud != null) {
                 iv_icoming_backgroud.setVisibility(View.VISIBLE);
-                GlideUtils.showBlurTransformation(
-                    SingleCallActivity.this,
-                    iv_icoming_backgroud,
-                    userInfo.getPortraitUri());
+                RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),
+                        userInfo.getPortraitUri(),R.drawable.rc_default_portrait,iv_icoming_backgroud);
             }
         }
         createPickupDetector();
@@ -397,7 +388,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                         (TextView) userInfoLayout.findViewById(R.id.rc_voip_call_remind_info);
                 CallKitUtils.textViewShadowLayer(callInfo, SingleCallActivity.this);
                 callInfo.setText(R.string.rc_voip_audio_call_inviting);
-                onIncomingCallRinging();
+                onIncomingCallRinging(callSession);
             }
         } else if (mediaType.equals(RongCallCommon.CallMediaType.VIDEO)) {
             if (callAction.equals(RongCallAction.ACTION_INCOMING_CALL)) {
@@ -419,7 +410,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                         (TextView) userInfoLayout.findViewById(R.id.rc_voip_call_remind_info);
                 CallKitUtils.textViewShadowLayer(callInfo, SingleCallActivity.this);
                 callInfo.setText(R.string.rc_voip_video_call_inviting);
-                onIncomingCallRinging();
+                onIncomingCallRinging(callSession);
             }
         }
         mButtonContainer.removeAllViews();
@@ -453,10 +444,8 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                 if (null != InviterUserIdInfo && null != InviterUserIdInfo.getPortraitUri()) {
                     ImageView iv_icoming_backgroud =
                             mUserInfoContainer.findViewById(R.id.iv_icoming_backgroud);
-                    GlideUtils.showBlurTransformation(
-                        SingleCallActivity.this,
-                        iv_icoming_backgroud,
-                        InviterUserIdInfo.getPortraitUri());
+                    RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),
+                            InviterUserIdInfo.getPortraitUri(),R.drawable.rc_default_portrait,iv_icoming_backgroud);
                     iv_icoming_backgroud.setVisibility(View.VISIBLE);
                     mUserInfoContainer
                             .findViewById(R.id.iv_large_preview_Mask)
@@ -736,19 +725,19 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                         (ImageView)
                                 mUserInfoContainer.findViewById(R.id.rc_voip_user_portrait);
                 if (userPortrait != null) {
-                    Glide.with(this)
-                            .load(userInfo.getPortraitUri())
-                            .placeholder(R.drawable.rc_default_portrait)
-                            .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                            .into(userPortrait);
+                    RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),
+                            userInfo.getPortraitUri(),R.drawable.rc_default_portrait,userPortrait);
+//                    Glide.with(this)
+//                            .load(userInfo.getPortraitUri())
+//                            .placeholder(R.drawable.rc_default_portrait)
+//                            .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+//                            .into(userPortrait);
                 }
             } else { // 单人视频接听layout
                 ImageView iv_large_preview = mUserInfoContainer.findViewById(R.id.iv_large_preview);
                 iv_large_preview.setVisibility(View.VISIBLE);
-                GlideUtils.showBlurTransformation(
-                    SingleCallActivity.this,
-                    iv_large_preview,
-                    userInfo.getPortraitUri());
+                RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),
+                        userInfo.getPortraitUri(),R.drawable.rc_default_portrait,iv_large_preview);
             }
         }
         mUserInfoContainer.setVisibility(View.VISIBLE);
@@ -773,10 +762,8 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
 
         if (null != userInfo
             && callSession.getMediaType().equals(RongCallCommon.CallMediaType.AUDIO)) {
-            GlideUtils.showBlurTransformation(
-                SingleCallActivity.this,
-                iv_large_preview,
-                userInfo.getPortraitUri());
+            RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),
+                    userInfo.getPortraitUri(),R.drawable.rc_default_portrait,iv_large_preview);
             iv_large_preview.setVisibility(View.VISIBLE);
         }
 
@@ -1002,21 +989,17 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                         (ImageView)
                                 mUserInfoContainer.findViewById(R.id.rc_voip_user_portrait);
                 if (userPortrait != null) {
-                    Glide.with(this)
-                            .load(userInfo.getPortraitUri())
-                            .placeholder(R.drawable.rc_default_portrait)
-                            .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                            .into(userPortrait);
+                    RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),
+                            userInfo.getPortraitUri(),R.drawable.rc_default_portrait,userPortrait);
                 }
             } else if (mediaType.equals(RongCallCommon.CallMediaType.VIDEO)) {
                 if (null != callAction && callAction.equals(RongCallAction.ACTION_INCOMING_CALL)) {
                     ImageView iv_large_preview =
                             mUserInfoContainer.findViewById(R.id.iv_large_preview);
                     iv_large_preview.setVisibility(View.VISIBLE);
-                    GlideUtils.showBlurTransformation(
-                            SingleCallActivity.this,
-                            iv_large_preview,
-                            null != userInfo ? userInfo.getPortraitUri() : null);
+                    Uri imgUri = userInfo== null? null:userInfo.getPortraitUri();
+                    RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),
+                            imgUri,R.drawable.rc_default_portrait,iv_large_preview);
                 }
             }
         }

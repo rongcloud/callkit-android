@@ -5,6 +5,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+
 import io.rong.callkit.util.CallKitBuildVar;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
@@ -13,7 +16,6 @@ import io.rong.calllib.RongCallSession;
 import io.rong.imkit.utils.PermissionCheckUtil;
 import io.rong.imlib.RongIMClient;
 import io.rong.imlib.model.Conversation;
-import java.util.ArrayList;
 
 public class RongCallKit {
 
@@ -29,6 +31,7 @@ public class RongCallKit {
     private static GroupMembersProvider mGroupMembersProvider;
 
     private static RongCallCustomerHandlerListener customerHandlerListener;
+    private static GlideCallKitImageEngine kitImageEngine = new GlideCallKitImageEngine();
 
     /**
      * 发起单人通话。
@@ -341,5 +344,21 @@ public class RongCallKit {
 
     public static String getVersion() {
         return CallKitBuildVar.SDK_VERSION;
+    }
+
+    public static void setKitImageEngine(GlideCallKitImageEngine kitImageEngine) {
+        RongCallKit.kitImageEngine = kitImageEngine;
+    }
+
+    /**
+     * 获取自定义头像engine
+     * @return
+     */
+    public static GlideCallKitImageEngine getKitImageEngine() {
+        return kitImageEngine;
+    }
+
+    public static GroupMembersProvider getmGroupMembersProvider() {
+        return mGroupMembersProvider;
     }
 }

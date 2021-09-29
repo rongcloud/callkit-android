@@ -17,6 +17,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 
 import io.rong.callkit.R;
+import io.rong.callkit.RongCallKit;
 import io.rong.imlib.model.UserInfo;
 import java.util.ArrayList;
 import java.util.List;
@@ -127,11 +128,9 @@ public class CallVerticalScrollView extends ScrollView implements ICallScrollVie
         }
 
         if (userInfo != null) {
-            Glide.with(this)
-                    .load(userInfo.getPortraitUri())
-                    .placeholder(R.drawable.rc_default_portrait)
-                    .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                    .into(imageView);
+            RongCallKit.getKitImageEngine()
+                .loadPortrait(this.getContext(), userInfo.getPortraitUri(),
+                    R.drawable.rc_default_portrait, imageView);
             name.setText(userInfo.getName() == null ? userInfo.getUserId() : userInfo.getName());
         } else {
             name.setText(childId);

@@ -53,7 +53,13 @@ public class MultiCallEndMessageProvider
         } else if (reason == RongCallCommon.CallDisconnectedReason.SERVICE_NOT_OPENED
                 || reason == RongCallCommon.CallDisconnectedReason.REMOTE_ENGINE_UNSUPPORTED) {
             msg = context.getResources().getString(R.string.rc_voip_engine_notfound);
-        } else {
+        } else if (reason == RongCallCommon.CallDisconnectedReason.CANCEL){
+            if (mediaType == RongIMClient.MediaType.AUDIO){
+                msg = context.getResources().getString(R.string.rc_voip_audio_cancel);
+            }else if (mediaType == RongIMClient.MediaType.VIDEO){
+                msg = context.getResources().getString(R.string.rc_voip_video_cancel);
+            }
+        }else {
             if (mediaType == RongIMClient.MediaType.AUDIO) {
                 msg = context.getResources().getString(R.string.rc_voip_audio_no_response);
             } else if (mediaType == RongIMClient.MediaType.VIDEO) {

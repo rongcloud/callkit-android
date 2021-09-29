@@ -32,10 +32,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.CircleCrop;
-import com.bumptech.glide.request.RequestOptions;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -149,6 +145,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
+        Log.d(TAG, "onNewIntent: [intent]");
         startForCheckPermissions = intent.getBooleanExtra("checkPermissions", false);
         super.onNewIntent(intent);
         boolean bool =
@@ -166,13 +163,19 @@ public class MultiVideoCallActivity extends BaseCallActivity {
     @Override
     public void onRequestPermissionsResult(
             int requestCode, String[] permissions, int[] grantResults) {
+        Log.d(TAG, "onRequestPermissionsResult: " + requestCode);
         switch (requestCode) {
             case REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS:
-                String[] callPermissions = CallKitUtils.getCallpermissions();
-                boolean granted = CallKitUtils.checkPermissions(this, callPermissions);
-                if (granted) {
-                    RongCallClient.getInstance().onPermissionGranted();
-                } else {
+
+                if (PermissionCheckUtil.checkPermissions(this, AUDIO_CALL_PERMISSIONS)) {
+                    if (startForCheckPermissions) {
+                        startForCheckPermissions = false;
+                        RongCallClient.getInstance().onPermissionGranted();
+                    } else {
+                        initViews();
+                        setupIntent();
+                    }
+                }else {
                     if (permissions.length > 0) {
                         RongCallClient.getInstance().onPermissionDenied();
                         Toast.makeText(this, getString(R.string.rc_voip_relevant_permissions), Toast.LENGTH_SHORT).show();
@@ -552,11 +555,8 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                 if (firstUserInfo != null) {
                     userNameView.setText(CallKitUtils.nickNameRestrict(firstUserInfo.getName()));
                     if (firstUserInfo.getPortraitUri() != null) {
-                        Glide.with(this)
-                                .load(firstUserInfo.getPortraitUri())
-                                .placeholder(R.drawable.rc_default_portrait)
-                                .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                                .into(userPortrait);
+                        RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(), firstUserInfo.getPortraitUri()
+                                , R.drawable.rc_default_portrait, userPortrait);
                         userPortrait.setVisibility(View.VISIBLE);
                     }
                 } else {
@@ -850,11 +850,8 @@ public class MultiVideoCallActivity extends BaseCallActivity {
             (ImageView) singleRemoteView.findViewById(R.id.user_portrait);
         if (userInfo != null) {
             if (userInfo.getPortraitUri() != null) {
-                Glide.with(this)
-                    .load(userInfo.getPortraitUri())
-                    .placeholder(R.drawable.rc_default_portrait)
-                    .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                    .into(userPortraitView);
+                RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),userInfo.getPortraitUri(),
+                        R.drawable.rc_default_portrait, userPortraitView);
             }
         }
         if (video.getParent() != null) {
@@ -909,11 +906,8 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                 (ImageView) singleRemoteView.findViewById(R.id.user_portrait);
         if (userInfo != null) {
             if (userInfo.getPortraitUri() != null) {
-                Glide.with(this)
-                        .load(userInfo.getPortraitUri())
-                        .placeholder(R.drawable.rc_default_portrait)
-                        .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                        .into(userPortraitView);
+                RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),userInfo.getPortraitUri(),
+                        R.drawable.rc_default_portrait, userPortraitView);
             }
             if (!TextUtils.isEmpty(userInfo.getName())) {
                 nameView.setText(userInfo.getName());
@@ -950,11 +944,8 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         TextView nameView = (TextView) singleRemoteView.findViewById(R.id.user_name);
         if (userInfo != null) {
             if (userInfo.getPortraitUri() != null) {
-                Glide.with(this)
-                        .load(userInfo.getPortraitUri())
-                        .placeholder(R.drawable.rc_default_portrait)
-                        .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                        .into(userPortraitView);
+                RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),userInfo.getPortraitUri(),
+                        R.drawable.rc_default_portrait, userPortraitView);
             }
             if (!TextUtils.isEmpty(userInfo.getName())) {
                 nameView.setText(userInfo.getName());
@@ -1150,7 +1141,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         if (callAction.equals(RongCallAction.ACTION_INCOMING_CALL)) {
             callSession = intent.getParcelableExtra("callSession");
 
-            onIncomingCallRinging();
+            onIncomingCallRinging(callSession);
             TextView callRemindInfoView =
                     (TextView) topContainer.findViewById(R.id.rc_voip_call_remind_info);
             TextView userNameView = (TextView) topContainer.findViewById(R.id.rc_voip_user_name);
@@ -1168,11 +1159,8 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                 if (userInfo != null) {
                     userNameView.setText(CallKitUtils.nickNameRestrict(userInfo.getName()));
                     if (userInfo.getPortraitUri() != null) {
-                        Glide.with(this)
-                                .load(userInfo.getPortraitUri())
-                                .placeholder(R.drawable.rc_default_portrait)
-                                .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                                .into(userPortrait);
+                        RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),userInfo.getPortraitUri(),
+                                R.drawable.rc_default_portrait, userPortrait);
                         userPortrait.setVisibility(View.VISIBLE);
                     }
                     //
@@ -1199,11 +1187,8 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                             (ImageView) userPortraitView.findViewById(R.id.rc_user_portrait);
                     userInfo = RongUserInfoManager.getInstance().getUserInfo(invitedList.get(i));
                     if (userInfo != null && userInfo.getPortraitUri() != null) {
-                        Glide.with(this)
-                                .load(userInfo.getPortraitUri())
-                                .placeholder(R.drawable.rc_default_portrait)
-                                .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                                .into(portraitView);
+                        RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),userInfo.getPortraitUri(),
+                                R.drawable.rc_default_portrait, portraitView);
                     }
                     portraitContainer1 =
                             (LinearLayout)
@@ -1519,11 +1504,8 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         }
         if (toUserInfo != null) {
             if (toUserInfo.getPortraitUri() != null) {
-                Glide.with(this)
-                        .load(toUserInfo.getPortraitUri())
-                        .placeholder(R.drawable.rc_default_portrait)
-                        .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                        .into(userPortraitView);
+                RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),toUserInfo.getPortraitUri(),
+                        R.drawable.rc_default_portrait, userPortraitView);
             }
         }
         fromView.setZOrderOnTop(false);
@@ -1602,11 +1584,8 @@ public class MultiVideoCallActivity extends BaseCallActivity {
             if (participantView != null && userInfo.getPortraitUri() != null) {
                 ImageView portraitView =
                         (ImageView) participantView.findViewById(R.id.rc_user_portrait);
-                Glide.with(this)
-                        .load(userInfo.getPortraitUri())
-                        .placeholder(R.drawable.rc_default_portrait)
-                        .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                        .into(portraitView);
+                RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),userInfo.getPortraitUri(),
+                        R.drawable.rc_default_portrait, portraitView);
             }
         }
         if (remoteViewContainer.getVisibility() == View.VISIBLE) {
@@ -1616,11 +1595,8 @@ public class MultiVideoCallActivity extends BaseCallActivity {
             if (remoteView != null && userInfo.getPortraitUri() != null) {
                 ImageView portraitView =
                         (ImageView) remoteView.findViewById(R.id.user_portrait);
-                Glide.with(this)
-                        .load(userInfo.getPortraitUri())
-                        .placeholder(R.drawable.rc_default_portrait)
-                        .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                        .into(portraitView);
+                RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),userInfo.getPortraitUri(),
+                        R.drawable.rc_default_portrait, portraitView);
             }
         }
         if (topContainer.getVisibility() == View.VISIBLE) {

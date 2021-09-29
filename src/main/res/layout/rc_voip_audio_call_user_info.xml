@@ -57,7 +57,6 @@
             android:textColor="#FFFFFF"
             android:textSize="@dimen/callkit_textsize18sp" />
 
-
         <TextView
             android:id="@+id/tv_setupTime_video"
             android:layout_below="@+id/rc_voip_user_name"
@@ -66,15 +65,15 @@
             android:visibility="gone"
             android:layout_marginTop="12dp"
             android:layout_height="wrap_content"
-            android:textColor="#66FFFFFF"
+            android:textColor="#FFFFFF"
             android:textSize="14sp" />
 
         <TextView
             android:id="@+id/tv_callState"
             android:layout_width="wrap_content"
-            android:layout_below="@+id/tv_setupTime"
+            android:layout_below="@+id/tv_setupTime_video"
             android:layout_centerInParent="true"
-            android:textColor="#FFFFFFFF"
+            android:textColor="#FFFFFF"
             android:textSize="13sp"
             android:visibility="gone"
             android:layout_marginTop="12dp"

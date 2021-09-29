@@ -27,8 +27,10 @@
     <string name="rc_voip_notificatio_video_call_inviting_general">你有一个视频通话邀请</string>
     <string name="rc_voip_video_ended">视频通话已结束</string>
     <string name="rc_voip_video_no_response">视频通话未接听</string>
+    <string name="rc_voip_video_cancel">视频通话已取消</string>
     <string name="rc_voip_audio_ended">语音通话已结束</string>
     <string name="rc_voip_audio_no_response">语音通话未接听</string>
+    <string name="rc_voip_audio_cancel">语音通话已取消</string>
     <string name="rc_voip_mute">静音</string>
     <string name="rc_voip_hangup">挂断</string>
     <string name="rc_voip_answer">接听</string>

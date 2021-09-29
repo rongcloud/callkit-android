@@ -26,12 +26,6 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.load.resource.bitmap.CircleCrop;
-import com.bumptech.glide.request.RequestOptions;
-
 import io.rong.callkit.util.CallKitSearchBarListener;
 import io.rong.callkit.util.CallKitSearchBarView;
 import io.rong.callkit.util.CallKitUtils;
@@ -413,6 +407,10 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity implements
     @Override
     public void onUserUpdate(UserInfo userInfo) {
         if (mList != null && userInfo != null) {
+            if (userInfo.getUserId() == null || !userInfoIndex.containsKey(userInfo.getUserId())
+                || userInfoIndex.get(userInfo.getUserId()) == null) {
+                return;
+            }
             synchronized (listLock) {
                 int index = userInfoIndex.get(userInfo.getUserId());
                 if (index >= 0 && index < userInfoArrayList.size()) {
@@ -491,10 +489,11 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity implements
                 holder.checkbox.setClickable(false);
                 holder.checkbox.setEnabled(true);
                 holder.name.setText("");
-                Glide.with(holder.portrait)
-                        .load(R.drawable.rc_default_portrait)
-                        .apply(RequestOptions.bitmapTransform(new CenterCrop()))
-                        .into(holder.portrait);
+                RongCallKit.getKitImageEngine().loadPortrait(getApplicationContext(),null, R.drawable.rc_default_portrait, holder.portrait);
+//                Glide.with(holder.portrait)
+//                        .load(R.drawable.rc_default_portrait)
+//                        .apply(RequestOptions.bitmapTransform(new CenterCrop()))
+//                        .into(holder.portrait);
                 holder.checkbox.setTag("");
                 return convertView;
             }
@@ -531,11 +530,8 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity implements
             } else {
                 holder.name.setText(displayName);
             }
-            Glide.with(holder.portrait)
-                    .load(mUserInfo.getPortraitUri())
-                    .placeholder(R.drawable.rc_default_portrait)
-                    .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                    .into(holder.portrait);
+            RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(), mUserInfo.getPortraitUri(),
+                    R.drawable.rc_default_portrait,holder.portrait);
             return convertView;
         }
     }
