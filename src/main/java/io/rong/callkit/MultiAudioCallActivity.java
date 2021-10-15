@@ -29,6 +29,7 @@ import io.rong.callkit.util.DefaultPushConfig;
 import io.rong.callkit.util.HeadsetInfo;
 import io.rong.callkit.util.ICallScrollView;
 import io.rong.callkit.util.RingingMode;
+import io.rong.callkit.util.RongCallPermissionUtil;
 import io.rong.callkit.util.SPUtils;
 import io.rong.calllib.CallUserProfile;
 import io.rong.calllib.RongCallClient;
@@ -133,7 +134,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
             int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
             case REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS:
-                if (PermissionCheckUtil.checkPermissions(this, AUDIO_CALL_PERMISSIONS)) {
+                if (RongCallPermissionUtil.checkAudioCallNeedPermission(this)) {
                     if (startForCheckPermissions) {
                         startForCheckPermissions = false;
                         RongCallClient.getInstance().onPermissionGranted();
@@ -766,7 +767,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         super.onActivityResult(requestCode, resultCode, data);
         callSession = RongCallClient.getInstance().getCallSession();
         if (requestCode == REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS) {
-            if (PermissionCheckUtil.checkPermissions(this, AUDIO_CALL_PERMISSIONS)) {
+            if (RongCallPermissionUtil.checkAudioCallNeedPermission(this)) {
                 if (startForCheckPermissions) {
                     startForCheckPermissions = false;
                     RongCallClient.getInstance().onPermissionGranted();

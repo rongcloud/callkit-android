@@ -12,6 +12,7 @@ import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
@@ -49,6 +50,7 @@ import io.rong.callkit.util.CallKitUtils;
 import io.rong.callkit.util.CallRingingUtil;
 import io.rong.callkit.util.HeadsetInfo;
 import io.rong.callkit.util.RingingMode;
+import io.rong.callkit.util.RongCallPermissionUtil;
 import io.rong.calllib.IRongCallListener;
 import io.rong.calllib.PublishCallBack;
 import io.rong.calllib.RongCallClient;
@@ -86,6 +88,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     private boolean shouldRestoreFloat;
     // 是否是请求开启悬浮窗权限的过程中
     private boolean checkingOverlaysPermission;
+    private boolean notRemindRequestFloatWindowPermissionAgain = false;
     protected Handler handler;
     /** 表示是否正在挂断 */
     protected boolean isFinishing;
@@ -95,10 +98,10 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     protected PowerManager.WakeLock wakeLock;
     protected PowerManager.WakeLock screenLock;
 
-    static final String[] VIDEO_CALL_PERMISSIONS = {
-        Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA
-    };
-    static final String[] AUDIO_CALL_PERMISSIONS = {Manifest.permission.RECORD_AUDIO};
+//    static final String[] VIDEO_CALL_PERMISSIONS = {
+//        Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA
+//    };
+//    static final String[] AUDIO_CALL_PERMISSIONS = {Manifest.permission.RECORD_AUDIO};
 
     public static final int CALL_NOTIFICATION_ID = 4000;
     private boolean isMuteCamera = false;
@@ -405,6 +408,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
                 }
                 if (checkingOverlaysPermission) {
                     checkDrawOverlaysPermission(false);
+                    checkingOverlaysPermission = false;
                 }
             }
         } catch (Exception e) {
@@ -598,23 +602,24 @@ public class BaseCallActivity extends BaseNoActionBarActivity
 
     @TargetApi(23)
     boolean requestCallPermissions(RongCallCommon.CallMediaType type, int requestCode) {
-        String[] permissions = null;
+//        String[] permissions = null;
         Log.i(TAG, "BaseActivty requestCallPermissions requestCode=" + requestCode);
-        if (type.equals(RongCallCommon.CallMediaType.VIDEO)
-                || type.equals(RongCallCommon.CallMediaType.AUDIO)) {
-            permissions = CallKitUtils.getCallpermissions();
-        }
-        boolean result = false;
-        if (permissions != null) {
-            boolean granted = CallKitUtils.checkPermissions(this, permissions);
-            Log.i(TAG, "BaseActivty requestCallPermissions granted=" + granted);
-            if (granted) {
-                result = true;
-            } else {
-                PermissionCheckUtil.requestPermissions(this, permissions, requestCode);
-            }
-        }
-        return result;
+//        if (type.equals(RongCallCommon.CallMediaType.VIDEO)
+//                || type.equals(RongCallCommon.CallMediaType.AUDIO)) {
+//            permissions = CallKitUtils.getCallpermissions();
+//        }
+//        boolean result = false;
+//        if (permissions != null) {
+//            boolean granted = CallKitUtils.checkPermissions(this, permissions);
+//            Log.i(TAG, "BaseActivty requestCallPermissions granted=" + granted);
+//            if (granted) {
+//                result = true;
+//            } else {
+//                PermissionCheckUtil.requestPermissions(this, permissions, requestCode);
+//            }
+//        }
+
+        return RongCallPermissionUtil.checkAndRequestPermissionByCallType(this, type,requestCode);
     }
 
     @Override
@@ -666,19 +671,27 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     }
 
     private boolean checkDrawOverlaysPermission(boolean needOpenPermissionSetting) {
-        if (Build.BRAND.toLowerCase().contains("xiaomi") || Build.VERSION.SDK_INT >= 23) {
-            if (PermissionCheckUtil.canDrawOverlays(this, needOpenPermissionSetting)) {
-                checkingOverlaysPermission = false;
-                return true;
-            } else {
-                if (needOpenPermissionSetting && !Build.BRAND.toLowerCase().contains("xiaomi")) {
-                    checkingOverlaysPermission = true;
-                }
-                return false;
-            }
-        } else {
+        if (RongCallPermissionUtil.checkFloatWindowPermission(this)) {
             checkingOverlaysPermission = false;
             return true;
+        } else {
+            if (needOpenPermissionSetting && !checkingOverlaysPermission && !notRemindRequestFloatWindowPermissionAgain) {
+                RongCallPermissionUtil.requestFloatWindowNeedPermission(this, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(DialogInterface.BUTTON_POSITIVE == which){
+                            checkingOverlaysPermission = true;
+                        } else if(DialogInterface.BUTTON_NEGATIVE == which){
+                            checkingOverlaysPermission = false;
+                        }else if(DialogInterface.BUTTON_NEUTRAL == which){
+                            checkingOverlaysPermission = false;
+                            notRemindRequestFloatWindowPermissionAgain = true;
+                        }
+                    }
+                });
+
+            }
+            return false;
         }
     }
 
@@ -723,8 +736,8 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     @Override
     public void onRequestPermissionsResult(
             int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (!PermissionCheckUtil.checkPermissions(this, permissions)) {
-            PermissionCheckUtil.showRequestPermissionFailedAlter(this, permissions, grantResults);
+        if (!RongCallPermissionUtil.checkPermissions(this, permissions)) {
+            RongCallPermissionUtil.showRequestPermissionFailedAlter(this, permissions, grantResults);
         }
     }
 
@@ -771,7 +784,9 @@ public class BaseCallActivity extends BaseNoActionBarActivity
             .setVideoFps(RCRTCVideoFps.Fps_15)
             .setMaxRate(1000)
             .setMinRate(350);
-        RongCallClient.getInstance().setVideoConfig(builder);
+        RongCallClient instance = RongCallClient.getInstance();
+        if (instance != null)
+            instance.setVideoConfig(builder);
     }
 
     protected void onHeadsetPlugUpdate(HeadsetInfo headsetInfo) {

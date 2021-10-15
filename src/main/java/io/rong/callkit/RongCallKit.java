@@ -9,6 +9,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import io.rong.callkit.util.CallKitBuildVar;
+import io.rong.callkit.util.RongCallPermissionUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallMissedListener;
@@ -200,14 +201,8 @@ public class RongCallKit {
      */
     private static boolean checkEnvironment(Context context, CallMediaType mediaType) {
         if (context instanceof Activity) {
-            String[] permissions;
-            if (mediaType.equals(CallMediaType.CALL_MEDIA_TYPE_AUDIO)) {
-                permissions = new String[] {Manifest.permission.RECORD_AUDIO};
-            } else {
-                permissions =
-                        new String[] {Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO};
-            }
-            if (!PermissionCheckUtil.requestPermissions((Activity) context, permissions)) {
+            boolean result = RongCallPermissionUtil.checkPermissionByType(context, mediaType == CallMediaType.CALL_MEDIA_TYPE_AUDIO ? RongCallCommon.CallMediaType.AUDIO : RongCallCommon.CallMediaType.VIDEO);
+            if (!result) {
                 return false;
             }
         }

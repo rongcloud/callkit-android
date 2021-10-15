@@ -48,6 +48,7 @@ import io.rong.callkit.util.CallKitUtils;
 import io.rong.callkit.util.DefaultPushConfig;
 import io.rong.callkit.util.HeadsetInfo;
 import io.rong.callkit.util.RingingMode;
+import io.rong.callkit.util.RongCallPermissionUtil;
 import io.rong.calllib.CallUserProfile;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
@@ -167,7 +168,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         switch (requestCode) {
             case REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS:
 
-                if (PermissionCheckUtil.checkPermissions(this, AUDIO_CALL_PERMISSIONS)) {
+                if (RongCallPermissionUtil.checkVideoCallNeedPermission(this)) {
                     if (startForCheckPermissions) {
                         startForCheckPermissions = false;
                         RongCallClient.getInstance().onPermissionGranted();
@@ -194,7 +195,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         super.onActivityResult(requestCode, resultCode, data);
         callSession = RongCallClient.getInstance().getCallSession();
         if (requestCode == REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS) {
-            if (PermissionCheckUtil.checkPermissions(this, VIDEO_CALL_PERMISSIONS)) {
+            if (RongCallPermissionUtil.checkVideoCallNeedPermission(this)) {
                 if (startForCheckPermissions) {
                     startForCheckPermissions = false;
                     RongCallClient.getInstance().onPermissionGranted();

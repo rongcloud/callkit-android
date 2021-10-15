@@ -10,6 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import io.rong.callkit.util.CallKitUtils;
+import io.rong.callkit.util.RongCallPermissionUtil;
+import io.rong.callkit.util.permission.PermissionType;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallSession;
@@ -53,8 +55,12 @@ public class VideoPlugin implements IPluginModule, IPluginRequestPermissionResul
         conversationType = extension.getConversationType();
         targetId = extension.getTargetId();
 
-        String[] permissions = CallKitUtils.getCallpermissions();
-        if (PermissionCheckUtil.checkPermissions(currentFragment.getActivity(), permissions)) {
+        PermissionType[] audioCallPermissions = RongCallPermissionUtil.getVideoCallPermissions();
+        String[] permissions = new String[audioCallPermissions.length];
+        for (int i = 0; i < audioCallPermissions.length; i++) {
+            permissions[i] = audioCallPermissions[i].getPermissionName();
+        }
+        if (RongCallPermissionUtil.checkPermissions(currentFragment.getActivity(), permissions)) {
             startVideoActivity(extension);
         } else {
             extension.requestPermissionForPluginResult(
@@ -164,10 +170,10 @@ public class VideoPlugin implements IPluginModule, IPluginRequestPermissionResul
             @NonNull String[] permissions,
             @NonNull int[] grantResults) {
         Context context = fragment.getContext();
-        if (PermissionCheckUtil.checkPermissions(context, permissions)) {
+        if (RongCallPermissionUtil.checkPermissions(context, permissions)) {
             startVideoActivity(extension);
         } else {
-            PermissionCheckUtil.showRequestPermissionFailedAlter(context, permissions, grantResults);
+            RongCallPermissionUtil.showRequestPermissionFailedAlter(context, permissions, grantResults);
         }
         return true;
     }

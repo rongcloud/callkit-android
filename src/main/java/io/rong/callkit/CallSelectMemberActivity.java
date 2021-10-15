@@ -11,6 +11,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.text.TextUtils;
+import android.view.KeyboardShortcutGroup;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -542,6 +543,7 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity implements
      * @param val 是否是远端挂断，如果是则关闭该页面
      */
     private void setActivityResult(boolean val) {
+        CallKitUtils.closeKeyBoard(CallSelectMemberActivity.this, null);
         Intent intent = new Intent();
         intent.putExtra("remote_hangup", val);
         intent.putStringArrayListExtra("invited", selectedMember);

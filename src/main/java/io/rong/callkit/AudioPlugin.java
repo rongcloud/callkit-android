@@ -11,6 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import io.rong.callkit.util.CallKitUtils;
+import io.rong.callkit.util.RongCallPermissionUtil;
+import io.rong.callkit.util.permission.PermissionType;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallSession;
@@ -54,8 +56,14 @@ public class AudioPlugin implements IPluginModule, IPluginRequestPermissionResul
         conversationType = extension.getConversationType();
         targetId = extension.getTargetId();
         Log.i(TAG, "---- targetId==" + targetId);
-        String[] permissions = CallKitUtils.getCallpermissions();
-        if (PermissionCheckUtil.checkPermissions(currentFragment.getActivity(), permissions)) {
+
+        PermissionType[] audioCallPermissions = RongCallPermissionUtil.getAudioCallPermissions();
+        String[] permissions = new String[audioCallPermissions.length];
+        for (int i = 0; i < audioCallPermissions.length; i++) {
+            permissions[i] = audioCallPermissions[i].getPermissionName();
+        }
+
+        if (RongCallPermissionUtil.checkPermissions(currentFragment.getActivity(), permissions)) {
             Log.i(TAG, "---- startAudioActivity ----");
             startAudioActivity(currentFragment, extension);
         } else {
@@ -175,10 +183,10 @@ public class AudioPlugin implements IPluginModule, IPluginRequestPermissionResul
             @NonNull String[] permissions,
             @NonNull int[] grantResults) {
         Context context = fragment.getContext();
-        if (PermissionCheckUtil.checkPermissions(context, permissions)) {
+        if (RongCallPermissionUtil.checkPermissions(context, permissions)) {
             startAudioActivity(fragment, extension);
         } else {
-            PermissionCheckUtil.showRequestPermissionFailedAlter(context, permissions, grantResults);
+            RongCallPermissionUtil.showRequestPermissionFailedAlter(context, permissions, grantResults);
         }
         return true;
     }

@@ -33,6 +33,7 @@ import io.rong.callkit.util.CallKitUtils;
 import io.rong.callkit.util.DefaultPushConfig;
 import io.rong.callkit.util.HeadsetInfo;
 import io.rong.callkit.util.RingingMode;
+import io.rong.callkit.util.RongCallPermissionUtil;
 import io.rong.calllib.CallUserProfile;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
@@ -177,15 +178,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
             case REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS:
-                boolean permissionGranted;
-                if (mediaType == RongCallCommon.CallMediaType.AUDIO) {
-                    permissionGranted =
-                            PermissionCheckUtil.checkPermissions(this, AUDIO_CALL_PERMISSIONS);
-                } else {
-                    permissionGranted =
-                            PermissionCheckUtil.checkPermissions(this, VIDEO_CALL_PERMISSIONS);
-                }
-                if (permissionGranted) {
+                if (RongCallPermissionUtil.checkPermissionByType(this,mediaType)) {
                     if (startForCheckPermissions) {
                         startForCheckPermissions = false;
                         RongCallClient.getInstance().onPermissionGranted();
@@ -215,14 +208,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS) {
-
-            String[] permissions;
-            if (mediaType == RongCallCommon.CallMediaType.AUDIO) {
-                permissions = AUDIO_CALL_PERMISSIONS;
-            } else {
-                permissions = VIDEO_CALL_PERMISSIONS;
-            }
-            if (PermissionCheckUtil.checkPermissions(this, permissions)) {
+            if (RongCallPermissionUtil.checkPermissionByType(this,mediaType)) {
                 if (startForCheckPermissions) {
                     RongCallClient.getInstance().onPermissionGranted();
                 } else {
