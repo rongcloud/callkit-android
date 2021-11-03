@@ -578,20 +578,23 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     }
 
     private void showNotification(Context context,String title,String content,PendingIntent pendingIntent,int notificationId){
+        String channelId = "rc_notification_voip_id";
         Notification notification = RongNotificationInterface
-            .createNotification(context, title, pendingIntent, content, RongNotificationInterface.SoundType.SILENT, true);
+                .createNotification(context, title, pendingIntent, content,
+                        RongNotificationInterface.SoundType.SILENT, channelId);
         NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             int importance = NotificationManager.IMPORTANCE_LOW;
-            String channelName = context.getResources().getString(context.getResources().getIdentifier("rc_notification_channel_name", "string", context.getPackageName()));
-            NotificationChannel notificationChannel = new NotificationChannel("rc_notification_id", channelName, importance);
+            String channelName = "VOIP";
+            NotificationChannel notificationChannel = new NotificationChannel(channelId, channelName, importance);
             notificationChannel.enableLights(false);
             notificationChannel.setLightColor(Color.GREEN);
             notificationChannel.enableVibration(false);
             notificationChannel.setSound(null, null);
             nm.createNotificationChannel(notificationChannel);
         }
+
         if (notification != null) {
             io.rong.push.common.RLog
                 .i(TAG, "sendNotification() real notify! notificationId: " + notificationId +
