@@ -34,6 +34,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import io.rong.calllib.RongCallCommon.CallMediaType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -249,6 +250,10 @@ public class BaseCallActivity extends BaseNoActionBarActivity
 
     @Override
     public void onRemoteUserRinging(String userId) {}
+
+    @Override
+    public void onRemoteUserAccept(String userId, CallMediaType mediaType) {
+    }
 
     @Override
     public void onCallDisconnected(

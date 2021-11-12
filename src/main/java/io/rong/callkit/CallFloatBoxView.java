@@ -33,6 +33,7 @@ import io.rong.calllib.IRongCallListener;
 import io.rong.calllib.ReportUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
+import io.rong.calllib.RongCallCommon.CallMediaType;
 import io.rong.calllib.RongCallSession;
 import io.rong.calllib.message.CallSTerminateMessage;
 import io.rong.common.RLog;
@@ -142,6 +143,10 @@ public class CallFloatBoxView {
 
                             @Override
                             public void onRemoteUserRinging(String userId) {}
+
+                            @Override
+                            public void onRemoteUserAccept(String userId, CallMediaType mediaType) {
+                            }
 
                             @Override
                             public void onCallDisconnected(
@@ -609,6 +614,10 @@ public class CallFloatBoxView {
 
                             @Override
                             public void onRemoteUserRinging(String userId) {}
+
+                            @Override
+                            public void onRemoteUserAccept(String userId, CallMediaType mediaType) {
+                            }
 
                             @Override
                             public void onCallDisconnected(

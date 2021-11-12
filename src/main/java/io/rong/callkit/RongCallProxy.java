@@ -10,6 +10,7 @@ import io.rong.callkit.util.IncomingCallExtraHandleUtil;
 import io.rong.calllib.IRongCallListener;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
+import io.rong.calllib.RongCallCommon.CallMediaType;
 import io.rong.calllib.RongCallSession;
 import io.rong.common.RLog;
 import io.rong.imkit.IMCenter;
@@ -92,6 +93,14 @@ public class RongCallProxy implements IRongCallListener {
         ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, "userId|state|desc", userId,"onRemoteUserRinging", getDescription());
         if (mCallListener != null) {
             mCallListener.onRemoteUserRinging(userId);
+        }
+    }
+
+    @Override
+    public void onRemoteUserAccept(String userId, CallMediaType mediaType) {
+        ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, "userId|state|desc", userId, "onRemoteUserAccept", getDescription());
+        if (mCallListener != null) {
+            mCallListener.onRemoteUserAccept(userId,mediaType);
         }
     }
 
