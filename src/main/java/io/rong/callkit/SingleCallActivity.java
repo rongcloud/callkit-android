@@ -186,11 +186,19 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                         setupIntent();
                     }
                 } else {
-                    Toast.makeText(
-                                    this,
-                                    getString(R.string.rc_permission_grant_needed),
-                                    Toast.LENGTH_SHORT)
-                            .show();
+                    StringBuilder builder = new StringBuilder();
+                    for (String str : permissions) {
+                        if (str.equals("android.permission.CAMERA")) {
+                            builder.append(getString(R.string.rc_android_permission_CAMERA));
+                        } else if (str.equals("android.permission.RECORD_AUDIO")) {
+                            builder.append(getString(R.string.rc_android_permission_RECORD_AUDIO));
+                        }
+                        builder.append(",");
+                    }
+
+                    String rets = builder.length() > 0 ? builder.substring(0, builder.length() - 1) : "";
+                    String msg = String.format("%s (%s)", getString(R.string.rc_permission_grant_needed), rets);
+                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
                     if (startForCheckPermissions) {
                         startForCheckPermissions = false;
                         RongCallClient.getInstance().onPermissionDenied();

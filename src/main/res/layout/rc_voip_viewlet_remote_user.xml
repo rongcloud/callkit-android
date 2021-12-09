@@ -36,6 +36,8 @@
                 style="@style/rc_voip_text_style_style"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:lines="1"
                 android:layout_marginLeft="5dp"
                 android:layout_gravity="left|bottom"/>
         </FrameLayout>
