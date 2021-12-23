@@ -157,25 +157,22 @@ public class CallFloatBoxView {
                                 String senderId;
                                 String extra = "";
                                 senderId = callProfile.getInviterUserId();
-                                switch (reason) {
-                                    case HANGUP:
-                                    case REMOTE_HANGUP:
-                                        if (mTime >= 3600) {
-                                            extra =
-                                                    String.format(
-                                                            "%d:%02d:%02d",
-                                                            mTime / 3600,
-                                                            (mTime % 3600) / 60,
-                                                            (mTime % 60));
-                                        } else {
-                                            extra =
-                                                    String.format(
-                                                            "%02d:%02d",
-                                                            (mTime % 3600) / 60, (mTime % 60));
-                                        }
-                                        break;
+                                long activeTime = callProfile.getActiveTime();
+                                long tmpTime = activeTime == 0 ? 0 : (System.currentTimeMillis() - activeTime) / 1000;
+                                mTime = tmpTime == 0 ? mTime : tmpTime;
+                                if (mTime >= 3600) {
+                                    extra =
+                                            String.format(
+                                                    "%d:%02d:%02d",
+                                                    mTime / 3600,
+                                                    (mTime % 3600) / 60,
+                                                    (mTime % 60));
+                                } else {
+                                    extra =
+                                            String.format(
+                                                    "%02d:%02d",
+                                                    (mTime % 3600) / 60, (mTime % 60));
                                 }
-
                                 if (!TextUtils.isEmpty(senderId)) {
                                     switch (callProfile.getConversationType()) {
                                         case PRIVATE:
@@ -628,17 +625,14 @@ public class CallFloatBoxView {
                                 String senderId;
                                 String extra = "";
                                 senderId = callProfile.getInviterUserId();
-                                switch (reason) {
-                                    case HANGUP:
-                                    case REMOTE_HANGUP:
-                                        if (mTime >= 3600) {
-                                            extra = String.format("%d:%02d:%02d", mTime / 3600, (mTime % 3600) / 60, (mTime % 60));
-                                        } else {
-                                            extra = String.format("%02d:%02d", (mTime % 3600) / 60, (mTime % 60));
-                                        }
-                                        break;
+                                long activeTime = callProfile.getActiveTime();
+                                long tmpTime = activeTime == 0 ? 0 : (System.currentTimeMillis() - activeTime) / 1000;
+                                mTime = tmpTime == 0 ? mTime : tmpTime;
+                                if (mTime >= 3600) {
+                                    extra = String.format("%d:%02d:%02d", mTime / 3600, (mTime % 3600) / 60, (mTime % 60));
+                                } else {
+                                    extra = String.format("%02d:%02d", (mTime % 3600) / 60, (mTime % 60));
                                 }
-
                                 if (!TextUtils.isEmpty(senderId)) {
                                     switch (callProfile.getConversationType()) {
                                         case PRIVATE:

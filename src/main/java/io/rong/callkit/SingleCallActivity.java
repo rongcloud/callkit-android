@@ -865,7 +865,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             return;
         }
         senderId = callSession.getInviterUserId();
-        long time = getTime();
+        long time = getTime(callSession.getActiveTime());
         if (time > 0) {
             if (time >= 3600) {
                 extra =

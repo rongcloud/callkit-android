@@ -232,7 +232,9 @@ public class BaseCallActivity extends BaseNoActionBarActivity
         }
     }
 
-    public long getTime() {
+    public long getTime(long activeTime) {
+        long tmpTime = activeTime == 0 ? 0 : (System.currentTimeMillis() - activeTime) / 1000;
+        time = tmpTime == 0 ? time : tmpTime;
         return time;
     }
 
@@ -405,8 +407,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
                     NotificationUtil.getInstance().clearNotification(this, BaseCallActivity.CALL_NOTIFICATION_ID);
                     CallRingingUtil.getInstance().stopServiceButContinueRinging(this);
                 }
-                long activeTime = session.getActiveTime();
-                time = activeTime == 0 ? 0 : (System.currentTimeMillis() - activeTime) / 1000;
+                time = getTime(session.getActiveTime());
                 shouldRestoreFloat = true;
                 if (time > 0) {
                     CallKitUtils.shouldShowFloat = true;
