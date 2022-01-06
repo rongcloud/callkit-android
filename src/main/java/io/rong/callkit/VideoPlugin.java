@@ -30,6 +30,8 @@ import io.rong.imlib.model.Conversation;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import static io.rong.callkit.BaseCallActivity.REQUEST_CODE_ADD_MEMBER;
+
 /** Created by weiqinxiao on 16/8/16. */
 public class VideoPlugin implements IPluginModule, IPluginRequestPermissionResultCallback {
     private static final String TAG = "VideoPlugin";
@@ -146,6 +148,15 @@ public class VideoPlugin implements IPluginModule, IPluginRequestPermissionResul
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK) {
             return;
+        }
+
+        if (requestCode == REQUEST_CODE_ADD_MEMBER) {
+            if (resultCode == Activity.RESULT_OK) {
+                if (data.getBooleanExtra("remote_hangup", false)) {
+                    RLog.d(TAG, "Remote exit, end the call.");
+                    return;
+                }
+            }
         }
 
         Intent intent = new Intent(RongVoIPIntent.RONG_INTENT_ACTION_VOIP_MULTIVIDEO);

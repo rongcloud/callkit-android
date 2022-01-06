@@ -163,11 +163,13 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         if (bundle != null) {
             handFree = bundle.getBoolean(KEY_HAND_FREE);
             muted = bundle.getBoolean(KEY_MUTED);
+            audioContainer.removeAllViews();
             audioContainer.addView(outgoingLayout);
             String str = (String) SPUtils.get(MultiAudioCallActivity.this, "ICallScrollView", "");
 
             FrameLayout controller =
                     (FrameLayout) audioContainer.findViewById(R.id.rc_voip_control_layout);
+            controller.removeAllViews();
             controller.addView(outgoingController);
             callSession = RongCallClient.getInstance().getCallSession();
             if (callSession == null) {
@@ -232,8 +234,8 @@ public class MultiAudioCallActivity extends BaseCallActivity {
             return;
         }
         ArrayList<String> invitedList = new ArrayList<>();
-
         if (callAction.equals(RongCallAction.ACTION_INCOMING_CALL)) {
+            audioContainer.removeAllViews();
             callSession = RongCallClient.getInstance().getCallSession();
             UserInfo userInfo = RongUserInfoManager.getInstance().getUserInfo(callSession.getCallerUserId());
             setTopContainerUserView(callSession.getCallerUserId());
@@ -253,6 +255,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
             }
             FrameLayout controller =
                     (FrameLayout) audioContainer.findViewById(R.id.rc_voip_control_layout);
+            controller.removeAllViews();
             controller.addView(incomingController);
 
             ImageView iv_answerBtn =
@@ -264,6 +267,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
 
             onIncomingCallRinging(callSession);
         } else if (callAction.equals(RongCallAction.ACTION_OUTGOING_CALL)) {
+            audioContainer.removeAllViews();
             Conversation.ConversationType conversationType =
                     Conversation.ConversationType.valueOf(
                             intent.getStringExtra("conversationType").toUpperCase(Locale.US));
@@ -288,6 +292,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
             memberContainer.enableShowState(true);
             FrameLayout controller =
                     (FrameLayout) audioContainer.findViewById(R.id.rc_voip_control_layout);
+            controller.removeAllViews();
             controller.addView(outgoingController);
 
             ImageView iv_answerBtn =
@@ -667,6 +672,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                                             RongCallClient.getInstance()
                                                     .getCallSession()
                                                     .getObserverUserList();
+                            intent.putExtra("callId", callSession.getCallId());
                             intent.putStringArrayListExtra("allObserver", allObserver);
                             intent.putStringArrayListExtra("invitedMembers", added);
                             intent.putExtra(

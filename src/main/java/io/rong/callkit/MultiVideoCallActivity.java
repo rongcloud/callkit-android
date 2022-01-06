@@ -50,6 +50,7 @@ import io.rong.callkit.util.HeadsetInfo;
 import io.rong.callkit.util.RingingMode;
 import io.rong.callkit.util.RongCallPermissionUtil;
 import io.rong.calllib.CallUserProfile;
+import io.rong.calllib.ReportUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallSession;
@@ -109,7 +110,6 @@ public class MultiVideoCallActivity extends BaseCallActivity {
 
     boolean isFullScreen = false;
     boolean isMuteMIC = false;
-    boolean isMuteCamera = false;
     boolean startForCheckPermissions = false;
 
     String localViewUserId;
@@ -1150,6 +1150,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
             if (callSession != null) {
                 if (!RongCallClient.getInstance().canCallContinued(callSession.getCallId())) {
                     RLog.w(TAG, "Already received hangup message before, finish current activity");
+                    ReportUtil.libStatus(ReportUtil.TAG.ACTIVITYFINISH, "reason", "canCallContinued not");
                     finish();
                     return;
                 }
@@ -1361,6 +1362,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                             RongCallClient.getInstance().getCallSession().getObserverUserList();
             intent.putStringArrayListExtra("allObserver", allObserver);
             intent.putStringArrayListExtra("invitedMembers", added);
+            intent.putExtra("callId", callSession.getCallId());
             intent.putExtra("groupId", callSession.getTargetId());
             intent.putExtra("conversationType", callSession.getConversationType().getValue());
             intent.putExtra("mediaType", RongCallCommon.CallMediaType.VIDEO.getValue());

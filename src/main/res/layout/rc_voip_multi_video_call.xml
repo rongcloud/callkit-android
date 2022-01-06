@@ -90,20 +90,20 @@
     </HorizontalScrollView>
 
     <LinearLayout
-        android:id="@+id/rc_waiting_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/rc_remoteuser_horizontalScrollView"
-        android:layout_alignParentTop="true"
-        android:gravity="center"
-        android:orientation="vertical">
+      android:id="@+id/rc_waiting_container"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_above="@+id/rc_remoteuser_horizontalScrollView"
+      android:layout_alignParentTop="true"
+      android:gravity="center"
+      android:orientation="vertical">
 
         <TextView
-            style="@style/callkit_voip_text_style_18spWhite"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/rc_voip_call_waiting" />
+          style="@style/callkit_voip_text_style_18spWhite"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+          android:text="@string/rc_voip_call_waiting" />
     </LinearLayout>
 
     <LinearLayout

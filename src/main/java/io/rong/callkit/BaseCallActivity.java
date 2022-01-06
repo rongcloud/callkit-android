@@ -105,7 +105,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
 //    static final String[] AUDIO_CALL_PERMISSIONS = {Manifest.permission.RECORD_AUDIO};
 
     public static final int CALL_NOTIFICATION_ID = 4000;
-    private boolean isMuteCamera = false;
+    boolean isMuteCamera = false;
 
     /**
      * 融云 SDK 默认麦克风、摄像头流唯一标识，和 RongCallClient#publishCustomVideoStream(tag, PublishCallBack) 方法中 tag 用法一致;

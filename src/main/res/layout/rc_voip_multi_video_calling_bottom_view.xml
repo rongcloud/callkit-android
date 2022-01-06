@@ -60,12 +60,12 @@
         android:layout_marginRight="20dp">
 
         <ImageView
-            android:id="@+id/rc_voip_disable_camera_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:onClick="onDisableCameraBtnClick"
-            android:src="@drawable/rc_voip_disable_camera_selector" />
+          android:id="@+id/rc_voip_disable_camera_btn"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_centerHorizontal="true"
+          android:onClick="onDisableCameraBtnClick"
+          android:src="@drawable/rc_voip_disable_camera_selector" />
 
         <TextView
             android:id="@+id/rc_voip_disable_camera_text"

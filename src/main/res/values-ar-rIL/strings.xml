@@ -16,6 +16,8 @@
     <string name="rc_voip_select_member">إختر الأعضاء</string>
     <string name="rc_voip_call_audio_start_fail">مكالمة صوتية جارية , حاول مرة اخرى</string>
     <string name="rc_voip_call_video_start_fail">مكالمة فيديو جارية , حاول مرة اخرى</string>
+    <string name="rc_voip_call_audio_start_fail_callidfailed"> مكالمة صوتية في التقدم ، دعوة جديدة غير مسموح</string>
+    <string name="rc_voip_call_video_start_fail_callidfailed"> مكالمات الفيديو في التقدم ، مكالمات جديدة لا يسمح</string>
     <string name="rc_voip_call_other">تم الرد على الأجهزة الأخرى .</string>
 
     <string name="rc_voip_audio_call_inviting">يدعوك إلى مكالمة صوتية</string>

@@ -6,8 +6,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 20211223
-        versionName "5.1.15_opensource"
+        versionCode 20220106
+        versionName "5.1.16_opensource"
     }
     buildTypes {
         release {
@@ -36,9 +36,8 @@ dependencies {
     api project(':IMKit')
     api project(':CallLib')
     //基础布局
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    api 'com.github.bumptech.glide:glide:4.9.0'
-    api 'com.google.code.gson:gson:2.8.1'
+    implementation 'androidx.media:media:1.2.1'
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
 
 }
 

@@ -35,6 +35,7 @@ import io.rong.callkit.util.HeadsetInfo;
 import io.rong.callkit.util.RingingMode;
 import io.rong.callkit.util.RongCallPermissionUtil;
 import io.rong.calllib.CallUserProfile;
+import io.rong.calllib.ReportUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallSession;
@@ -127,6 +128,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         }
         if (!RongCallClient.getInstance().canCallContinued(receivedCallId)) {
             RLog.w(TAG, "Already received hangup message before, finish current activity");
+            ReportUtil.libStatus(ReportUtil.TAG.ACTIVITYFINISH, "reason", "canCallContinued not");
             finish();
             return;
         }
@@ -468,7 +470,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             button.setEnabled(true);
             mButtonContainer.removeAllViews();
             mButtonContainer.addView(btnLayout);
-            RCRTCEngine.getInstance().enableSpeaker(false);
+            RCRTCEngine.getInstance().enableSpeaker(handFree);
         } else {
             mConnectionStateTextView.setVisibility(View.VISIBLE);
             mConnectionStateTextView.setText(R.string.rc_voip_connecting);
@@ -1073,6 +1075,14 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         if (targetId != null && targetId.equals(info.getUserId())) {
             TextView userName = (TextView) mUserInfoContainer.findViewById(R.id.rc_voip_user_name);
             if (info.getName() != null) userName.setText(CallKitUtils.nickNameRestrict(info.getName()));
+
+            ImageView userPortrait =
+                    (ImageView)
+                            mUserInfoContainer.findViewById(R.id.rc_voip_user_portrait);
+            if (userPortrait != null && info.getPortraitUri() != null && userPortrait.getVisibility() == View.VISIBLE) {
+                RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),
+                        info.getPortraitUri(), R.drawable.rc_default_portrait, userPortrait);
+            }
         }
     }
 

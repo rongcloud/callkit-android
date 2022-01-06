@@ -31,9 +31,12 @@ import io.rong.callkit.util.CallKitSearchBarListener;
 import io.rong.callkit.util.CallKitSearchBarView;
 import io.rong.callkit.util.CallKitUtils;
 import io.rong.callkit.util.CallSelectMemberSerializable;
+import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
+import io.rong.calllib.RongCallSession;
 import io.rong.common.RLog;
 import io.rong.imkit.feature.mention.RongMentionManager;
+import io.rong.imkit.picture.tools.ToastUtils;
 import io.rong.imkit.userinfo.RongUserInfoManager;
 import io.rong.imkit.userinfo.model.GroupUserInfo;
 import io.rong.imlib.model.Conversation;
@@ -66,6 +69,7 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity implements
     private ArrayList<String> allObserver = null; // 保存当前通话中从多人音/视频传递过来的观察者列表
 
     private String groupId;
+    private String callId;
     private RelativeLayout rlSearchTop;
     private RelativeLayout rlActionBar;
     private ImageView ivBack;
@@ -174,6 +178,7 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity implements
         conversationType = Conversation.ConversationType.setValue(conType);
         invitedMembers = intent.getStringArrayListExtra("invitedMembers");
         groupId = intent.getStringExtra("groupId");
+        callId = intent.getStringExtra("callId");
         allObserver = intent.getStringArrayListExtra("allObserver");
 
         ArrayList<String> list = intent.getStringArrayListExtra("allMembers");
@@ -543,6 +548,18 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity implements
      * @param val 是否是远端挂断，如果是则关闭该页面
      */
     private void setActivityResult(boolean val) {
+        RongCallSession profile = RongCallClient.getInstance().getCallSession();
+        if (profile != null) {
+            //callid由多聊页面传入，如果先启动群组选择人员页面再启动多聊页面，不允许启动多聊页面
+            if (null != profile.getCallId() && (!profile.getCallId().equals(callId))) {
+                String msg = profile.getMediaType() == RongCallCommon.CallMediaType.AUDIO ?
+                        getString(io.rong.callkit.R.string.rc_voip_call_audio_start_fail) :
+                        getString(io.rong.callkit.R.string.rc_voip_call_video_start_fail);
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
         CallKitUtils.closeKeyBoard(CallSelectMemberActivity.this, null);
         Intent intent = new Intent();
         intent.putExtra("remote_hangup", val);

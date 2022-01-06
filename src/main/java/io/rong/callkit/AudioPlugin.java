@@ -30,6 +30,8 @@ import io.rong.imlib.discussion.model.Discussion;
 import io.rong.imlib.model.Conversation;
 import java.util.ArrayList;
 
+import static io.rong.callkit.BaseCallActivity.REQUEST_CODE_ADD_MEMBER;
+
 /** Created by weiqinxiao on 16/8/16. */
 public class AudioPlugin implements IPluginModule, IPluginRequestPermissionResultCallback {
     private static final String TAG = "AudioPlugin";
@@ -161,6 +163,14 @@ public class AudioPlugin implements IPluginModule, IPluginRequestPermissionResul
             return;
         }
 
+        if (requestCode == REQUEST_CODE_ADD_MEMBER) {
+            if (resultCode == Activity.RESULT_OK) {
+                if (data.getBooleanExtra("remote_hangup", false)) {
+                    RLog.d(TAG, "Remote exit, end the call.");
+                    return;
+                }
+            }
+        }
         Intent intent = new Intent(RongVoIPIntent.RONG_INTENT_ACTION_VOIP_MULTIAUDIO);
         ArrayList<String> userIds = data.getStringArrayListExtra("invited");
         ArrayList<String> observers = data.getStringArrayListExtra("observers");
