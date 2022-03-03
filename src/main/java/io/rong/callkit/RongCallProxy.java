@@ -2,16 +2,17 @@ package io.rong.callkit;
 
 import android.text.TextUtils;
 import android.view.SurfaceView;
-
 import cn.rongcloud.rtc.api.RCRTCAudioRouteManager;
 import io.rong.callkit.util.CallKitUtils;
-import io.rong.calllib.ReportUtil;
 import io.rong.callkit.util.IncomingCallExtraHandleUtil;
 import io.rong.calllib.IRongCallListener;
+import io.rong.calllib.ReportUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallCommon.CallMediaType;
 import io.rong.calllib.RongCallSession;
+import io.rong.calllib.message.CallSTerminateMessage;
+import io.rong.calllib.message.MultiCallEndMessage;
 import io.rong.common.RLog;
 import io.rong.imkit.IMCenter;
 import io.rong.imlib.RongIMClient;
@@ -19,8 +20,6 @@ import io.rong.imlib.model.Conversation;
 import java.util.HashMap;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
-import io.rong.calllib.message.CallSTerminateMessage;
-import io.rong.calllib.message.MultiCallEndMessage;
 
 /** Created by jiangecho on 2016/10/27. */
 public class RongCallProxy implements IRongCallListener {
@@ -55,18 +54,29 @@ public class RongCallProxy implements IRongCallListener {
 
     @Override
     public void onCallOutgoing(RongCallSession callSession, SurfaceView localVideo) {
-        ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, callSession, "state|desc", "onCallOutgoing", getDescription());
+        ReportUtil.appStatus(
+                ReportUtil.TAG.CALL_LISTENER,
+                callSession,
+                "state|desc",
+                "onCallOutgoing",
+                getDescription());
         if (mCallListener != null) {
             mCallListener.onCallOutgoing(callSession, localVideo);
         }
         if (RongCallClient.getInstance().getContext() != null) {
-            RCRTCAudioRouteManager.getInstance().init(RongCallClient.getInstance().getContext().getApplicationContext());
+            RCRTCAudioRouteManager.getInstance()
+                    .init(RongCallClient.getInstance().getContext().getApplicationContext());
         }
     }
 
     @Override
     public void onCallConnected(RongCallSession callSession, SurfaceView localVideo) {
-        ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, callSession, "state|desc", "onCallConnected", getDescription());
+        ReportUtil.appStatus(
+                ReportUtil.TAG.CALL_LISTENER,
+                callSession,
+                "state|desc",
+                "onCallConnected",
+                getDescription());
         if (mCallListener != null) {
             mCallListener.onCallConnected(callSession, localVideo);
         }
@@ -76,12 +86,18 @@ public class RongCallProxy implements IRongCallListener {
     public void onCallDisconnected(
             RongCallSession callSession, RongCallCommon.CallDisconnectedReason reason) {
         RLog.d(TAG, "RongCallProxy onCallDisconnected mCallListener = " + mCallListener);
-        ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, callSession, "state|reason|desc", "onCallDisconnected",reason.getValue(), getDescription());
+        ReportUtil.appStatus(
+                ReportUtil.TAG.CALL_LISTENER,
+                callSession,
+                "state|reason|desc",
+                "onCallDisconnected",
+                reason.getValue(),
+                getDescription());
         if (mCallListener != null) {
             mCallListener.onCallDisconnected(callSession, reason);
         } else if (!IncomingCallExtraHandleUtil.needNotify()) {
             mCachedCallQueue.offer(new CallDisconnectedInfo(callSession, reason));
-        } else { //android 10 后台来电，被叫端不响应，主叫挂断时 mCallListener 为空 ，需要生成通话记录
+        } else { // android 10 后台来电，被叫端不响应，主叫挂断时 mCallListener 为空 ，需要生成通话记录
             insertCallLogMessage(callSession, reason);
         }
         // 取消耳机监听
@@ -90,7 +106,12 @@ public class RongCallProxy implements IRongCallListener {
 
     @Override
     public void onRemoteUserRinging(String userId) {
-        ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, "userId|state|desc", userId,"onRemoteUserRinging", getDescription());
+        ReportUtil.appStatus(
+                ReportUtil.TAG.CALL_LISTENER,
+                "userId|state|desc",
+                userId,
+                "onRemoteUserRinging",
+                getDescription());
         if (mCallListener != null) {
             mCallListener.onRemoteUserRinging(userId);
         }
@@ -98,9 +119,14 @@ public class RongCallProxy implements IRongCallListener {
 
     @Override
     public void onRemoteUserAccept(String userId, CallMediaType mediaType) {
-        ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, "userId|state|desc", userId, "onRemoteUserAccept", getDescription());
+        ReportUtil.appStatus(
+                ReportUtil.TAG.CALL_LISTENER,
+                "userId|state|desc",
+                userId,
+                "onRemoteUserAccept",
+                getDescription());
         if (mCallListener != null) {
-            mCallListener.onRemoteUserAccept(userId,mediaType);
+            mCallListener.onRemoteUserAccept(userId, mediaType);
         }
     }
 
@@ -110,7 +136,12 @@ public class RongCallProxy implements IRongCallListener {
             RongCallCommon.CallMediaType mediaType,
             int userType,
             SurfaceView remoteVideo) {
-        ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, "userId|state|desc", userId, "onRemoteUserJoined", getDescription());
+        ReportUtil.appStatus(
+                ReportUtil.TAG.CALL_LISTENER,
+                "userId|state|desc",
+                userId,
+                "onRemoteUserJoined",
+                getDescription());
         if (mCallListener != null) {
             mCallListener.onRemoteUserJoined(userId, mediaType, userType, remoteVideo);
         }
@@ -118,7 +149,12 @@ public class RongCallProxy implements IRongCallListener {
 
     @Override
     public void onRemoteUserInvited(String userId, RongCallCommon.CallMediaType mediaType) {
-        ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, "userId|state|desc", userId, "onRemoteUserInvited", getDescription());
+        ReportUtil.appStatus(
+                ReportUtil.TAG.CALL_LISTENER,
+                "userId|state|desc",
+                userId,
+                "onRemoteUserInvited",
+                getDescription());
         if (mCallListener != null) {
             mCallListener.onRemoteUserInvited(userId, mediaType);
         }
@@ -126,7 +162,13 @@ public class RongCallProxy implements IRongCallListener {
 
     @Override
     public void onRemoteUserLeft(String userId, RongCallCommon.CallDisconnectedReason reason) {
-        ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, "userId|state|reason|desc", userId, "onRemoteUserLeft",reason.getValue(), getDescription());
+        ReportUtil.appStatus(
+                ReportUtil.TAG.CALL_LISTENER,
+                "userId|state|reason|desc",
+                userId,
+                "onRemoteUserLeft",
+                reason.getValue(),
+                getDescription());
         if (mCallListener != null) {
             mCallListener.onRemoteUserLeft(userId, reason);
         }
@@ -135,7 +177,13 @@ public class RongCallProxy implements IRongCallListener {
     @Override
     public void onMediaTypeChanged(
             String userId, RongCallCommon.CallMediaType mediaType, SurfaceView video) {
-        ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, "userId|state|mediaType|desc", userId, "onMediaTypeChanged",mediaType.getValue(), getDescription());
+        ReportUtil.appStatus(
+                ReportUtil.TAG.CALL_LISTENER,
+                "userId|state|mediaType|desc",
+                userId,
+                "onMediaTypeChanged",
+                mediaType.getValue(),
+                getDescription());
         if (mCallListener != null) {
             mCallListener.onMediaTypeChanged(userId, mediaType, video);
         }
@@ -143,7 +191,12 @@ public class RongCallProxy implements IRongCallListener {
 
     @Override
     public void onError(RongCallCommon.CallErrorCode errorCode) {
-        ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, "state|code|desc", "onError",errorCode.getValue(), getDescription());
+        ReportUtil.appStatus(
+                ReportUtil.TAG.CALL_LISTENER,
+                "state|code|desc",
+                "onError",
+                errorCode.getValue(),
+                getDescription());
         if (mCallListener != null) {
             mCallListener.onError(errorCode);
         }
@@ -151,7 +204,13 @@ public class RongCallProxy implements IRongCallListener {
 
     @Override
     public void onRemoteCameraDisabled(String userId, boolean disabled) {
-        ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, "userId|state|disabled|desc",userId, "onRemoteCameraDisabled",disabled, getDescription());
+        ReportUtil.appStatus(
+                ReportUtil.TAG.CALL_LISTENER,
+                "userId|state|disabled|desc",
+                userId,
+                "onRemoteCameraDisabled",
+                disabled,
+                getDescription());
         if (mCallListener != null) {
             mCallListener.onRemoteCameraDisabled(userId, disabled);
         }
@@ -159,7 +218,13 @@ public class RongCallProxy implements IRongCallListener {
 
     @Override
     public void onRemoteMicrophoneDisabled(String userId, boolean disabled) {
-        ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, "userId|state|disabled|desc",userId, "onRemoteMicrophoneDisabled",disabled, getDescription());
+        ReportUtil.appStatus(
+                ReportUtil.TAG.CALL_LISTENER,
+                "userId|state|disabled|desc",
+                userId,
+                "onRemoteMicrophoneDisabled",
+                disabled,
+                getDescription());
         if (mCallListener != null) {
             mCallListener.onRemoteMicrophoneDisabled(userId, disabled);
         }
@@ -174,7 +239,12 @@ public class RongCallProxy implements IRongCallListener {
 
     @Override
     public void onFirstRemoteVideoFrame(String userId, int height, int width) {
-        ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, "userId|state|desc",userId, "onFirstRemoteVideoFrame", getDescription());
+        ReportUtil.appStatus(
+                ReportUtil.TAG.CALL_LISTENER,
+                "userId|state|desc",
+                userId,
+                "onFirstRemoteVideoFrame",
+                getDescription());
         if (mCallListener != null) {
             mCallListener.onFirstRemoteVideoFrame(userId, height, width);
         }
@@ -189,7 +259,13 @@ public class RongCallProxy implements IRongCallListener {
 
     public void onRemoteUserPublishVideoStream(
             String userId, String streamId, String tag, SurfaceView surfaceView) {
-        ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, "userId|state|streamId|desc", userId, "onRemoteUserPublishVideoStream", streamId, getDescription());
+        ReportUtil.appStatus(
+                ReportUtil.TAG.CALL_LISTENER,
+                "userId|state|streamId|desc",
+                userId,
+                "onRemoteUserPublishVideoStream",
+                streamId,
+                getDescription());
         if (mCallListener != null) {
             mCallListener.onRemoteUserPublishVideoStream(userId, streamId, tag, surfaceView);
         }
@@ -203,7 +279,13 @@ public class RongCallProxy implements IRongCallListener {
     }
 
     public void onRemoteUserUnpublishVideoStream(String userId, String streamId, String tag) {
-        ReportUtil.appStatus(ReportUtil.TAG.CALL_LISTENER, "userId|state|streamId|desc", userId, "onRemoteUserUnpublishVideoStream", streamId, getDescription());
+        ReportUtil.appStatus(
+                ReportUtil.TAG.CALL_LISTENER,
+                "userId|state|streamId|desc",
+                userId,
+                "onRemoteUserUnpublishVideoStream",
+                streamId,
+                getDescription());
         if (mCallListener != null) {
             mCallListener.onRemoteUserUnpublishVideoStream(userId, streamId, tag);
         }
@@ -234,31 +316,26 @@ public class RongCallProxy implements IRongCallListener {
         return "no callListener set";
     }
 
-    private void insertCallLogMessage(RongCallSession callSession, RongCallCommon.CallDisconnectedReason reason) {
+    private void insertCallLogMessage(
+            RongCallSession callSession, RongCallCommon.CallDisconnectedReason reason) {
         if (!TextUtils.isEmpty(callSession.getInviterUserId())) {
             long insertTime = callSession.getEndTime();
             if (insertTime == 0) {
                 insertTime = callSession.getStartTime();
             }
-            if (callSession.getConversationType()
-                == Conversation.ConversationType.PRIVATE) {
+            if (callSession.getConversationType() == Conversation.ConversationType.PRIVATE) {
                 CallSTerminateMessage message = new CallSTerminateMessage();
                 message.setReason(reason);
                 message.setMediaType(callSession.getMediaType());
 
                 String extra;
-                long time =
-                    (callSession.getEndTime() - callSession.getStartTime())
-                        / 1000;
+                long time = (callSession.getEndTime() - callSession.getStartTime()) / 1000;
                 if (time >= 3600) {
                     extra =
-                        String.format(
-                            "%d:%02d:%02d",
-                            time / 3600, (time % 3600) / 60, (time % 60));
+                            String.format(
+                                    "%d:%02d:%02d", time / 3600, (time % 3600) / 60, (time % 60));
                 } else {
-                    extra =
-                        String.format(
-                            "%02d:%02d", (time % 3600) / 60, (time % 60));
+                    extra = String.format("%02d:%02d", (time % 3600) / 60, (time % 60));
                 }
                 message.setExtra(extra);
 
@@ -266,45 +343,42 @@ public class RongCallProxy implements IRongCallListener {
                 if (senderId.equals(callSession.getSelfUserId())) {
                     message.setDirection("MO");
                     IMCenter.getInstance()
-                        .insertOutgoingMessage(
-                            Conversation.ConversationType.PRIVATE,
-                            callSession.getTargetId(),
-                            io.rong.imlib.model.Message.SentStatus.SENT,
-                            message,
-                            insertTime,
-                            null);
+                            .insertOutgoingMessage(
+                                    Conversation.ConversationType.PRIVATE,
+                                    callSession.getTargetId(),
+                                    io.rong.imlib.model.Message.SentStatus.SENT,
+                                    message,
+                                    insertTime,
+                                    null);
                 } else {
                     message.setDirection("MT");
                     IMCenter.getInstance()
-                        .insertIncomingMessage(
-                                Conversation.ConversationType.PRIVATE,
-                                callSession.getTargetId(),
-                                senderId,
-                                CallKitUtils.getReceivedStatus(reason),
-                                message,
-                                insertTime,
-                                null);
+                            .insertIncomingMessage(
+                                    Conversation.ConversationType.PRIVATE,
+                                    callSession.getTargetId(),
+                                    senderId,
+                                    CallKitUtils.getReceivedStatus(reason),
+                                    message,
+                                    insertTime,
+                                    null);
                 }
-            } else if (callSession.getConversationType()
-                == Conversation.ConversationType.GROUP) {
+            } else if (callSession.getConversationType() == Conversation.ConversationType.GROUP) {
                 MultiCallEndMessage multiCallEndMessage = new MultiCallEndMessage();
                 multiCallEndMessage.setReason(reason);
-                if (callSession.getMediaType()
-                    == RongCallCommon.CallMediaType.AUDIO) {
+                if (callSession.getMediaType() == RongCallCommon.CallMediaType.AUDIO) {
                     multiCallEndMessage.setMediaType(RongIMClient.MediaType.AUDIO);
-                } else if (callSession.getMediaType()
-                    == RongCallCommon.CallMediaType.VIDEO) {
+                } else if (callSession.getMediaType() == RongCallCommon.CallMediaType.VIDEO) {
                     multiCallEndMessage.setMediaType(RongIMClient.MediaType.VIDEO);
                 }
                 IMCenter.getInstance()
-                    .insertIncomingMessage(
-                            callSession.getConversationType(),
-                            callSession.getTargetId(),
-                            callSession.getCallerUserId(),
-                            CallKitUtils.getReceivedStatus(reason),
-                            multiCallEndMessage,
-                            insertTime,
-                            null);
+                        .insertIncomingMessage(
+                                callSession.getConversationType(),
+                                callSession.getTargetId(),
+                                callSession.getCallerUserId(),
+                                CallKitUtils.getReceivedStatus(reason),
+                                multiCallEndMessage,
+                                insertTime,
+                                null);
             }
         }
     }

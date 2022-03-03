@@ -1,6 +1,5 @@
 package io.rong.callkit.util;
 
-import android.app.ActivityManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -19,28 +18,19 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.text.TextUtils;
-
 import androidx.annotation.DrawableRes;
 import androidx.annotation.RequiresApi;
-
-import java.io.IOException;
-import java.util.List;
-
 import cn.rongcloud.rtc.api.RCRTCEngine;
 import io.rong.callkit.R;
 import io.rong.callkit.RongIncomingCallService;
 import io.rong.common.RLog;
 import io.rong.imkit.notification.NotificationUtil;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.io.IOException;
 
-/**
- * @author gusd
- * @Date 2021/09/14
- */
+/** @author gusd @Date 2021/09/14 */
 public class CallRingingUtil {
     private static final String TAG = "CallRingingUtil";
-
-    private AtomicBoolean isRinging = new AtomicBoolean(false);
+    private volatile boolean isRinging = false;
     private RingingMode mCurrentRingingMode = null;
 
     private MediaPlayer mMediaPlayer;
@@ -49,44 +39,43 @@ public class CallRingingUtil {
     private volatile boolean stopServiceAndRingingTag = false;
     private volatile boolean isFirstReceivedBroadcast = true;
 
-    private String needAutoAcceptCallId = null;
-
-    private static final String DEFAULT_CHANNEL_NAME = "Voip_Incoming_channel";
-    private static final String DEFAULT_CHANNEL_ID = "rc_notification_id";
+    private static final String DEFAULT_CHANNEL_NAME = "VOIP";
+    private static final String DEFAULT_CHANNEL_ID = "rc_notification_voip_id";
     public static final int DEFAULT_ANSWER_ICON = R.drawable.rc_voip_notification_answer;
     public static final int DEFAULT_HANGUP_ICON = R.drawable.rc_voip_notification_hangup;
 
-    @DrawableRes
-    private int answerIcon = DEFAULT_ANSWER_ICON;
-    @DrawableRes
-    private int hangupIcon = DEFAULT_HANGUP_ICON;
+    @DrawableRes private int answerIcon = DEFAULT_ANSWER_ICON;
+    @DrawableRes private int hangupIcon = DEFAULT_HANGUP_ICON;
 
-    private CallRingingUtil() {
+    private CallRingingUtil() {}
 
-    }
-
-    private static class Holder {
-        static CallRingingUtil util = new CallRingingUtil();
+    private static class InstanceHolder {
+        static final CallRingingUtil instance = new CallRingingUtil();
     }
 
     public static CallRingingUtil getInstance() {
-        return Holder.util;
+        return InstanceHolder.instance;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void startRingingService(Context context, Bundle bundle) {
         if (!isRingingServiceRunning(context)) {
-            Intent intent = new Intent(context, RongIncomingCallService.class);
+            Intent intent = new Intent();
             intent.putExtras(bundle);
-            context.startForegroundService(intent);
+            // KNOTE: 2021/9/29 前台服务启动限制
+            try {
+                RongIncomingCallService.getInstance().startRing(context, intent);
+            } catch (Exception e) {
+                e.printStackTrace();
+                RLog.e(TAG, e.getMessage());
+            }
         }
     }
 
     public void stopService(Context context) {
         RLog.d(TAG, "stopService: ");
         if (isRingingServiceRunning(context)) {
-            Intent intent = new Intent(context, RongIncomingCallService.class);
-            context.stopService(intent);
+            RongIncomingCallService.getInstance().stopRinging(context);
         }
     }
 
@@ -98,37 +87,15 @@ public class CallRingingUtil {
         }
         stopServiceAndRingingTag = true;
         stopService(context);
-
     }
 
     public boolean isRingingServiceRunning(Context context) {
-        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningServiceInfo> services = activityManager.getRunningServices(1000);
-        for (ActivityManager.RunningServiceInfo service : services) {
-            if (service.service.getClassName().equals(RongIncomingCallService.class.getName())) {
-                return true;
-            }
-        }
-        return false;
+        return RongIncomingCallService.getInstance().isRinging();
     }
-
-    public void setNeedAutoAnswerCallId(String sessionId) {
-        needAutoAcceptCallId = sessionId;
-    }
-
-
-    public boolean needAutoAnswerCallId(String callId) {
-        if (!TextUtils.isEmpty(callId) && TextUtils.equals(callId, needAutoAcceptCallId)) {
-            needAutoAcceptCallId = null;
-            return true;
-        }
-        return false;
-    }
-
 
     public void startRinging(Context context, RingingMode mode) {
         RLog.d(TAG, "startRinging: ");
-        if (isRinging.get()) {
+        if (isRinging) {
             return;
         }
 
@@ -159,21 +126,22 @@ public class CallRingingUtil {
             callRinging(context, mode);
         }
         mCurrentRingingMode = mode;
-        isRinging.set(true);
+        isRinging = true;
     }
 
     protected void startVibrator(Context context) {
         if (mVibrator == null) {
-            mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+            mVibrator =
+                    (Vibrator)
+                            context.getApplicationContext()
+                                    .getSystemService(Context.VIBRATOR_SERVICE);
         } else {
             mVibrator.cancel();
         }
-        mVibrator.vibrate(new long[]{500, 1000}, 0);
+        mVibrator.vibrate(new long[] {500, 1000}, 0);
     }
 
-    /**
-     * 判断系统是否设置了 响铃时振动
-     */
+    /** 判断系统是否设置了 响铃时振动 */
     private boolean isVibrateWhenRinging(Context context) {
         ContentResolver resolver = context.getApplicationContext().getContentResolver();
         if (Build.MANUFACTURER.equals("Xiaomi")) {
@@ -190,7 +158,7 @@ public class CallRingingUtil {
         try {
             if (mode == RingingMode.Incoming) {
                 Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-                mMediaPlayer.setDataSource(context, uri);
+                mMediaPlayer.setDataSource(context.getApplicationContext(), uri);
             } else if (mode == RingingMode.Incoming_Custom || mode == RingingMode.Outgoing) {
                 int rawResId =
                         mode == RingingMode.Outgoing
@@ -209,24 +177,28 @@ public class CallRingingUtil {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 AudioAttributes attributes =
                         new AudioAttributes.Builder()
-                                .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                                .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
                                 .build();
                 mMediaPlayer.setAudioAttributes(attributes);
             } else {
-                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_RING);
+                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_VOICE_CALL);
             }
             mMediaPlayer.prepareAsync();
-            final AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+            final AudioManager am =
+                    (AudioManager)
+                            context.getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
             if (am != null) {
-                RCRTCEngine.getInstance().enableSpeaker(mode == RingingMode.Incoming || mode == RingingMode.Incoming_Custom);
+                RCRTCEngine.getInstance()
+                        .enableSpeaker(
+                                mode == RingingMode.Incoming
+                                        || mode == RingingMode.Incoming_Custom);
                 // 设置此值可在拨打时控制响铃音量
-                am.setMode(AudioManager.MODE_RINGTONE);
+                am.setMode(AudioManager.MODE_IN_COMMUNICATION);
                 // 设置拨打时响铃音量默认值
                 am.setStreamVolume(
                         AudioManager.STREAM_VOICE_CALL, 5, AudioManager.STREAM_VOICE_CALL);
             }
-        } catch (
-                IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e1) {
             RLog.i(TAG, "---onOutgoingCallRinging Error---" + e1.getMessage());
@@ -275,7 +247,8 @@ public class CallRingingUtil {
                     applicationContext.unregisterReceiver(mRingModeReceiver);
                 } catch (Exception e) {
                 }
-                final AudioManager am = (AudioManager) applicationContext.getSystemService(Context.AUDIO_SERVICE);
+                final AudioManager am =
+                        (AudioManager) applicationContext.getSystemService(Context.AUDIO_SERVICE);
                 if (am != null) {
                     am.setMode(AudioManager.MODE_IN_COMMUNICATION);
                 }
@@ -284,7 +257,7 @@ public class CallRingingUtil {
             e.printStackTrace();
             RLog.i(TAG, "mMediaPlayer stopRing error=" + e.getMessage());
         } finally {
-            isRinging.set(false);
+            isRinging = false;
             mCurrentRingingMode = null;
         }
     }
@@ -293,27 +266,32 @@ public class CallRingingUtil {
             new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    RLog.d(TAG, "onReceive : " + "context = " + context + "," + "intent = " + intent);
+                    RLog.d(
+                            TAG,
+                            "onReceive : " + "context = " + context + "," + "intent = " + intent);
                     // 此类广播为 sticky 类型的，首次注册广播便会收到，因此第一次收到的广播不作处理
                     if (isFirstReceivedBroadcast) {
                         isFirstReceivedBroadcast = false;
                         return;
                     }
-                    if (!isRinging.get()) {
+                    if (!isRinging) {
                         return;
                     }
                     // 根据 isIncoming 判断只有在接听界面时做铃声和振动的切换，拨打界面不作处理
-                    if ((mCurrentRingingMode == RingingMode.Incoming || mCurrentRingingMode == RingingMode.Incoming_Custom)
+                    if ((mCurrentRingingMode == RingingMode.Incoming
+                                    || mCurrentRingingMode == RingingMode.Incoming_Custom)
                             && AudioManager.RINGER_MODE_CHANGED_ACTION.equals(intent.getAction())
                             && !CallKitUtils.callConnected) {
                         AudioManager am =
-                                (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+                                (AudioManager)
+                                        context.getApplicationContext()
+                                                .getSystemService(Context.AUDIO_SERVICE);
                         final int ringMode = am.getRingerMode();
                         RLog.i(TAG, "Ring mode Receiver mode=" + ringMode);
                         switch (ringMode) {
                             case AudioManager.RINGER_MODE_NORMAL:
                                 stopRinging();
-                                callRinging(context, RingingMode.Incoming);
+                                callRinging(context.getApplicationContext(), RingingMode.Incoming);
                                 break;
                             case AudioManager.RINGER_MODE_SILENT:
                                 stopRinging();
@@ -330,11 +308,16 @@ public class CallRingingUtil {
 
     /**
      * 创建通知通道
+     *
      * @param context
      */
     public void createNotificationChannel(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(getNotificationChannelId(), getNotificationChannelName(context), NotificationManager.IMPORTANCE_HIGH);
+            NotificationChannel channel =
+                    new NotificationChannel(
+                            getNotificationChannelId(),
+                            getNotificationChannelName(context),
+                            NotificationManager.IMPORTANCE_HIGH);
             channel.setSound(null, null);
             context.getSystemService(NotificationManager.class).createNotificationChannel(channel);
         }
@@ -345,7 +328,11 @@ public class CallRingingUtil {
     }
 
     public String getNotificationChannelName(Context context) {
-        String channelName = context.getResources().getString(context.getResources().getIdentifier("rc_notification_channel_name", "string", context.getPackageName()));
+        int id =
+                context.getResources()
+                        .getIdentifier(
+                                "rc_incoming_channel_name", "string", context.getPackageName());
+        String channelName = id == 0 ? null : context.getResources().getString(id);
         return TextUtils.isEmpty(channelName) ? DEFAULT_CHANNEL_NAME : channelName;
     }
 
@@ -369,6 +356,7 @@ public class CallRingingUtil {
 
     /**
      * 创建通道并检查是否有悬浮通知权限
+     *
      * @param context
      */
     public boolean createChannelAndCheckFullScreenPermission(Context context) {
@@ -378,15 +366,20 @@ public class CallRingingUtil {
 
     /**
      * 检查是否有悬浮通知权限
+     *
      * @param context
      * @param channelId
      * @return
      */
     public boolean checkFullScreenPermission(Context context, String channelId) {
-        NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {//Android 8.0及以上
-            NotificationChannel channel = mNotificationManager.getNotificationChannel(channelId);//CHANNEL_ID是自己定义的渠道ID
-            if (channel.getImportance() == NotificationManager.IMPORTANCE_DEFAULT) {//未开启
+        NotificationManager mNotificationManager =
+                (NotificationManager)
+                        context.getApplicationContext()
+                                .getSystemService(Context.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // Android 8.0及以上
+            NotificationChannel channel =
+                    mNotificationManager.getNotificationChannel(channelId); // CHANNEL_ID是自己定义的渠道ID
+            if (channel.getImportance() == NotificationManager.IMPORTANCE_DEFAULT) { // 未开启
                 return false;
             }
             return true;
@@ -396,6 +389,7 @@ public class CallRingingUtil {
 
     /**
      * 跳转到通知设置界面
+     *
      * @param context
      */
     public void gotoChannelSettingPage(Context context) {
@@ -406,5 +400,4 @@ public class CallRingingUtil {
             context.startActivity(intent);
         }
     }
-
 }

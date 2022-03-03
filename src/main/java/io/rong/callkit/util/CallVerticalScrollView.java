@@ -11,11 +11,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
-
 import io.rong.callkit.R;
 import io.rong.callkit.RongCallKit;
 import io.rong.imlib.model.UserInfo;
@@ -45,7 +43,9 @@ public class CallVerticalScrollView extends ScrollView implements ICallScrollVie
     private void init(Context context) {
         this.context = context;
         linearLayout = new LinearLayout(context);
-        linearLayout.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        linearLayout.setLayoutParams(
+                new LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         linearLayout.setOrientation(LinearLayout.VERTICAL);
         addView(linearLayout);
     }
@@ -129,8 +129,11 @@ public class CallVerticalScrollView extends ScrollView implements ICallScrollVie
 
         if (userInfo != null) {
             RongCallKit.getKitImageEngine()
-                .loadPortrait(this.getContext(), userInfo.getPortraitUri(),
-                    R.drawable.rc_default_portrait, imageView);
+                    .loadPortrait(
+                            this.getContext(),
+                            userInfo.getPortraitUri(),
+                            R.drawable.rc_default_portrait,
+                            imageView);
             name.setText(userInfo.getName() == null ? userInfo.getUserId() : userInfo.getName());
         } else {
             name.setText(childId);
@@ -199,8 +202,7 @@ public class CallVerticalScrollView extends ScrollView implements ICallScrollVie
             LinearLayout container = (LinearLayout) linearLayout.getChildAt(i);
             LinearLayout child = (LinearLayout) container.findViewWithTag(childId);
             if (child != null) {
-                ImageView imageView =
-                        (ImageView) child.findViewById(R.id.rc_user_portrait);
+                ImageView imageView = (ImageView) child.findViewById(R.id.rc_user_portrait);
                 Glide.with(this)
                         .load(userInfo.getPortraitUri())
                         .placeholder(R.drawable.rc_default_portrait)

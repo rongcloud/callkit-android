@@ -13,20 +13,16 @@ import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
-
 import androidx.core.app.AppOpsManagerCompat;
-
+import io.rong.common.RLog;
 import java.lang.reflect.Method;
 
-import io.rong.common.RLog;
-
 /**
- * @author gusd
- * @Date 2021/09/17
+ * @author gusd @Date 2021/09/17
  * @escription 处理系统之间的差异化问题
  */
 public enum DeviceAdapter {
-    defaultAdapter(),// 默认 adapter
+    defaultAdapter(), // 默认 adapter
     ///////////////////////////////////////////////////////////////////////////
     // 小米手机
     ///////////////////////////////////////////////////////////////////////////
@@ -35,13 +31,17 @@ public enum DeviceAdapter {
         public void gotoAppPermissionSettingPage(Context context) {
             try { // MIUI 8
                 Intent localIntent = new Intent("miui.intent.action.APP_PERM_EDITOR");
-                localIntent.setClassName("com.miui.securitycenter", "com.miui.permcenter.permissions.PermissionsEditorActivity");
+                localIntent.setClassName(
+                        "com.miui.securitycenter",
+                        "com.miui.permcenter.permissions.PermissionsEditorActivity");
                 localIntent.putExtra("extra_pkgname", context.getPackageName());
                 context.startActivity(localIntent);
             } catch (Exception e) {
                 try { // MIUI 5/6/7
                     Intent localIntent = new Intent("miui.intent.action.APP_PERM_EDITOR");
-                    localIntent.setClassName("com.miui.securitycenter", "com.miui.permcenter.permissions.AppPermissionsEditorActivity");
+                    localIntent.setClassName(
+                            "com.miui.securitycenter",
+                            "com.miui.permcenter.permissions.AppPermissionsEditorActivity");
                     localIntent.putExtra("extra_pkgname", context.getPackageName());
                     context.startActivity(localIntent);
                 } catch (Exception e1) { // 否则跳转到应用详情
@@ -59,8 +59,18 @@ public enum DeviceAdapter {
             try {
                 int op = 10020; // >= 23
                 // ops.checkOpNoThrow(op, uid, packageName)
-                Method method = ops.getClass().getMethod("checkOpNoThrow", new Class[]{int.class, int.class, String.class});
-                Integer result = (Integer) method.invoke(ops, op, android.os.Process.myUid(), context.getPackageName());
+                Method method =
+                        ops.getClass()
+                                .getMethod(
+                                        "checkOpNoThrow",
+                                        new Class[] {int.class, int.class, String.class});
+                Integer result =
+                        (Integer)
+                                method.invoke(
+                                        ops,
+                                        op,
+                                        android.os.Process.myUid(),
+                                        context.getPackageName());
 
                 return result == AppOpsManager.MODE_ALLOWED;
 
@@ -96,16 +106,22 @@ public enum DeviceAdapter {
 
         private boolean hasRecordPermision(Context context) {
             boolean hasPermission = false;
-            int bufferSizeInBytes = AudioRecord.getMinBufferSize(44100,
-                    AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT);
+            int bufferSizeInBytes =
+                    AudioRecord.getMinBufferSize(
+                            44100, AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT);
             if (bufferSizeInBytes < 0) {
                 RLog.e(TAG, "bufferSizeInBytes = " + bufferSizeInBytes);
                 return false;
             }
             AudioRecord audioRecord;
             try {
-                audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, 44100,
-                        AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT, bufferSizeInBytes);
+                audioRecord =
+                        new AudioRecord(
+                                MediaRecorder.AudioSource.MIC,
+                                44100,
+                                AudioFormat.CHANNEL_IN_STEREO,
+                                AudioFormat.ENCODING_PCM_16BIT,
+                                bufferSizeInBytes);
                 audioRecord.startRecording();
                 if (audioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING) {
                     hasPermission = true;
@@ -129,7 +145,10 @@ public enum DeviceAdapter {
             try {
                 Intent intent = new Intent();
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                ComponentName comp = new ComponentName("com.huawei.systemmanager", "com.huawei.permissionmanager.ui.MainActivity");//华为权限管理
+                ComponentName comp =
+                        new ComponentName(
+                                "com.huawei.systemmanager",
+                                "com.huawei.permissionmanager.ui.MainActivity"); // 华为权限管理
                 intent.setComponent(comp);
                 context.startActivity(intent);
             } catch (Exception e) {
@@ -148,7 +167,10 @@ public enum DeviceAdapter {
                 Intent intent = new Intent("android.settings.APPLICATION_DETAILS_SETTINGS");
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.putExtra("packageName", context.getApplicationInfo().processName);
-                ComponentName comp = new ComponentName("com.coloros.securitypermission", "com.coloros.securitypermission.permission.PermissionAppAllPermissionActivity");//R11t 7.1.1 os-v3.2
+                ComponentName comp =
+                        new ComponentName(
+                                "com.coloros.securitypermission",
+                                "com.coloros.securitypermission.permission.PermissionAppAllPermissionActivity"); // R11t 7.1.1 os-v3.2
                 intent.setComponent(comp);
                 context.startActivity(intent);
             } catch (Exception e) {
@@ -163,13 +185,15 @@ public enum DeviceAdapter {
         @Override
         public boolean checkLockScreenDisplayPermission(Context context) {
             String packageName = context.getPackageName();
-            Uri uri2 = Uri.parse("content://com.vivo.permissionmanager.provider.permission/control_locked_screen_action");
+            Uri uri2 =
+                    Uri.parse(
+                            "content://com.vivo.permissionmanager.provider.permission/control_locked_screen_action");
             String selection = "pkgname = ?";
-            String[] selectionArgs = new String[]{packageName};
+            String[] selectionArgs = new String[] {packageName};
             try {
-                Cursor cursor = context
-                        .getContentResolver()
-                        .query(uri2, null, selection, selectionArgs, null);
+                Cursor cursor =
+                        context.getContentResolver()
+                                .query(uri2, null, selection, selectionArgs, null);
                 if (cursor != null) {
                     if (cursor.moveToFirst()) {
                         int currentMode = cursor.getInt(cursor.getColumnIndex("currentstate"));
@@ -208,7 +232,6 @@ public enum DeviceAdapter {
         return adapter;
     }
 
-
     public void gotoAppPermissionSettingPage(Context context) {
         Intent intent = new Intent();
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -222,12 +245,13 @@ public enum DeviceAdapter {
         if (opStr == null && Build.VERSION.SDK_INT < 23) {
             return true;
         }
-        return context != null && context.checkCallingOrSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
+        return context != null
+                && context.checkCallingOrSelfPermission(Manifest.permission.RECORD_AUDIO)
+                        == PackageManager.PERMISSION_GRANTED;
     }
 
     // 只有 小米 和 vivo 设备可检测，其他设备无法检测，默认返回 true
     public boolean checkLockScreenDisplayPermission(Context context) {
         return true;
     }
-
 }

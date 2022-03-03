@@ -12,19 +12,15 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
-
 import io.rong.callkit.util.ICallScrollView;
 import io.rong.imlib.model.UserInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by weiqinxiao on 16/3/25. coming 横向显示 多人语音_被叫
- */
+/** Created by weiqinxiao on 16/3/25. coming 横向显示 多人语音_被叫 */
 public class CallUserGridView extends HorizontalScrollView implements ICallScrollView {
 
     private Context context;
@@ -52,7 +48,7 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CallUserGridView);
         isHorizontal = a.getBoolean(R.styleable.CallUserGridView_CallGridViewOrientation, true);
         CHILDREN_PER_LINE =
-            a.getInteger(R.styleable.CallUserGridView_CallGridViewChildrenPerLine, 4);
+                a.getInteger(R.styleable.CallUserGridView_CallGridViewChildrenPerLine, 4);
         init(context);
         a.recycle();
     }
@@ -61,8 +57,8 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
         this.context = context;
         linearLayout = new LinearLayout(context);
         linearLayout.setLayoutParams(
-            new LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                new LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         linearLayout.setOrientation(LinearLayout.HORIZONTAL);
         //        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
         addView(linearLayout);
@@ -103,20 +99,20 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
         if (lastContainer == null) {
             lastContainer = new LinearLayout(context);
             lastContainer.setLayoutParams(
-                new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT));
+                    new LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT));
             lastContainer.setGravity(Gravity.CENTER_HORIZONTAL);
             lastContainer.setPadding(0, dip2pix(CHILDREN_SPACE), 0, 0);
             linearLayout.addView(lastContainer);
         }
 
         LinearLayout child =
-            (LinearLayout)
-                LayoutInflater.from(context).inflate(R.layout.rc_voip_user_info, null);
+                (LinearLayout)
+                        LayoutInflater.from(context).inflate(R.layout.rc_voip_user_info, null);
         child.setLayoutParams(
-            new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         if (containerCount == 0) {
             child.setPadding(dip2pix(15), 0, dip2pix(CHILDREN_SPACE), 0);
@@ -126,7 +122,7 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
         child.setTag(childId);
         if (portraitSize > 0) {
             child.findViewById(R.id.rc_user_portrait_layout)
-                .setLayoutParams(new LinearLayout.LayoutParams(portraitSize, portraitSize));
+                    .setLayoutParams(new LinearLayout.LayoutParams(portraitSize, portraitSize));
         }
         ImageView imageView = (ImageView) child.findViewById(R.id.rc_user_portrait);
         TextView name = (TextView) child.findViewById(R.id.rc_user_name);
@@ -141,8 +137,11 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
 
         if (userInfo != null) {
             RongCallKit.getKitImageEngine()
-                .loadPortrait(this.getContext(), userInfo.getPortraitUri(),
-                    R.drawable.rc_default_portrait, imageView);
+                    .loadPortrait(
+                            this.getContext(),
+                            userInfo.getPortraitUri(),
+                            R.drawable.rc_default_portrait,
+                            imageView);
             name.setText(userInfo.getName() == null ? userInfo.getUserId() : userInfo.getName());
         } else {
             name.setText(childId);
@@ -211,13 +210,12 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
             LinearLayout container = (LinearLayout) linearLayout.getChildAt(i);
             LinearLayout child = (LinearLayout) container.findViewWithTag(childId);
             if (child != null) {
-                ImageView imageView =
-                    (ImageView) child.findViewById(R.id.rc_user_portrait);
+                ImageView imageView = (ImageView) child.findViewById(R.id.rc_user_portrait);
                 Glide.with(this)
-                    .load(userInfo.getPortraitUri())
-                    .placeholder(R.drawable.rc_default_portrait)
-                    .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                    .into(imageView);
+                        .load(userInfo.getPortraitUri())
+                        .placeholder(R.drawable.rc_default_portrait)
+                        .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                        .into(imageView);
                 if (enableTitle) {
                     TextView textView = (TextView) child.findViewById(R.id.rc_user_name);
                     textView.setLines(1);

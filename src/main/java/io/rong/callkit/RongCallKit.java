@@ -1,22 +1,18 @@
 package io.rong.callkit;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
-
-import java.util.ArrayList;
-
 import io.rong.callkit.util.CallKitBuildVar;
 import io.rong.callkit.util.RongCallPermissionUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallMissedListener;
 import io.rong.calllib.RongCallSession;
-import io.rong.imkit.utils.PermissionCheckUtil;
 import io.rong.imlib.RongIMClient;
 import io.rong.imlib.model.Conversation;
+import java.util.ArrayList;
 
 public class RongCallKit {
 
@@ -201,7 +197,12 @@ public class RongCallKit {
      */
     private static boolean checkEnvironment(Context context, CallMediaType mediaType) {
         if (context instanceof Activity) {
-            boolean result = RongCallPermissionUtil.checkPermissionByType(context, mediaType == CallMediaType.CALL_MEDIA_TYPE_AUDIO ? RongCallCommon.CallMediaType.AUDIO : RongCallCommon.CallMediaType.VIDEO);
+            boolean result =
+                    RongCallPermissionUtil.checkPermissionByType(
+                            context,
+                            mediaType == CallMediaType.CALL_MEDIA_TYPE_AUDIO
+                                    ? RongCallCommon.CallMediaType.AUDIO
+                                    : RongCallCommon.CallMediaType.VIDEO);
             if (!result) {
                 return false;
             }
@@ -315,14 +316,15 @@ public class RongCallKit {
         RongCallModule.setMissedCallListener(rongCallMissedListener);
     }
 
-    //TODO 由于最新CallKit中已经将 RongCallModule#mViewLoaded 默认值改为true，所以不在需要此方法
-//    /**
-//     * 防止 voip 通话页面被会话列表、会话页面或者开发者 app 层页面覆盖。 使用 maven 接入 callkit 的开发者在 app 层主页面的 onCreate 调用此方法即可。
-//     * 针对导入 callkit 源码的开发者，不使用会话列表和会话页面我们建议在 {@link RongCallModule#onCreate(Context)}方法中设置
-//     * mViewLoaded 为 true 即可。
-//     */
-//    public static void onViewCreated() {
-//    }
+    // TODO 由于最新CallKit中已经将 RongCallModule#mViewLoaded 默认值改为true，所以不在需要此方法
+    //    /**
+    //     * 防止 voip 通话页面被会话列表、会话页面或者开发者 app 层页面覆盖。 使用 maven 接入 callkit 的开发者在 app 层主页面的 onCreate
+    // 调用此方法即可。
+    //     * 针对导入 callkit 源码的开发者，不使用会话列表和会话页面我们建议在 {@link RongCallModule#onCreate(Context)}方法中设置
+    //     * mViewLoaded 为 true 即可。
+    //     */
+    //    public static void onViewCreated() {
+    //    }
 
     /**
      * 忽略 voip 来电，不弹出来电界面，直接挂断。
@@ -347,6 +349,7 @@ public class RongCallKit {
 
     /**
      * 获取自定义头像engine
+     *
      * @return
      */
     public static GlideCallKitImageEngine getKitImageEngine() {

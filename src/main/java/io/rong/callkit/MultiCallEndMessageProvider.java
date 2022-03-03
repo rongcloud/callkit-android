@@ -7,9 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import java.util.List;
-
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.message.MultiCallEndMessage;
 import io.rong.imkit.conversation.messgelist.provider.BaseNotificationMessageItemProvider;
@@ -18,18 +15,28 @@ import io.rong.imkit.widget.adapter.IViewProviderListener;
 import io.rong.imkit.widget.adapter.ViewHolder;
 import io.rong.imlib.RongIMClient;
 import io.rong.imlib.model.MessageContent;
+import java.util.List;
 
 public class MultiCallEndMessageProvider
         extends BaseNotificationMessageItemProvider<MultiCallEndMessage> {
 
     @Override
     protected ViewHolder onCreateMessageContentViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.rc_voip_msg_multi_call_end, parent, false);
+        View v =
+                LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.rc_voip_msg_multi_call_end, parent, false);
         return new ViewHolder(parent.getContext(), v);
     }
 
     @Override
-    protected void bindMessageContentViewHolder(ViewHolder holder,ViewHolder parentHolder, MultiCallEndMessage multiCallEndMessage, UiMessage uiMessage, int position, List<UiMessage> list, IViewProviderListener<UiMessage> listener) {
+    protected void bindMessageContentViewHolder(
+            ViewHolder holder,
+            ViewHolder parentHolder,
+            MultiCallEndMessage multiCallEndMessage,
+            UiMessage uiMessage,
+            int position,
+            List<UiMessage> list,
+            IViewProviderListener<UiMessage> listener) {
         Context context = holder.getContext();
         String msg = "";
         RongCallCommon.CallDisconnectedReason reason = multiCallEndMessage.getReason();
@@ -53,13 +60,13 @@ public class MultiCallEndMessageProvider
         } else if (reason == RongCallCommon.CallDisconnectedReason.SERVICE_NOT_OPENED
                 || reason == RongCallCommon.CallDisconnectedReason.REMOTE_ENGINE_UNSUPPORTED) {
             msg = context.getResources().getString(R.string.rc_voip_engine_notfound);
-        } else if (reason == RongCallCommon.CallDisconnectedReason.CANCEL){
-            if (mediaType == RongIMClient.MediaType.AUDIO){
+        } else if (reason == RongCallCommon.CallDisconnectedReason.CANCEL) {
+            if (mediaType == RongIMClient.MediaType.AUDIO) {
                 msg = context.getResources().getString(R.string.rc_voip_audio_cancel);
-            }else if (mediaType == RongIMClient.MediaType.VIDEO){
+            } else if (mediaType == RongIMClient.MediaType.VIDEO) {
                 msg = context.getResources().getString(R.string.rc_voip_video_cancel);
             }
-        }else {
+        } else {
             if (mediaType == RongIMClient.MediaType.AUDIO) {
                 msg = context.getResources().getString(R.string.rc_voip_audio_no_response);
             } else if (mediaType == RongIMClient.MediaType.VIDEO) {

@@ -21,11 +21,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
 import cn.rongcloud.rtc.api.RCRTCEngine;
 import cn.rongcloud.rtc.audioroute.RCAudioRouteType;
 import io.rong.callkit.util.BluetoothUtil;
@@ -43,10 +38,12 @@ import io.rong.calllib.message.CallSTerminateMessage;
 import io.rong.common.RLog;
 import io.rong.imkit.IMCenter;
 import io.rong.imkit.userinfo.RongUserInfoManager;
-import io.rong.imkit.utils.PermissionCheckUtil;
 import io.rong.imlib.RongIMClient;
 import io.rong.imlib.model.Conversation;
 import io.rong.imlib.model.UserInfo;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class SingleCallActivity extends BaseCallActivity implements Handler.Callback {
     private static final String TAG = "VoIPSingleActivity";
@@ -180,7 +177,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
             case REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS:
-                if (RongCallPermissionUtil.checkPermissionByType(this,mediaType)) {
+                if (RongCallPermissionUtil.checkPermissionByType(this, mediaType)) {
                     if (startForCheckPermissions) {
                         startForCheckPermissions = false;
                         RongCallClient.getInstance().onPermissionGranted();
@@ -198,8 +195,12 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                         builder.append(",");
                     }
 
-                    String rets = builder.length() > 0 ? builder.substring(0, builder.length() - 1) : "";
-                    String msg = String.format("%s (%s)", getString(R.string.rc_permission_grant_needed), rets);
+                    String rets =
+                            builder.length() > 0 ? builder.substring(0, builder.length() - 1) : "";
+                    String msg =
+                            String.format(
+                                    "%s (%s)",
+                                    getString(R.string.rc_permission_grant_needed), rets);
                     Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
                     if (startForCheckPermissions) {
                         startForCheckPermissions = false;
@@ -218,7 +219,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS) {
-            if (RongCallPermissionUtil.checkPermissionByType(this,mediaType)) {
+            if (RongCallPermissionUtil.checkPermissionByType(this, mediaType)) {
                 if (startForCheckPermissions) {
                     RongCallClient.getInstance().onPermissionGranted();
                 } else {
@@ -263,7 +264,10 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             List<String> userIds = new ArrayList<>();
             userIds.add(targetId);
 
-            RongCallClient.setPushConfig(DefaultPushConfig.getInviteConfig(this, mediaType == RongCallCommon.CallMediaType.AUDIO, true, ""), DefaultPushConfig.getHangupConfig(this, true, ""));
+            RongCallClient.setPushConfig(
+                    DefaultPushConfig.getInviteConfig(
+                            this, mediaType == RongCallCommon.CallMediaType.AUDIO, true, ""),
+                    DefaultPushConfig.getHangupConfig(this, true, ""));
 
             RongCallClient.getInstance()
                     .startCall(conversationType, targetId, userIds, null, mediaType, null);
@@ -283,11 +287,14 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             if (mediaType.equals(RongCallCommon.CallMediaType.AUDIO)
                     || callAction.equals(RongCallAction.ACTION_INCOMING_CALL)) {
                 ImageView userPortrait =
-                        (ImageView)
-                                mUserInfoContainer.findViewById(R.id.rc_voip_user_portrait);
+                        (ImageView) mUserInfoContainer.findViewById(R.id.rc_voip_user_portrait);
                 if (userPortrait != null && userInfo.getPortraitUri() != null) {
-                    RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),
-                            userInfo.getPortraitUri(),R.drawable.rc_default_portrait,userPortrait);
+                    RongCallKit.getKitImageEngine()
+                            .loadPortrait(
+                                    getBaseContext(),
+                                    userInfo.getPortraitUri(),
+                                    R.drawable.rc_default_portrait,
+                                    userPortrait);
                 }
                 TextView userName =
                         (TextView) mUserInfoContainer.findViewById(R.id.rc_voip_user_name);
@@ -296,11 +303,15 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         }
         if (callAction.equals(RongCallAction.ACTION_INCOMING_CALL) && userInfo != null) {
             ImageView iv_icoming_backgroud =
-                (ImageView) mUserInfoContainer.findViewById(R.id.iv_icoming_backgroud);
+                    (ImageView) mUserInfoContainer.findViewById(R.id.iv_icoming_backgroud);
             if (iv_icoming_backgroud != null) {
                 iv_icoming_backgroud.setVisibility(View.VISIBLE);
-                RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),
-                        userInfo.getPortraitUri(),R.drawable.rc_default_portrait,iv_icoming_backgroud);
+                RongCallKit.getKitImageEngine()
+                        .loadPortrait(
+                                getBaseContext(),
+                                userInfo.getPortraitUri(),
+                                R.drawable.rc_default_portrait,
+                                iv_icoming_backgroud);
             }
         }
         createPickupDetector();
@@ -413,7 +424,6 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         mButtonContainer.addView(buttonLayout);
         mUserInfoContainer.removeAllViews();
         mUserInfoContainer.addView(userInfoLayout);
-
     }
 
     @Override
@@ -422,7 +432,8 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         this.callSession = callSession;
         try {
             UserInfo InviterUserIdInfo = RongUserInfoManager.getInstance().getUserInfo(targetId);
-            UserInfo SelfUserInfo = RongUserInfoManager.getInstance().getUserInfo(callSession.getSelfUserId());
+            UserInfo SelfUserInfo =
+                    RongUserInfoManager.getInstance().getUserInfo(callSession.getSelfUserId());
             if (callSession.getMediaType().equals(RongCallCommon.CallMediaType.VIDEO)) {
                 mLPreviewContainer.setVisibility(View.VISIBLE);
                 localVideo.setTag(callSession.getSelfUserId());
@@ -433,15 +444,20 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                             (TextView)
                                     mUserInfoContainer.findViewById(
                                             R.id.callkit_voip_user_name_signleVideo);
-//                    topUserName = SelfUserInfo.getName();
-                    callkit_voip_user_name_signleVideo.setText(CallKitUtils.nickNameRestrict(SelfUserInfo.getName()));
+                    //                    topUserName = SelfUserInfo.getName();
+                    callkit_voip_user_name_signleVideo.setText(
+                            CallKitUtils.nickNameRestrict(SelfUserInfo.getName()));
                 }
             } else if (callSession.getMediaType().equals(RongCallCommon.CallMediaType.AUDIO)) {
                 if (null != InviterUserIdInfo && null != InviterUserIdInfo.getPortraitUri()) {
                     ImageView iv_icoming_backgroud =
                             mUserInfoContainer.findViewById(R.id.iv_icoming_backgroud);
-                    RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),
-                            InviterUserIdInfo.getPortraitUri(),R.drawable.rc_default_portrait,iv_icoming_backgroud);
+                    RongCallKit.getKitImageEngine()
+                            .loadPortrait(
+                                    getBaseContext(),
+                                    InviterUserIdInfo.getPortraitUri(),
+                                    R.drawable.rc_default_portrait,
+                                    iv_icoming_backgroud);
                     iv_icoming_backgroud.setVisibility(View.VISIBLE);
                     mUserInfoContainer
                             .findViewById(R.id.iv_large_preview_Mask)
@@ -452,7 +468,6 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             e.printStackTrace();
         }
         callRinging(RingingMode.Outgoing);
-
     }
 
     @Override
@@ -521,7 +536,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         if (handFreeV != null) {
             if (type == RCAudioRouteType.HEADSET || type == RCAudioRouteType.HEADSET_BLUETOOTH) {
                 // 耳机态下不在将扬声器设为关闭
-//                handFreeV.setSelected(false);
+                //                handFreeV.setSelected(false);
             } else {
                 // 非耳机状态
                 handFreeV.setSelected(type == RCAudioRouteType.SPEAKER_PHONE);
@@ -548,7 +563,14 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             int userType,
             SurfaceView remoteVideo) {
         super.onRemoteUserJoined(userId, mediaType, userType, remoteVideo);
-        Log.v(TAG, "onRemoteUserJoined userID=" + userId + ",mediaType=" + mediaType.name() + " , userType=" + (userType == 1 ? "Normal" : "Observer"));
+        Log.v(
+                TAG,
+                "onRemoteUserJoined userID="
+                        + userId
+                        + ",mediaType="
+                        + mediaType.name()
+                        + " , userType="
+                        + (userType == 1 ? "Normal" : "Observer"));
         this.remoteMediaType = mediaType;
         this.userType = userType;
         this.remoteVideo = remoteVideo;
@@ -611,14 +633,16 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                                 if (null != fromView.getTag()
                                         && !TextUtils.isEmpty(fromView.getTag().toString())) {
                                     UserInfo userInfo =
-                                            RongUserInfoManager.getInstance().getUserInfo(
-                                                            fromView.getTag().toString());
+                                            RongUserInfoManager.getInstance()
+                                                    .getUserInfo(fromView.getTag().toString());
                                     TextView userName =
                                             (TextView)
                                                     mUserInfoContainer.findViewById(
                                                             R.id.rc_voip_user_name);
-//                                    topUserName = userInfo.getName();
-                                    userName.setText(CallKitUtils.nickNameRestrict(userInfo.getName()));
+                                    //                                    topUserName =
+                                    // userInfo.getName();
+                                    userName.setText(
+                                            CallKitUtils.nickNameRestrict(userInfo.getName()));
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -718,22 +742,30 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             userName.setText(CallKitUtils.nickNameRestrict(userInfo.getName()));
             if (callSession.getMediaType().equals(RongCallCommon.CallMediaType.AUDIO)) {
                 ImageView userPortrait =
-                        (ImageView)
-                                mUserInfoContainer.findViewById(R.id.rc_voip_user_portrait);
+                        (ImageView) mUserInfoContainer.findViewById(R.id.rc_voip_user_portrait);
                 if (userPortrait != null) {
-                    RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),
-                            userInfo.getPortraitUri(),R.drawable.rc_default_portrait,userPortrait);
-//                    Glide.with(this)
-//                            .load(userInfo.getPortraitUri())
-//                            .placeholder(R.drawable.rc_default_portrait)
-//                            .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-//                            .into(userPortrait);
+                    RongCallKit.getKitImageEngine()
+                            .loadPortrait(
+                                    getBaseContext(),
+                                    userInfo.getPortraitUri(),
+                                    R.drawable.rc_default_portrait,
+                                    userPortrait);
+                    //                    Glide.with(this)
+                    //                            .load(userInfo.getPortraitUri())
+                    //                            .placeholder(R.drawable.rc_default_portrait)
+                    //                            .apply(RequestOptions.bitmapTransform(new
+                    // CircleCrop()))
+                    //                            .into(userPortrait);
                 }
             } else { // 单人视频接听layout
                 ImageView iv_large_preview = mUserInfoContainer.findViewById(R.id.iv_large_preview);
                 iv_large_preview.setVisibility(View.VISIBLE);
-                RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),
-                        userInfo.getPortraitUri(),R.drawable.rc_default_portrait,iv_large_preview);
+                RongCallKit.getKitImageEngine()
+                        .loadPortrait(
+                                getBaseContext(),
+                                userInfo.getPortraitUri(),
+                                R.drawable.rc_default_portrait,
+                                iv_large_preview);
             }
         }
         mUserInfoContainer.setVisibility(View.VISIBLE);
@@ -757,9 +789,13 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         ImageView iv_large_preview = mUserInfoContainer.findViewById(R.id.iv_icoming_backgroud);
 
         if (null != userInfo
-            && callSession.getMediaType().equals(RongCallCommon.CallMediaType.AUDIO)) {
-            RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),
-                    userInfo.getPortraitUri(),R.drawable.rc_default_portrait,iv_large_preview);
+                && callSession.getMediaType().equals(RongCallCommon.CallMediaType.AUDIO)) {
+            RongCallKit.getKitImageEngine()
+                    .loadPortrait(
+                            getBaseContext(),
+                            userInfo.getPortraitUri(),
+                            R.drawable.rc_default_portrait,
+                            iv_large_preview);
             iv_large_preview.setVisibility(View.VISIBLE);
         }
 
@@ -769,11 +805,16 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
     }
 
     public void onHangupBtnClick(View view) {
-//        unRegisterHeadsetplugReceiver();
+        //        unRegisterHeadsetplugReceiver();
         RongCallSession session = RongCallClient.getInstance().getCallSession();
         if (session == null || isFinishing) {
             finish();
-            Log.e(TAG, "hangup call error:  callSession=" + (callSession == null) + ",isFinishing=" + isFinishing);
+            Log.e(
+                    TAG,
+                    "hangup call error:  callSession="
+                            + (callSession == null)
+                            + ",isFinishing="
+                            + isFinishing);
             return;
         }
         RongCallClient.getInstance().hangUpCall(session.getCallId());
@@ -783,7 +824,12 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
     public void onReceiveBtnClick(View view) {
         RongCallSession session = RongCallClient.getInstance().getCallSession();
         if (session == null || isFinishing) {
-            Log.e(TAG, "hangup call error:  callSession=" + (callSession == null) + ",isFinishing=" + isFinishing);
+            Log.e(
+                    TAG,
+                    "hangup call error:  callSession="
+                            + (callSession == null)
+                            + ",isFinishing="
+                            + isFinishing);
             finish();
             return;
         }
@@ -870,10 +916,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         long time = getTime(callSession.getActiveTime());
         if (time > 0) {
             if (time >= 3600) {
-                extra =
-                    String.format(
-                        "%d:%02d:%02d",
-                        time / 3600, (time % 3600) / 60, (time % 60));
+                extra = String.format("%d:%02d:%02d", time / 3600, (time % 3600) / 60, (time % 60));
             } else {
                 extra = String.format("%02d:%02d", (time % 3600) / 60, (time % 60));
             }
@@ -961,7 +1004,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         if (bundle == null) return;
         muted = bundle.getBoolean("muted");
         handFree = bundle.getBoolean("handFree");
-//        topUserName=bundle.getString(EXTRA_BUNDLE_KEY_USER_TOP_NAME);
+        //        topUserName=bundle.getString(EXTRA_BUNDLE_KEY_USER_TOP_NAME);
 
         setShouldShowFloat(true);
         callSession = RongCallClient.getInstance().getCallSession();
@@ -982,20 +1025,27 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             userName.setText(CallKitUtils.nickNameRestrict(userInfo.getName()));
             if (mediaType.equals(RongCallCommon.CallMediaType.AUDIO)) {
                 ImageView userPortrait =
-                        (ImageView)
-                                mUserInfoContainer.findViewById(R.id.rc_voip_user_portrait);
+                        (ImageView) mUserInfoContainer.findViewById(R.id.rc_voip_user_portrait);
                 if (userPortrait != null) {
-                    RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),
-                            userInfo.getPortraitUri(),R.drawable.rc_default_portrait,userPortrait);
+                    RongCallKit.getKitImageEngine()
+                            .loadPortrait(
+                                    getBaseContext(),
+                                    userInfo.getPortraitUri(),
+                                    R.drawable.rc_default_portrait,
+                                    userPortrait);
                 }
             } else if (mediaType.equals(RongCallCommon.CallMediaType.VIDEO)) {
                 if (null != callAction && callAction.equals(RongCallAction.ACTION_INCOMING_CALL)) {
                     ImageView iv_large_preview =
                             mUserInfoContainer.findViewById(R.id.iv_large_preview);
                     iv_large_preview.setVisibility(View.VISIBLE);
-                    Uri imgUri = userInfo== null? null:userInfo.getPortraitUri();
-                    RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),
-                            imgUri,R.drawable.rc_default_portrait,iv_large_preview);
+                    Uri imgUri = userInfo == null ? null : userInfo.getPortraitUri();
+                    RongCallKit.getKitImageEngine()
+                            .loadPortrait(
+                                    getBaseContext(),
+                                    imgUri,
+                                    R.drawable.rc_default_portrait,
+                                    iv_large_preview);
                 }
             }
         }
@@ -1035,7 +1085,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         bundle.putBoolean("muted", muted);
         bundle.putBoolean("handFree", handFree);
         bundle.putInt("mediaType", callSession.getMediaType().getValue());
-//        bundle.putString(EXTRA_BUNDLE_KEY_USER_TOP_NAME, topUserName);
+        //        bundle.putString(EXTRA_BUNDLE_KEY_USER_TOP_NAME, topUserName);
         return getIntent().getAction();
     }
 
@@ -1074,14 +1124,20 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         }
         if (targetId != null && targetId.equals(info.getUserId())) {
             TextView userName = (TextView) mUserInfoContainer.findViewById(R.id.rc_voip_user_name);
-            if (info.getName() != null) userName.setText(CallKitUtils.nickNameRestrict(info.getName()));
+            if (info.getName() != null)
+                userName.setText(CallKitUtils.nickNameRestrict(info.getName()));
 
             ImageView userPortrait =
-                    (ImageView)
-                            mUserInfoContainer.findViewById(R.id.rc_voip_user_portrait);
-            if (userPortrait != null && info.getPortraitUri() != null && userPortrait.getVisibility() == View.VISIBLE) {
-                RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(),
-                        info.getPortraitUri(), R.drawable.rc_default_portrait, userPortrait);
+                    (ImageView) mUserInfoContainer.findViewById(R.id.rc_voip_user_portrait);
+            if (userPortrait != null
+                    && info.getPortraitUri() != null
+                    && userPortrait.getVisibility() == View.VISIBLE) {
+                RongCallKit.getKitImageEngine()
+                        .loadPortrait(
+                                getBaseContext(),
+                                info.getPortraitUri(),
+                                R.drawable.rc_default_portrait,
+                                userPortrait);
             }
         }
     }
@@ -1091,7 +1147,12 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             Log.v(TAG, "SingleCallActivity 不在前台！");
             return;
         }
-        Log.v(TAG, "Insert=" + headsetInfo.isInsert() + ",headsetInfo.getType=" + headsetInfo.getType().getValue());
+        Log.v(
+                TAG,
+                "Insert="
+                        + headsetInfo.isInsert()
+                        + ",headsetInfo.getType="
+                        + headsetInfo.getType().getValue());
         try {
             if (headsetInfo.isInsert()) {
                 RongCallClient.getInstance().setEnableSpeakerphone(false);

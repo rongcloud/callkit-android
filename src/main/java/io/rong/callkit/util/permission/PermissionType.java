@@ -1,33 +1,23 @@
 package io.rong.callkit.util.permission;
 
-
 import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.AppOpsManagerCompat;
-
+import io.rong.common.RLog;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.rong.common.RLog;
-
-/**
- * @author gusd
- * @Date 2021/09/17
- * 别在多线程里面用
- */
+/** @author gusd @Date 2021/09/17 别在多线程里面用 */
 public enum PermissionType {
 
     // 摄像头权限
@@ -46,28 +36,43 @@ public enum PermissionType {
     // 悬浮窗
     FloatWindow("android.settings.action.MANAGE_OVERLAY_PERMISSION") {
         private static final String TAG = "FloatWindow";
+
         @Override
         public boolean checkPermission(final Context context) {
             boolean result = true;
             boolean booleanValue;
             if (Build.VERSION.SDK_INT >= 23) {
                 try {
-                    booleanValue = (Boolean) Settings.class.getDeclaredMethod("canDrawOverlays", Context.class).invoke(null, new Object[]{context});
+                    booleanValue =
+                            (Boolean)
+                                    Settings.class
+                                            .getDeclaredMethod("canDrawOverlays", Context.class)
+                                            .invoke(null, new Object[] {context});
                     RLog.i(TAG, "isFloatWindowOpAllowed allowed: " + booleanValue);
                     return booleanValue;
                 } catch (Exception e) {
-                    RLog.e(TAG, String.format("getDeclaredMethod:canDrawOverlays! Error:%s, etype:%s", e.getMessage(), e.getClass().getCanonicalName()));
+                    RLog.e(
+                            TAG,
+                            String.format(
+                                    "getDeclaredMethod:canDrawOverlays! Error:%s, etype:%s",
+                                    e.getMessage(), e.getClass().getCanonicalName()));
                     return true;
                 }
             } else if (Build.VERSION.SDK_INT < 19) {
                 return true;
-            } else if(Build.BRAND.toLowerCase().contains("xiaomi")){
+            } else if (Build.BRAND.toLowerCase().contains("xiaomi")) {
                 Method method;
                 Object systemService = context.getSystemService(Context.APP_OPS_SERVICE);
                 try {
-                    method = Class.forName("android.app.AppOpsManager").getMethod("checkOp", Integer.TYPE, Integer.TYPE, String.class);
+                    method =
+                            Class.forName("android.app.AppOpsManager")
+                                    .getMethod("checkOp", Integer.TYPE, Integer.TYPE, String.class);
                 } catch (NoSuchMethodException e) {
-                    RLog.e(TAG, String.format("NoSuchMethodException method:checkOp! Error:%s", e.getMessage()));
+                    RLog.e(
+                            TAG,
+                            String.format(
+                                    "NoSuchMethodException method:checkOp! Error:%s",
+                                    e.getMessage()));
                     method = null;
                 } catch (ClassNotFoundException e) {
                     RLog.e(TAG, "canDrawOverlays", e);
@@ -75,10 +80,22 @@ public enum PermissionType {
                 }
                 if (method != null) {
                     try {
-                        Integer tmp = (Integer) method.invoke(systemService, new Object[]{24, context.getApplicationInfo().uid, context.getPackageName()});
+                        Integer tmp =
+                                (Integer)
+                                        method.invoke(
+                                                systemService,
+                                                new Object[] {
+                                                    24,
+                                                    context.getApplicationInfo().uid,
+                                                    context.getPackageName()
+                                                });
                         result = tmp != null && tmp == 0;
                     } catch (Exception e) {
-                        RLog.e(TAG, String.format("call checkOp failed: %s etype:%s", e.getMessage(), e.getClass().getCanonicalName()));
+                        RLog.e(
+                                TAG,
+                                String.format(
+                                        "call checkOp failed: %s etype:%s",
+                                        e.getMessage(), e.getClass().getCanonicalName()));
                     }
                 }
                 RLog.i(TAG, "isFloatWindowOpAllowed allowed: " + result);
@@ -90,8 +107,10 @@ public enum PermissionType {
         @Override
         public void gotoSettingPage(Context context) {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:" + context.getPackageName()));
+                Intent intent =
+                        new Intent(
+                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                Uri.parse("package:" + context.getPackageName()));
                 context.startActivity(intent);
             }
         }
@@ -108,8 +127,10 @@ public enum PermissionType {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 return false;
             }
-            NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            NotificationChannel channel = mNotificationManager.getNotificationChannel(channelId);//CHANNEL_ID是自己定义的渠道ID
+            NotificationManager mNotificationManager =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationChannel channel =
+                    mNotificationManager.getNotificationChannel(channelId); // CHANNEL_ID是自己定义的渠道ID
             return channel.getImportance() == NotificationManager.IMPORTANCE_HIGH;
         }
 
@@ -154,7 +175,6 @@ public enum PermissionType {
         }
     };
 
-
     private static final Map<String, PermissionType> permissionMap = new HashMap<>();
 
     static {
@@ -167,7 +187,6 @@ public enum PermissionType {
     public static PermissionType gerPermissionByName(String permissionName) {
         return permissionMap.get(permissionName);
     }
-
 
     private final String mPermissionName;
     // 是否为必要权限
@@ -182,9 +201,7 @@ public enum PermissionType {
         return mPermissionName;
     }
 
-    /**
-     * 跳转到对应的设置页面
-     */
+    /** 跳转到对应的设置页面 */
     public void gotoSettingPage(Context context) {
         // 默认跳转到权限设置界面
         DeviceAdapter.getDeviceAdapter().gotoAppPermissionSettingPage(context);
@@ -195,7 +212,9 @@ public enum PermissionType {
         if (opStr == null && Build.VERSION.SDK_INT < 23) {
             return true;
         }
-        return context != null && context.checkCallingOrSelfPermission(mPermissionName) == PackageManager.PERMISSION_GRANTED;
+        return context != null
+                && context.checkCallingOrSelfPermission(mPermissionName)
+                        == PackageManager.PERMISSION_GRANTED;
     }
 
     public boolean isNecessary() {
@@ -205,6 +224,4 @@ public enum PermissionType {
     public void setNecessary(boolean isNecessary) {
         this.isNecessary = isNecessary;
     }
-
-
 }

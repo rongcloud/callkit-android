@@ -6,8 +6,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 20220106
-        versionName "5.1.16_opensource"
+        versionCode 20220301
+        versionName "5.2.0_opensource"
     }
     buildTypes {
         release {
@@ -40,4 +40,3 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.9.0'
 
 }
-

@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
-
 import io.rong.callkit.RongCallModule;
 
 public class ActivityStartCheckUtils {
@@ -25,13 +24,13 @@ public class ActivityStartCheckUtils {
 
     private static class SingletonHolder {
 
-      static ActivityStartCheckUtils sInstance = new ActivityStartCheckUtils();
+        static ActivityStartCheckUtils sInstance = new ActivityStartCheckUtils();
     }
 
     private ActivityStartCheckUtils() {}
 
     public static ActivityStartCheckUtils getInstance() {
-     return SingletonHolder.sInstance;
+        return SingletonHolder.sInstance;
     }
 
     public void registerActivityLifecycleCallbacks(Context context) {
@@ -123,16 +122,17 @@ public class ActivityStartCheckUtils {
             };
 
     /**
-     * Android 10 以上禁止后台启动 Activity
-     * callKit 适配方案是后台来电时弹通知栏通知，但是如果用户不点击通知栏，
+     * Android 10 以上禁止后台启动 Activity callKit 适配方案是后台来电时弹通知栏通知，但是如果用户不点击通知栏，
      * 通过桌面图标打开应用，需要增加一种补偿机制启动来电界面
      */
     private void handleIncomingCallNotify() {
         if (mAppContext != null && IncomingCallExtraHandleUtil.needNotify()) {
             IncomingCallExtraHandleUtil.removeNotification(mAppContext);
-            mAppContext.startActivity(RongCallModule.createVoIPIntent(mAppContext,
-                    IncomingCallExtraHandleUtil.getCallSession(),
-                    IncomingCallExtraHandleUtil.isCheckPermissions()));
+            mAppContext.startActivity(
+                    RongCallModule.createVoIPIntent(
+                            mAppContext,
+                            IncomingCallExtraHandleUtil.getCallSession(),
+                            IncomingCallExtraHandleUtil.isCheckPermissions()));
             IncomingCallExtraHandleUtil.clear();
         }
     }

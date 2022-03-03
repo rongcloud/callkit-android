@@ -11,8 +11,8 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
 
     <!--读取电话的状态信息的权限-->
@@ -70,25 +70,25 @@
 
     <!--   Android Q 后台无法弹出Activity，通过通知栏提醒用户-->
         <receiver
-            android:name="io.rong.callkit.VoIPBroadcastReceiver">
+            android:name="io.rong.callkit.VoIPBroadcastReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="action.push.CallInviteMessage" />
                 <action android:name="action.push.CallInviteMessage.CLICKED"/>
                 <action android:name="action.push.voip.hangup.click"/>
+                <action android:name="action.voip.notification.clear"/>
             </intent-filter>
         </receiver>
 
         <activity android:name=".CallSelectMemberActivity"></activity>
 
-        <receiver android:name=".util.RTCPhoneStateReceiver">
+        <receiver android:name=".util.RTCPhoneStateReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE"/>
             </intent-filter>
         </receiver>
 
-        <service android:name=".RongIncomingCallService"
-            android:enabled="true"
-            android:exported="true"/>
     </application>
 
 </manifest>

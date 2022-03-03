@@ -12,29 +12,23 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
 import android.text.TextUtils;
-
 import androidx.annotation.NonNull;
 import androidx.core.app.AppOpsManagerCompat;
-
+import io.rong.callkit.util.permission.PermissionType;
+import io.rong.calllib.RongCallCommon;
+import io.rong.common.RLog;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import io.rong.callkit.util.permission.PermissionType;
-import io.rong.calllib.RongCallCommon;
-import io.rong.common.RLog;
-
-/**
- * @author gusd
- * @Date 2021/09/17
- */
+/** @author gusd @Date 2021/09/17 */
 public class RongCallPermissionUtil {
     private static final String TAG = "RongCallPermissionUtil";
 
-
-    public static void requestPermissions(Activity activity, PermissionType[] permissionTypes, int requestCode) {
+    public static void requestPermissions(
+            Activity activity, PermissionType[] permissionTypes, int requestCode) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return;
         }
@@ -68,7 +62,7 @@ public class RongCallPermissionUtil {
      * @return
      */
     public static PermissionType[] getAudioCallPermissions() {
-        return new PermissionType[]{PermissionType.AudioRecord};
+        return new PermissionType[] {PermissionType.AudioRecord};
     }
 
     public static boolean checkAudioCallNeedPermission(Context context) {
@@ -80,14 +74,14 @@ public class RongCallPermissionUtil {
         return true;
     }
 
-    public static boolean checkAndRequestAudioCallPermission(Activity activity, final int requestCode) {
+    public static boolean checkAndRequestAudioCallPermission(
+            Activity activity, final int requestCode) {
         boolean granted = checkAudioCallNeedPermission(activity);
         if (!granted) {
             requestAudioCallNeedPermission(activity, requestCode);
         }
         return granted;
     }
-
 
     ///////////////////////////////////////////////////////////////////////////
     // 视频通话权限相关
@@ -105,7 +99,8 @@ public class RongCallPermissionUtil {
         requestPermissions(activity, getVideoCallPermissions(), requestCode);
     }
 
-    public static boolean checkAndRequestVideoCallPermission(Activity activity, final int requestCode) {
+    public static boolean checkAndRequestVideoCallPermission(
+            Activity activity, final int requestCode) {
         boolean granted = checkVideoCallNeedPermission(activity);
         if (!granted) {
             requestVideoCallNeedPermission(activity, requestCode);
@@ -113,17 +108,17 @@ public class RongCallPermissionUtil {
         return granted;
     }
 
-
     /**
      * 获取视频通话所需必要权限
      *
      * @return
      */
     public static PermissionType[] getVideoCallPermissions() {
-        return new PermissionType[]{PermissionType.CameraPermission, PermissionType.AudioRecord};
+        return new PermissionType[] {PermissionType.CameraPermission, PermissionType.AudioRecord};
     }
 
-    public static boolean checkAndRequestPermissionByCallType(Activity activity, RongCallCommon.CallMediaType type, final int requestCode) {
+    public static boolean checkAndRequestPermissionByCallType(
+            Activity activity, RongCallCommon.CallMediaType type, final int requestCode) {
         if (RongCallCommon.CallMediaType.VIDEO.equals(type)) {
             return checkAndRequestVideoCallPermission(activity, requestCode);
         } else if (RongCallCommon.CallMediaType.AUDIO.equals(type)) {
@@ -132,7 +127,8 @@ public class RongCallPermissionUtil {
         return false;
     }
 
-    public static boolean checkPermissionByType(Context context, RongCallCommon.CallMediaType type) {
+    public static boolean checkPermissionByType(
+            Context context, RongCallCommon.CallMediaType type) {
         if (RongCallCommon.CallMediaType.VIDEO.equals(type)) {
             return checkVideoCallNeedPermission(context);
         } else if (RongCallCommon.CallMediaType.AUDIO.equals(type)) {
@@ -145,11 +141,15 @@ public class RongCallPermissionUtil {
     // 悬浮窗相关
     ///////////////////////////////////////////////////////////////////////////
 
-    public static void requestFloatWindowNeedPermission(final Context context, final DialogInterface.OnClickListener listener) {
+    public static void requestFloatWindowNeedPermission(
+            final Context context, final DialogInterface.OnClickListener listener) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ArrayList<String> permissionList = new ArrayList<>();
             permissionList.add(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-            showPermissionAlert(context, context.getString(io.rong.imkit.R.string.rc_permission_grant_needed) + getNotGrantedPermissionMsg(context, permissionList),
+            showPermissionAlert(
+                    context,
+                    context.getString(io.rong.imkit.R.string.rc_permission_grant_needed)
+                            + getNotGrantedPermissionMsg(context, permissionList),
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -157,8 +157,10 @@ public class RongCallPermissionUtil {
                                 listener.onClick(dialog, which);
                             }
                             if (DialogInterface.BUTTON_POSITIVE == which) {
-                                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                        Uri.parse("package:" + context.getPackageName()));
+                                Intent intent =
+                                        new Intent(
+                                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                                Uri.parse("package:" + context.getPackageName()));
                                 context.startActivity(intent);
                             }
                         }
@@ -174,11 +176,20 @@ public class RongCallPermissionUtil {
         String permissionValue;
         try {
             for (String permission : permissions) {
-                permissionValue = context.getString(context.getResources().getIdentifier("rc_" + permission, "string", context.getPackageName()), 0);
+                permissionValue =
+                        context.getString(
+                                context.getResources()
+                                        .getIdentifier(
+                                                "rc_" + permission,
+                                                "string",
+                                                context.getPackageName()),
+                                0);
                 permissionsValue.add(permissionValue);
             }
         } catch (Resources.NotFoundException e) {
-            RLog.e(TAG, "one of the permissions is not recognized by SDK." + permissions.toString());
+            RLog.e(
+                    TAG,
+                    "one of the permissions is not recognized by SDK." + permissions.toString());
             return "";
         }
 
@@ -191,7 +202,8 @@ public class RongCallPermissionUtil {
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private static void showPermissionAlert(Context context, String content, DialogInterface.OnClickListener listener) {
+    private static void showPermissionAlert(
+            Context context, String content, DialogInterface.OnClickListener listener) {
         new AlertDialog.Builder(context)
                 .setMessage(content)
                 .setPositiveButton(io.rong.imkit.R.string.rc_confirm, listener)
@@ -206,29 +218,30 @@ public class RongCallPermissionUtil {
         return PermissionType.FloatWindow.checkPermission(context);
     }
 
-
-    public static void showRequestPermissionFailedAlter(final Context context, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public static void showRequestPermissionFailedAlter(
+            final Context context, @NonNull String[] permissions, @NonNull int[] grantResults) {
         String content = getNotGrantedPermissionMsg(context, permissions, grantResults);
         if (TextUtils.isEmpty(content)) {
             return;
         }
-        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case DialogInterface.BUTTON_POSITIVE:
-                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                        Uri uri = Uri.fromParts("package", context.getPackageName(), null);
-                        intent.setData(uri);
-                        context.startActivity(intent);
-                        break;
-                    case DialogInterface.BUTTON_NEGATIVE:
-                    default:
-                        break;
-                }
-
-            }
-        };
+        DialogInterface.OnClickListener listener =
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case DialogInterface.BUTTON_POSITIVE:
+                                Intent intent =
+                                        new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package", context.getPackageName(), null);
+                                intent.setData(uri);
+                                context.startActivity(intent);
+                                break;
+                            case DialogInterface.BUTTON_NEGATIVE:
+                            default:
+                                break;
+                        }
+                    }
+                };
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             new AlertDialog.Builder(context, android.R.style.Theme_Material_Light_Dialog_Alert)
                     .setMessage(content)
@@ -248,7 +261,8 @@ public class RongCallPermissionUtil {
         }
     }
 
-    private static String getNotGrantedPermissionMsg(Context context, String[] permissions, int[] grantResults) {
+    private static String getNotGrantedPermissionMsg(
+            Context context, String[] permissions, int[] grantResults) {
         if (permissions == null || permissions.length == 0) {
             return "";
         }
@@ -256,25 +270,37 @@ public class RongCallPermissionUtil {
             List<String> permissionNameList = new ArrayList<>(permissions.length);
             for (int i = 0; i < permissions.length; i++) {
                 if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
-                    String permissionName = context.getString(context.getResources().getIdentifier("rc_" + permissions[i], "string", context.getPackageName()), 0);
+                    String permissionName =
+                            context.getString(
+                                    context.getResources()
+                                            .getIdentifier(
+                                                    "rc_" + permissions[i],
+                                                    "string",
+                                                    context.getPackageName()),
+                                    0);
                     if (!permissionNameList.contains(permissionName)) {
                         permissionNameList.add(permissionName);
                     }
                 }
             }
 
-            StringBuilder builder = new StringBuilder(context.getResources().getString(io.rong.imkit.R.string.rc_permission_grant_needed));
+            StringBuilder builder =
+                    new StringBuilder(
+                            context.getResources()
+                                    .getString(io.rong.imkit.R.string.rc_permission_grant_needed));
             return builder.append("(")
                     .append(TextUtils.join(" ", permissionNameList))
                     .append(")")
                     .toString();
         } catch (Resources.NotFoundException e) {
-            RLog.e(TAG, "One of the permissions is not recognized by SDK." + Arrays.toString(permissions));
+            RLog.e(
+                    TAG,
+                    "One of the permissions is not recognized by SDK."
+                            + Arrays.toString(permissions));
         }
 
         return "";
     }
-
 
     public static boolean checkPermissions(Context context, @NonNull String[] permissions) {
         if (permissions.length == 0) {
@@ -301,8 +327,8 @@ public class RongCallPermissionUtil {
         if (opStr == null && Build.VERSION.SDK_INT < 23) {
             return true;
         }
-        return context != null && context.checkCallingOrSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
+        return context != null
+                && context.checkCallingOrSelfPermission(permission)
+                        == PackageManager.PERMISSION_GRANTED;
     }
-
-
 }

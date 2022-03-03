@@ -11,7 +11,6 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.text.TextUtils;
-import android.view.KeyboardShortcutGroup;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +35,6 @@ import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallSession;
 import io.rong.common.RLog;
 import io.rong.imkit.feature.mention.RongMentionManager;
-import io.rong.imkit.picture.tools.ToastUtils;
 import io.rong.imkit.userinfo.RongUserInfoManager;
 import io.rong.imkit.userinfo.model.GroupUserInfo;
 import io.rong.imlib.model.Conversation;
@@ -46,7 +44,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class CallSelectMemberActivity extends BaseNoActionBarActivity implements RongUserInfoManager.UserDataObserver {
+public class CallSelectMemberActivity extends BaseNoActionBarActivity
+        implements RongUserInfoManager.UserDataObserver {
     private static final String TAG = "CallSelectMemberActivity";
     public static final String DISCONNECT_ACTION = "call_disconnect";
     ArrayList<String> selectedMember;
@@ -144,16 +143,17 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity implements
     private static final String CALLSELECTMEMBERSERIALIZABLE_KEY =
             "CALLSELECTMEMBERSERIALIZABLEKEY";
 
-    private BroadcastReceiver disconnectBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (TextUtils.equals(intent.getAction(), DISCONNECT_ACTION)) {
-                if (!isFinishing()) {
-                    setActivityResult(true);
+    private BroadcastReceiver disconnectBroadcastReceiver =
+            new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (TextUtils.equals(intent.getAction(), DISCONNECT_ACTION)) {
+                        if (!isFinishing()) {
+                            setActivityResult(true);
+                        }
+                    }
                 }
-            }
-        }
-    };
+            };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -343,7 +343,8 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity implements
                             startSearchMember(content);
                         } else {
                             Toast.makeText(
-                                            CallSelectMemberActivity.this, getString(R.string.rc_voip_search_no_member),
+                                            CallSelectMemberActivity.this,
+                                            getString(R.string.rc_voip_search_no_member),
                                             Toast.LENGTH_SHORT)
                                     .show();
                         }
@@ -413,8 +414,9 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity implements
     @Override
     public void onUserUpdate(UserInfo userInfo) {
         if (mList != null && userInfo != null) {
-            if (userInfo.getUserId() == null || !userInfoIndex.containsKey(userInfo.getUserId())
-                || userInfoIndex.get(userInfo.getUserId()) == null) {
+            if (userInfo.getUserId() == null
+                    || !userInfoIndex.containsKey(userInfo.getUserId())
+                    || userInfoIndex.get(userInfo.getUserId()) == null) {
                 return;
             }
             synchronized (listLock) {
@@ -436,14 +438,10 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity implements
     }
 
     @Override
-    public void onGroupUpdate(Group group) {
-
-    }
+    public void onGroupUpdate(Group group) {}
 
     @Override
-    public void onGroupUserInfoUpdate(GroupUserInfo groupUserInfo) {
-
-    }
+    public void onGroupUserInfoUpdate(GroupUserInfo groupUserInfo) {}
 
     class ListAdapter extends BaseAdapter {
         List<UserInfo> mallMembers;
@@ -495,11 +493,16 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity implements
                 holder.checkbox.setClickable(false);
                 holder.checkbox.setEnabled(true);
                 holder.name.setText("");
-                RongCallKit.getKitImageEngine().loadPortrait(getApplicationContext(),null, R.drawable.rc_default_portrait, holder.portrait);
-//                Glide.with(holder.portrait)
-//                        .load(R.drawable.rc_default_portrait)
-//                        .apply(RequestOptions.bitmapTransform(new CenterCrop()))
-//                        .into(holder.portrait);
+                RongCallKit.getKitImageEngine()
+                        .loadPortrait(
+                                getApplicationContext(),
+                                null,
+                                R.drawable.rc_default_portrait,
+                                holder.portrait);
+                //                Glide.with(holder.portrait)
+                //                        .load(R.drawable.rc_default_portrait)
+                //                        .apply(RequestOptions.bitmapTransform(new CenterCrop()))
+                //                        .into(holder.portrait);
                 holder.checkbox.setTag("");
                 return convertView;
             }
@@ -536,8 +539,12 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity implements
             } else {
                 holder.name.setText(displayName);
             }
-            RongCallKit.getKitImageEngine().loadPortrait(getBaseContext(), mUserInfo.getPortraitUri(),
-                    R.drawable.rc_default_portrait,holder.portrait);
+            RongCallKit.getKitImageEngine()
+                    .loadPortrait(
+                            getBaseContext(),
+                            mUserInfo.getPortraitUri(),
+                            R.drawable.rc_default_portrait,
+                            holder.portrait);
             return convertView;
         }
     }
@@ -550,11 +557,12 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity implements
     private void setActivityResult(boolean val) {
         RongCallSession profile = RongCallClient.getInstance().getCallSession();
         if (profile != null) {
-            //callid由多聊页面传入，如果先启动群组选择人员页面再启动多聊页面，不允许启动多聊页面
+            // callid由多聊页面传入，如果先启动群组选择人员页面再启动多聊页面，不允许启动多聊页面
             if (null != profile.getCallId() && (!profile.getCallId().equals(callId))) {
-                String msg = profile.getMediaType() == RongCallCommon.CallMediaType.AUDIO ?
-                        getString(io.rong.callkit.R.string.rc_voip_call_audio_start_fail) :
-                        getString(io.rong.callkit.R.string.rc_voip_call_video_start_fail);
+                String msg =
+                        profile.getMediaType() == RongCallCommon.CallMediaType.AUDIO
+                                ? getString(io.rong.callkit.R.string.rc_voip_call_audio_start_fail)
+                                : getString(io.rong.callkit.R.string.rc_voip_call_video_start_fail);
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
                 return;
             }

@@ -16,15 +16,12 @@ import android.view.View;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.core.app.AppOpsManagerCompat;
 import androidx.core.content.ContextCompat;
-
 import io.rong.callkit.R;
 import io.rong.calllib.RongCallCommon;
 import io.rong.imlib.model.Message;
-
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,21 +29,15 @@ import java.util.Map;
 /** Created by dengxudong on 2018/5/17. */
 public class CallKitUtils {
 
-    /**
-     * 拨打true or 接听false
-     */
+    /** 拨打true or 接听false */
     public static boolean isDial = true;
 
     public static boolean shouldShowFloat;
-    /**
-     * 是否已经建立通话连接 默认没有，为了修改接听之后将情景模式切换成震动 在通话界面一直震动的问题
-     */
+    /** 是否已经建立通话连接 默认没有，为了修改接听之后将情景模式切换成震动 在通话界面一直震动的问题 */
     public static boolean callConnected = false;
     /** true:响铃中，false：响铃已结束 */
     // public static boolean RINGSTATE=false;
-    /**
-     * 当前 免提 是否打开的状态 true：打开中
-     */
+    /** 当前 免提 是否打开的状态 true：打开中 */
     public static boolean speakerphoneState = false;
 
     public static StringBuffer stringBuffer = null;
@@ -59,15 +50,13 @@ public class CallKitUtils {
 
     public static int dp2px(float dpVal, Context context) {
         return (int)
-            TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                dpVal,
-                context.getResources().getDisplayMetrics());
+                TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP,
+                        dpVal,
+                        context.getResources().getDisplayMetrics());
     }
 
-    /**
-     * 关闭软键盘
-     */
+    /** 关闭软键盘 */
     public static void closeKeyBoard(Activity activity, View view) {
         IBinder token;
         if (view == null || view.getWindowToken() == null) {
@@ -87,7 +76,7 @@ public class CallKitUtils {
             token = view.getWindowToken();
         }
         InputMethodManager imm =
-            (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(token, 0);
     }
 
@@ -106,9 +95,7 @@ public class CallKitUtils {
         return b1.divide(b2, 4, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
-    /**
-     * 四舍五入把double转化int整型
-     */
+    /** 四舍五入把double转化int整型 */
     public static int getInt(double number) {
         BigDecimal bd = BigDecimal.valueOf(number).setScale(0, BigDecimal.ROUND_HALF_UP);
         return Integer.parseInt(bd.toString());
@@ -119,12 +106,12 @@ public class CallKitUtils {
             return;
         }
         text.setShadowLayer(
-            16F,
-            0F,
-            2F,
-            context.getApplicationContext()
-                .getResources()
-                .getColor(R.color.callkit_shadowcolor));
+                16F,
+                0F,
+                2F,
+                context.getApplicationContext()
+                        .getResources()
+                        .getColor(R.color.callkit_shadowcolor));
     }
 
     public static boolean checkPermissions(Context context, @NonNull String[] permissions) {
@@ -149,30 +136,28 @@ public class CallKitUtils {
             return true;
         }
         boolean bool =
-            context.checkCallingOrSelfPermission(permission)
-                == PackageManager.PERMISSION_GRANTED;
+                context.checkCallingOrSelfPermission(permission)
+                        == PackageManager.PERMISSION_GRANTED;
         return bool;
     }
 
     public static String[] getCallpermissions() {
         String[] permissions =
-            new String[]{
-                Manifest.permission.CAMERA,
-                Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.INTERNET,
-                Manifest.permission.MODIFY_AUDIO_SETTINGS,
-                Manifest.permission.BLUETOOTH,
-                Manifest.permission.BLUETOOTH_ADMIN,
-                Manifest.permission.READ_PHONE_STATE,
-            };
+                new String[] {
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.INTERNET,
+                    Manifest.permission.MODIFY_AUDIO_SETTINGS,
+                    Manifest.permission.BLUETOOTH,
+                    Manifest.permission.BLUETOOTH_ADMIN,
+                    Manifest.permission.READ_PHONE_STATE,
+                };
         return permissions;
     }
 
-    /**
-     * 获取字符串指定拼接内容
-     */
+    /** 获取字符串指定拼接内容 */
     public static String getStitchedContent(String val1, String val2) {
         if (TextUtils.isEmpty(val1)) {
             val1 = "";
@@ -190,9 +175,7 @@ public class CallKitUtils {
         return stringBuffer.toString();
     }
 
-    /**
-     * 是否是debug状态
-     */
+    /** 是否是debug状态 */
     public static boolean isDebug(Context context) {
         try {
             ApplicationInfo info = context.getApplicationInfo();
@@ -204,7 +187,7 @@ public class CallKitUtils {
 
     public static boolean isNetworkAvailable(Context context) {
         ConnectivityManager cm =
-            (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = cm.getActiveNetworkInfo();
         if (networkInfo == null || !networkInfo.isConnected() || !networkInfo.isAvailable()) {
             return false;
@@ -212,9 +195,7 @@ public class CallKitUtils {
         return true;
     }
 
-    /**
-     * double click
-     */
+    /** double click */
     public static boolean isFastDoubleClick() {
         return isFastDoubleClick("Default");
     }
@@ -233,9 +214,7 @@ public class CallKitUtils {
         return false;
     }
 
-    /**
-     * 昵称长度超过5，后面使用...显示
-     */
+    /** 昵称长度超过5，后面使用...显示 */
     public static String nickNameRestrict(String userName) {
         if (!TextUtils.isEmpty(userName) && userName.length() > 5) {
             StringBuffer stringBuffer = new StringBuffer();
@@ -246,12 +225,14 @@ public class CallKitUtils {
         return userName;
     }
 
-    public static Message.ReceivedStatus getReceivedStatus(RongCallCommon.CallDisconnectedReason reason) {
-        //己方超时未接听或是对方取消通话时，应插入未读消息
-        if (reason == RongCallCommon.CallDisconnectedReason.REMOTE_CANCEL || reason == RongCallCommon.CallDisconnectedReason.NO_RESPONSE) {
+    public static Message.ReceivedStatus getReceivedStatus(
+            RongCallCommon.CallDisconnectedReason reason) {
+        // 己方超时未接听或是对方取消通话时，应插入未读消息
+        if (reason == RongCallCommon.CallDisconnectedReason.REMOTE_CANCEL
+                || reason == RongCallCommon.CallDisconnectedReason.NO_RESPONSE) {
             return new Message.ReceivedStatus(0);
         }
-        //默认是已读状态
+        // 默认是已读状态
         return new Message.ReceivedStatus(1);
     }
 }

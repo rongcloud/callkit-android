@@ -17,8 +17,7 @@ public class BlurBitmapUtil {
         static BlurBitmapUtil sInstance = new BlurBitmapUtil();
     }
 
-    private BlurBitmapUtil() {
-    }
+    private BlurBitmapUtil() {}
 
     public static BlurBitmapUtil instance() {
         return SingletonHolder.sInstance;

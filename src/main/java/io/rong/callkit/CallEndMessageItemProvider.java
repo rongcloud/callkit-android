@@ -1,5 +1,8 @@
 package io.rong.callkit;
 
+import static io.rong.calllib.RongCallCommon.CallDisconnectedReason.HANGUP;
+import static io.rong.calllib.RongCallCommon.CallDisconnectedReason.OTHER_DEVICE_HAD_ACCEPTED;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -11,10 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.List;
-import java.util.Locale;
-
 import io.rong.callkit.util.CallKitUtils;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
@@ -26,19 +25,28 @@ import io.rong.imkit.widget.adapter.IViewProviderListener;
 import io.rong.imkit.widget.adapter.ViewHolder;
 import io.rong.imlib.model.Message;
 import io.rong.imlib.model.MessageContent;
-
-import static io.rong.calllib.RongCallCommon.CallDisconnectedReason.HANGUP;
-import static io.rong.calllib.RongCallCommon.CallDisconnectedReason.OTHER_DEVICE_HAD_ACCEPTED;
+import java.util.List;
+import java.util.Locale;
 
 public class CallEndMessageItemProvider extends BaseMessageItemProvider<CallSTerminateMessage> {
     @Override
-    protected io.rong.imkit.widget.adapter.ViewHolder onCreateMessageContentViewHolder(ViewGroup parent, int viewType) {
-        View textView = LayoutInflater.from(parent.getContext()).inflate(R.layout.rc_text_message_item, parent, false);
+    protected io.rong.imkit.widget.adapter.ViewHolder onCreateMessageContentViewHolder(
+            ViewGroup parent, int viewType) {
+        View textView =
+                LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.rc_text_message_item, parent, false);
         return new ViewHolder(parent.getContext(), textView);
     }
 
     @Override
-    protected void bindMessageContentViewHolder(ViewHolder holder, ViewHolder parentHolder, CallSTerminateMessage callSTerminateMessage, UiMessage uiMessage, int position, List<UiMessage> list, IViewProviderListener<UiMessage> listener) {
+    protected void bindMessageContentViewHolder(
+            ViewHolder holder,
+            ViewHolder parentHolder,
+            CallSTerminateMessage callSTerminateMessage,
+            UiMessage uiMessage,
+            int position,
+            List<UiMessage> list,
+            IViewProviderListener<UiMessage> listener) {
         Message message = uiMessage.getMessage();
         final TextView view = holder.getView(io.rong.imkit.R.id.rc_text);
         if (message.getMessageDirection() == Message.MessageDirection.SEND) {
@@ -88,25 +96,29 @@ public class CallEndMessageItemProvider extends BaseMessageItemProvider<CallSTer
                 msgContent = view.getResources().getString(R.string.rc_voip_engine_notfound);
                 break;
             case REJECTED_BY_BLACKLIST:
-                msgContent = view.getResources().getString(R.string.rc_voip_mo_rejected_by_blocklist);
+                msgContent =
+                        view.getResources().getString(R.string.rc_voip_mo_rejected_by_blocklist);
                 break;
-             default:
-                 String mo_reject = view.getResources().getString(R.string.rc_voip_mo_reject);
-                 String mt_reject = view.getResources().getString(R.string.rc_voip_mt_reject);
-                 String extra = callSTerminateMessage.getExtra();
-                 String timeRegex = "([0-9]?[0-9]:)?([0-5][0-9]:)?([0-5][0-9])$";
-                 if (!TextUtils.isEmpty(extra)) {
-                     boolean val = extra.matches(timeRegex);
-                     if (val) {
-                         msgContent = view.getResources().getString(R.string.rc_voip_call_time_length);
-                         msgContent += extra;
-                     }else {
-                         msgContent = view.getResources().getString(R.string.rc_voip_call_time_length);
-                     }
-                 } else {
-                     msgContent = callSTerminateMessage.getReason() == HANGUP ? mo_reject : mt_reject;
-                 }
-                 break;
+            default:
+                String mo_reject = view.getResources().getString(R.string.rc_voip_mo_reject);
+                String mt_reject = view.getResources().getString(R.string.rc_voip_mt_reject);
+                String extra = callSTerminateMessage.getExtra();
+                String timeRegex = "([0-9]?[0-9]:)?([0-5][0-9]:)?([0-5][0-9])$";
+                if (!TextUtils.isEmpty(extra)) {
+                    boolean val = extra.matches(timeRegex);
+                    if (val) {
+                        msgContent =
+                                view.getResources().getString(R.string.rc_voip_call_time_length);
+                        msgContent += extra;
+                    } else {
+                        msgContent =
+                                view.getResources().getString(R.string.rc_voip_call_time_length);
+                    }
+                } else {
+                    msgContent =
+                            callSTerminateMessage.getReason() == HANGUP ? mo_reject : mt_reject;
+                }
+                break;
         }
 
         view.setText(msgContent);
@@ -129,12 +141,15 @@ public class CallEndMessageItemProvider extends BaseMessageItemProvider<CallSTer
         } else {
             if (direction != null && direction.equals("MO")) {
                 if (callSTerminateMessage.getReason().equals(HANGUP)
-                        || callSTerminateMessage.getReason()
-                        .equals(RongCallCommon.CallDisconnectedReason.REMOTE_HANGUP)) {
+                        || callSTerminateMessage
+                                .getReason()
+                                .equals(RongCallCommon.CallDisconnectedReason.REMOTE_HANGUP)) {
                     drawable =
-                            view.getResources().getDrawable(R.drawable.rc_voip_audio_right_connected);
+                            view.getResources()
+                                    .getDrawable(R.drawable.rc_voip_audio_right_connected);
                 } else {
-                    drawable = view.getResources().getDrawable(R.drawable.rc_voip_audio_right_cancel);
+                    drawable =
+                            view.getResources().getDrawable(R.drawable.rc_voip_audio_right_cancel);
                 }
                 drawable.setBounds(
                         0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
@@ -142,12 +157,15 @@ public class CallEndMessageItemProvider extends BaseMessageItemProvider<CallSTer
                 view.setTextColor(view.getResources().getColor(R.color.rc_voip_color_right));
             } else {
                 if (callSTerminateMessage.getReason().equals(HANGUP)
-                        || callSTerminateMessage.getReason()
-                        .equals(RongCallCommon.CallDisconnectedReason.REMOTE_HANGUP)) {
+                        || callSTerminateMessage
+                                .getReason()
+                                .equals(RongCallCommon.CallDisconnectedReason.REMOTE_HANGUP)) {
                     drawable =
-                            view.getResources().getDrawable(R.drawable.rc_voip_audio_left_connected);
+                            view.getResources()
+                                    .getDrawable(R.drawable.rc_voip_audio_left_connected);
                 } else {
-                    drawable = view.getResources().getDrawable(R.drawable.rc_voip_audio_left_cancel);
+                    drawable =
+                            view.getResources().getDrawable(R.drawable.rc_voip_audio_left_cancel);
                 }
                 drawable.setBounds(
                         0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
@@ -158,7 +176,13 @@ public class CallEndMessageItemProvider extends BaseMessageItemProvider<CallSTer
     }
 
     @Override
-    protected boolean onItemClick(ViewHolder holder, CallSTerminateMessage callSTerminateMessage, UiMessage uiMessage, int position, List<UiMessage> list, IViewProviderListener<UiMessage> listener) {
+    protected boolean onItemClick(
+            ViewHolder holder,
+            CallSTerminateMessage callSTerminateMessage,
+            UiMessage uiMessage,
+            int position,
+            List<UiMessage> list,
+            IViewProviderListener<UiMessage> listener) {
         if (callSTerminateMessage.getReason() == OTHER_DEVICE_HAD_ACCEPTED) {
             return true;
         }
@@ -166,14 +190,26 @@ public class CallEndMessageItemProvider extends BaseMessageItemProvider<CallSTer
         RongCallSession profile = RongCallClient.getInstance().getCallSession();
         if (profile != null && profile.getActiveTime() > 0) {
             if (profile.getMediaType() == RongCallCommon.CallMediaType.AUDIO) {
-                Toast.makeText(context, context.getString(R.string.rc_voip_call_audio_start_fail), Toast.LENGTH_SHORT).show();
+                Toast.makeText(
+                                context,
+                                context.getString(R.string.rc_voip_call_audio_start_fail),
+                                Toast.LENGTH_SHORT)
+                        .show();
             } else {
-                Toast.makeText(context, context.getString(R.string.rc_voip_call_video_start_fail), Toast.LENGTH_SHORT).show();
+                Toast.makeText(
+                                context,
+                                context.getString(R.string.rc_voip_call_video_start_fail),
+                                Toast.LENGTH_SHORT)
+                        .show();
             }
             return true;
         }
         if (!CallKitUtils.isNetworkAvailable(context)) {
-            Toast.makeText(context, context.getString(R.string.rc_voip_call_network_error), Toast.LENGTH_SHORT).show();
+            Toast.makeText(
+                            context,
+                            context.getString(R.string.rc_voip_call_network_error),
+                            Toast.LENGTH_SHORT)
+                    .show();
             return true;
         }
         RongCallCommon.CallMediaType mediaType = callSTerminateMessage.getMediaType();
@@ -186,7 +222,8 @@ public class CallEndMessageItemProvider extends BaseMessageItemProvider<CallSTer
         Intent intent = new Intent(action);
         intent.setPackage(context.getPackageName());
         intent.putExtra(
-                "conversationType", uiMessage.getMessage().getConversationType().getName().toLowerCase(Locale.US));
+                "conversationType",
+                uiMessage.getMessage().getConversationType().getName().toLowerCase(Locale.US));
         intent.putExtra("targetId", uiMessage.getMessage().getTargetId());
         intent.putExtra("callAction", RongCallAction.ACTION_OUTGOING_CALL.getName());
         context.startActivity(intent);
@@ -199,7 +236,8 @@ public class CallEndMessageItemProvider extends BaseMessageItemProvider<CallSTer
     }
 
     @Override
-    public Spannable getSummarySpannable(Context context, CallSTerminateMessage callSTerminateMessage) {
+    public Spannable getSummarySpannable(
+            Context context, CallSTerminateMessage callSTerminateMessage) {
         RongCallCommon.CallMediaType mediaType = callSTerminateMessage.getMediaType();
         if (mediaType.equals(RongCallCommon.CallMediaType.AUDIO)) {
             return new SpannableString(context.getString(R.string.rc_voip_message_audio));

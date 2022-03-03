@@ -1,15 +1,15 @@
 package io.rong.callkit;
 
+import static io.rong.callkit.BaseCallActivity.REQUEST_CODE_ADD_MEMBER;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-
 import io.rong.callkit.util.CallKitUtils;
 import io.rong.callkit.util.RongCallPermissionUtil;
 import io.rong.callkit.util.permission.PermissionType;
@@ -20,17 +20,13 @@ import io.rong.common.RLog;
 import io.rong.imkit.conversation.extension.RongExtension;
 import io.rong.imkit.conversation.extension.component.plugin.IPluginModule;
 import io.rong.imkit.conversation.extension.component.plugin.IPluginRequestPermissionResultCallback;
-import io.rong.imkit.utils.PermissionCheckUtil;
 import io.rong.imlib.IRongCoreCallback;
 import io.rong.imlib.IRongCoreEnum;
-import io.rong.imlib.RongCoreClient;
 import io.rong.imlib.RongIMClient;
 import io.rong.imlib.discussion.base.RongDiscussionClient;
 import io.rong.imlib.discussion.model.Discussion;
 import io.rong.imlib.model.Conversation;
 import java.util.ArrayList;
-
-import static io.rong.callkit.BaseCallActivity.REQUEST_CODE_ADD_MEMBER;
 
 /** Created by weiqinxiao on 16/8/16. */
 public class AudioPlugin implements IPluginModule, IPluginRequestPermissionResultCallback {
@@ -196,7 +192,8 @@ public class AudioPlugin implements IPluginModule, IPluginRequestPermissionResul
         if (RongCallPermissionUtil.checkPermissions(context, permissions)) {
             startAudioActivity(fragment, extension);
         } else {
-            RongCallPermissionUtil.showRequestPermissionFailedAlter(context, permissions, grantResults);
+            RongCallPermissionUtil.showRequestPermissionFailedAlter(
+                    context, permissions, grantResults);
         }
         return true;
     }
