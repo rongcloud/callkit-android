@@ -7,7 +7,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 29
         versionCode 20220511
-        versionName "5.2.1_opensource"
+        versionName "5.2.2_opensource"
     }
     buildTypes {
         release {
