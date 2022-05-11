@@ -53,7 +53,8 @@ public class VideoPlugin implements IPluginModule, IPluginRequestPermissionResul
         conversationType = extension.getConversationType();
         targetId = extension.getTargetId();
 
-        PermissionType[] audioCallPermissions = RongCallPermissionUtil.getVideoCallPermissions();
+        PermissionType[] audioCallPermissions =
+                RongCallPermissionUtil.getVideoCallPermissions(context);
         String[] permissions = new String[audioCallPermissions.length];
         for (int i = 0; i < audioCallPermissions.length; i++) {
             permissions[i] = audioCallPermissions[i].getPermissionName();

@@ -252,13 +252,13 @@ public class RongIncomingCallService {
                 createOpenAppIntent(
                         context, message, callSession, checkPermissions, requestCode, isMulti);
         intent.putExtra(KEY_NEED_AUTO_ANSWER, callSession.getCallId());
-        intent.setClass(context, VoIPBroadcastReceiver.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (Build.VERSION.SDK_INT >= 31
                     && context.getApplicationInfo().targetSdkVersion >= 31) {
                 return PendingIntent.getActivity(
                         context, 12345664, intent, PendingIntent.FLAG_IMMUTABLE);
             } else {
+                intent.setClass(context, VoIPBroadcastReceiver.class);
                 return PendingIntent.getBroadcast(
                         context,
                         ACCEPT_REQUEST_CODE,
@@ -266,6 +266,7 @@ public class RongIncomingCallService {
                         PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             }
         } else {
+            intent.setClass(context, VoIPBroadcastReceiver.class);
             return PendingIntent.getBroadcast(
                     context, ACCEPT_REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         }

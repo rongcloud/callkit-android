@@ -55,7 +55,8 @@ public class AudioPlugin implements IPluginModule, IPluginRequestPermissionResul
         targetId = extension.getTargetId();
         Log.i(TAG, "---- targetId==" + targetId);
 
-        PermissionType[] audioCallPermissions = RongCallPermissionUtil.getAudioCallPermissions();
+        PermissionType[] audioCallPermissions =
+                RongCallPermissionUtil.getAudioCallPermissions(context);
         String[] permissions = new String[audioCallPermissions.length];
         for (int i = 0; i < audioCallPermissions.length; i++) {
             permissions[i] = audioCallPermissions[i].getPermissionName();

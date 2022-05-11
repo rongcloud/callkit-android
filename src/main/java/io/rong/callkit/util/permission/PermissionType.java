@@ -33,6 +33,13 @@ public enum PermissionType {
             return DeviceAdapter.getDeviceAdapter().checkRecordPermission(context);
         }
     },
+    // android 12 的蓝牙权限
+    BluetoothConnect("android.permission.BLUETOOTH_CONNECT") {
+        @Override
+        public int getVersion() {
+            return Build.VERSION_CODES.S;
+        }
+    },
     // 悬浮窗
     FloatWindow("android.settings.action.MANAGE_OVERLAY_PERMISSION") {
         private static final String TAG = "FloatWindow";
@@ -215,6 +222,11 @@ public enum PermissionType {
         return context != null
                 && context.checkCallingOrSelfPermission(mPermissionName)
                         == PackageManager.PERMISSION_GRANTED;
+    }
+
+    // 权限对应的版本
+    public int getVersion() {
+        return 0;
     }
 
     public boolean isNecessary() {

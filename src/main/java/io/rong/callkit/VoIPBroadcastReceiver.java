@@ -308,16 +308,12 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             int importance = NotificationManager.IMPORTANCE_HIGH;
-            String channelName =
-                    context.getResources()
-                            .getString(
-                                    context.getResources()
-                                            .getIdentifier(
-                                                    "rc_notification_channel_name",
-                                                    "string",
-                                                    context.getPackageName()));
+            String channelName = CallRingingUtil.getInstance().getNotificationChannelName(context);
             NotificationChannel notificationChannel =
-                    new NotificationChannel("rc_notification_id", channelName, importance);
+                    new NotificationChannel(
+                            CallRingingUtil.getInstance().getNotificationChannelId(),
+                            channelName,
+                            importance);
             notificationChannel.enableLights(true);
             notificationChannel.setLightColor(Color.GREEN);
             if (notification != null && notification.sound != null) {

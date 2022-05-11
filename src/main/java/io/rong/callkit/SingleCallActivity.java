@@ -191,6 +191,9 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                             builder.append(getString(R.string.rc_android_permission_CAMERA));
                         } else if (str.equals("android.permission.RECORD_AUDIO")) {
                             builder.append(getString(R.string.rc_android_permission_RECORD_AUDIO));
+                        } else if (str.equals("android.permission.BLUETOOTH_CONNECT")) {
+                            builder.append(
+                                    getString(R.string.rc_android_permission_BLUETOOTH_CONNECT));
                         }
                         builder.append(",");
                     }

@@ -31,7 +31,7 @@ import java.io.IOException;
 public class CallRingingUtil {
     private static final String TAG = "CallRingingUtil";
     private volatile boolean isRinging = false;
-    private RingingMode mCurrentRingingMode = null;
+    private volatile RingingMode mCurrentRingingMode = null;
 
     private MediaPlayer mMediaPlayer;
     private Vibrator mVibrator;

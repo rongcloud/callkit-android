@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="io.rong.callkit">
 
-
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -12,18 +11,13 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-
-
-    <!--读取电话的状态信息的权限-->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application android:supportsRtl="true">
         <meta-data
             android:name="rc.callkit"
-            android:value="io.rong.callkit.util.CallKitBuildVar" />
+            android:value="io.rong.callkit.RongCallKit" />
 
-        <!-- new voip config start -->
         <activity
             android:name=".MultiVideoCallActivity"
             android:exported="true"
@@ -32,10 +26,10 @@
             android:windowSoftInputMode="stateHidden|adjustResize">
             <intent-filter>
                 <action android:name="io.rong.intent.action.voip.MULTIVIDEO" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".SingleCallActivity"
             android:exported="true"
@@ -44,15 +38,14 @@
             android:windowSoftInputMode="stateHidden|adjustResize">
             <intent-filter>
                 <action android:name="io.rong.intent.action.voip.SINGLEVIDEO" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
                 <action android:name="io.rong.intent.action.voip.SINGLEAUDIO" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".MultiAudioCallActivity"
             android:exported="true"
@@ -61,34 +54,30 @@
             android:windowSoftInputMode="stateHidden|adjustResize">
             <intent-filter>
                 <action android:name="io.rong.intent.action.voip.MULTIAUDIO" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
-        <!-- new voip config end -->
-
-    <!--   Android Q 后台无法弹出Activity，通过通知栏提醒用户-->
+        <!-- Android Q 后台无法弹出Activity，通过通知栏提醒用户-->
         <receiver
             android:name="io.rong.callkit.VoIPBroadcastReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="action.push.CallInviteMessage" />
-                <action android:name="action.push.CallInviteMessage.CLICKED"/>
-                <action android:name="action.push.voip.hangup.click"/>
-                <action android:name="action.voip.notification.clear"/>
+                <action android:name="action.push.CallInviteMessage.CLICKED" />
+                <action android:name="action.push.voip.hangup.click" />
+                <action android:name="action.voip.notification.clear" />
             </intent-filter>
         </receiver>
 
-        <activity android:name=".CallSelectMemberActivity"></activity>
+        <activity android:name=".CallSelectMemberActivity" />
 
-        <receiver android:name=".util.RTCPhoneStateReceiver"
+        <receiver
+            android:name=".util.RTCPhoneStateReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.PHONE_STATE"/>
+                <action android:name="android.intent.action.PHONE_STATE" />
             </intent-filter>
         </receiver>
-
     </application>
-
 </manifest>

@@ -53,7 +53,7 @@ public class RongCallPermissionUtil {
      * @param activity
      */
     public static void requestAudioCallNeedPermission(Activity activity, final int requestCode) {
-        requestPermissions(activity, getAudioCallPermissions(), requestCode);
+        requestPermissions(activity, getAudioCallPermissions(activity), requestCode);
     }
 
     /**
@@ -61,12 +61,20 @@ public class RongCallPermissionUtil {
      *
      * @return
      */
-    public static PermissionType[] getAudioCallPermissions() {
-        return new PermissionType[] {PermissionType.AudioRecord};
+    public static PermissionType[] getAudioCallPermissions(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                && context.getApplicationInfo() != null
+                && context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S) {
+            return new PermissionType[] {
+                PermissionType.AudioRecord, PermissionType.BluetoothConnect
+            };
+        } else {
+            return new PermissionType[] {PermissionType.AudioRecord};
+        }
     }
 
     public static boolean checkAudioCallNeedPermission(Context context) {
-        for (PermissionType audioCallPermission : getAudioCallPermissions()) {
+        for (PermissionType audioCallPermission : getAudioCallPermissions(context)) {
             if (!audioCallPermission.checkPermission(context)) {
                 return false;
             }
@@ -87,7 +95,7 @@ public class RongCallPermissionUtil {
     // 视频通话权限相关
     ///////////////////////////////////////////////////////////////////////////
     public static boolean checkVideoCallNeedPermission(Context context) {
-        for (PermissionType audioCallPermission : getVideoCallPermissions()) {
+        for (PermissionType audioCallPermission : getVideoCallPermissions(context)) {
             if (!audioCallPermission.checkPermission(context)) {
                 return false;
             }
@@ -96,7 +104,7 @@ public class RongCallPermissionUtil {
     }
 
     public static void requestVideoCallNeedPermission(Activity activity, final int requestCode) {
-        requestPermissions(activity, getVideoCallPermissions(), requestCode);
+        requestPermissions(activity, getVideoCallPermissions(activity), requestCode);
     }
 
     public static boolean checkAndRequestVideoCallPermission(
@@ -113,8 +121,20 @@ public class RongCallPermissionUtil {
      *
      * @return
      */
-    public static PermissionType[] getVideoCallPermissions() {
-        return new PermissionType[] {PermissionType.CameraPermission, PermissionType.AudioRecord};
+    public static PermissionType[] getVideoCallPermissions(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                && context.getApplicationInfo() != null
+                && context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S) {
+            return new PermissionType[] {
+                PermissionType.CameraPermission,
+                PermissionType.AudioRecord,
+                PermissionType.BluetoothConnect
+            };
+        } else {
+            return new PermissionType[] {
+                PermissionType.CameraPermission, PermissionType.AudioRecord
+            };
+        }
     }
 
     public static boolean checkAndRequestPermissionByCallType(

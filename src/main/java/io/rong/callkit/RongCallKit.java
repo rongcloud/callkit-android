@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
-import io.rong.callkit.util.CallKitBuildVar;
 import io.rong.callkit.util.RongCallPermissionUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
@@ -340,7 +339,7 @@ public class RongCallKit {
     }
 
     public static String getVersion() {
-        return CallKitBuildVar.SDK_VERSION;
+        return BuildConfig.VERSION_NAME;
     }
 
     public static void setKitImageEngine(GlideCallKitImageEngine kitImageEngine) {
