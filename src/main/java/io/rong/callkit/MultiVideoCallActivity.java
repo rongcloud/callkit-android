@@ -1048,7 +1048,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                     }
                 });
         super.onCallDisconnected(callSession, reason);
-        sendBroadcast(new Intent(DISCONNECT_ACTION));
+        sendBroadcast(new Intent(DISCONNECT_ACTION).setPackage(getPackageName()));
     }
 
     @Override

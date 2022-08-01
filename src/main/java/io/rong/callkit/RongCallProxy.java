@@ -251,6 +251,19 @@ public class RongCallProxy implements IRongCallListener {
     }
 
     @Override
+    public void onFirstRemoteAudioFrame(String userId) {
+        ReportUtil.appStatus(
+                ReportUtil.TAG.CALL_LISTENER,
+                "userId|state|desc",
+                userId,
+                "onFirstRemoteAudioFrame",
+                getDescription());
+        if (mCallListener != null) {
+            mCallListener.onFirstRemoteAudioFrame(userId);
+        }
+    }
+
+    @Override
     public void onAudioLevelSend(String audioLevel) {
         if (mCallListener != null) {
             mCallListener.onAudioLevelSend(audioLevel);

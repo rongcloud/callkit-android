@@ -118,6 +118,7 @@ public enum PermissionType {
                         new Intent(
                                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                                 Uri.parse("package:" + context.getPackageName()));
+                intent.setPackage(context.getPackageName());
                 context.startActivity(intent);
             }
         }
@@ -152,6 +153,7 @@ public enum PermissionType {
                 return;
             }
             Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS);
+            intent.setPackage(context.getPackageName());
             intent.putExtra(Settings.EXTRA_APP_PACKAGE, context.getPackageName());
             intent.putExtra(Settings.EXTRA_CHANNEL_ID, channelId);
             context.startActivity(intent);
@@ -168,6 +170,7 @@ public enum PermissionType {
         public void gotoSettingPage(Context context) {
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 Intent intent = new Intent();
+                intent.setPackage(context.getPackageName());
                 intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
                 intent.putExtra("app_package", context.getPackageName());
                 intent.putExtra("app_uid", context.getApplicationInfo().uid);
@@ -176,6 +179,7 @@ public enum PermissionType {
                 Intent intent = new Intent();
                 intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                 intent.addCategory(Intent.CATEGORY_DEFAULT);
+                intent.setPackage(context.getPackageName());
                 intent.setData(Uri.parse("package:" + context.getPackageName()));
                 context.startActivity(intent);
             }

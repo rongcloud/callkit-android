@@ -799,7 +799,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                         finish();
                     }
                 });
-        sendBroadcast(new Intent(DISCONNECT_ACTION));
+        sendBroadcast(new Intent(DISCONNECT_ACTION).setPackage(getPackageName()));
     }
 
     @Override

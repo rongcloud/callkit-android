@@ -25,6 +25,7 @@ import io.rong.callkit.R;
 import io.rong.callkit.RongIncomingCallService;
 import io.rong.common.RLog;
 import io.rong.imkit.notification.NotificationUtil;
+import io.rong.push.notification.RongNotificationHelper;
 import java.io.IOException;
 
 /** @author gusd @Date 2021/09/14 */
@@ -40,7 +41,8 @@ public class CallRingingUtil {
     private volatile boolean isFirstReceivedBroadcast = true;
 
     private static final String DEFAULT_CHANNEL_NAME = "VOIP";
-    private static final String DEFAULT_CHANNEL_ID = "rc_notification_voip_id";
+    private static final String DEFAULT_CHANNEL_ID =
+            RongNotificationHelper.getDefaultVoipChannelId();
     public static final int DEFAULT_ANSWER_ICON = R.drawable.rc_voip_notification_answer;
     public static final int DEFAULT_HANGUP_ICON = R.drawable.rc_voip_notification_hangup;
 
@@ -62,6 +64,7 @@ public class CallRingingUtil {
         if (!isRingingServiceRunning(context)) {
             Intent intent = new Intent();
             intent.putExtras(bundle);
+            intent.setPackage(context.getPackageName());
             // KNOTE: 2021/9/29 前台服务启动限制
             try {
                 RongIncomingCallService.getInstance().startRing(context, intent);
@@ -331,7 +334,9 @@ public class CallRingingUtil {
         int id =
                 context.getResources()
                         .getIdentifier(
-                                "rc_incoming_channel_name", "string", context.getPackageName());
+                                RongNotificationHelper.getDefaultVoipChannelName(),
+                                "string",
+                                context.getPackageName());
         String channelName = id == 0 ? null : context.getResources().getString(id);
         return TextUtils.isEmpty(channelName) ? DEFAULT_CHANNEL_NAME : channelName;
     }
@@ -396,6 +401,7 @@ public class CallRingingUtil {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS);
             intent.putExtra(Settings.EXTRA_APP_PACKAGE, context.getPackageName());
+            intent.setPackage(context.getPackageName());
             intent.putExtra(Settings.EXTRA_CHANNEL_ID, getNotificationChannelId());
             context.startActivity(intent);
         }
