@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import cn.rongcloud.rtc.api.RCRTCEngine;
 import cn.rongcloud.rtc.audioroute.RCAudioRouteType;
+import cn.rongcloud.rtc.utils.FinLog;
 import io.rong.callkit.util.BluetoothUtil;
 import io.rong.callkit.util.CallKitUtils;
 import io.rong.callkit.util.DefaultPushConfig;
@@ -263,7 +264,10 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                     Conversation.ConversationType.valueOf(
                             intent.getStringExtra("conversationType").toUpperCase(Locale.US));
             targetId = intent.getStringExtra("targetId");
-
+            RongCallCommon.RoomType roomType = RongCallCommon.RoomType.NORMAL;
+            if (intent.hasExtra("roomType")) {
+                roomType = RongCallCommon.RoomType.valueOf(intent.getIntExtra("roomType", 0));
+            }
             List<String> userIds = new ArrayList<>();
             userIds.add(targetId);
 
@@ -272,8 +276,20 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                             this, mediaType == RongCallCommon.CallMediaType.AUDIO, true, ""),
                     DefaultPushConfig.getHangupConfig(this, true, ""));
 
-            RongCallClient.getInstance()
-                    .startCall(conversationType, targetId, userIds, null, mediaType, null);
+            if (isCrossCall(targetId)) {
+                roomType = RongCallCommon.RoomType.CROSS;
+            } else {
+                roomType = RongCallCommon.RoomType.NORMAL;
+            }
+            FinLog.i(TAG, "call type: " + roomType.name() + " targetId" + targetId);
+
+            if (roomType == RongCallCommon.RoomType.NORMAL) {
+                RongCallClient.getInstance()
+                        .startCall(conversationType, targetId, userIds, null, mediaType, null);
+            } else {
+                RongCallClient.getInstance()
+                        .startCrossCall(conversationType, targetId, userIds, null, mediaType, null);
+            }
         } else { // resume call
             callSession = RongCallClient.getInstance().getCallSession();
             mediaType = callSession.getMediaType();
@@ -318,6 +334,16 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             }
         }
         createPickupDetector();
+    }
+
+    private boolean isCrossCall(String targetId) {
+        if (!TextUtils.isEmpty(targetId) && targetId.contains("_")) {
+            String[] pairs = targetId.split("_");
+            if (pairs.length == 2 && pairs[0].length() == 13) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

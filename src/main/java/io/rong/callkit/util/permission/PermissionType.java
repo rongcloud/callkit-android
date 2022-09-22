@@ -40,6 +40,21 @@ public enum PermissionType {
             return Build.VERSION_CODES.S;
         }
     },
+
+    BluetoothScan("android.permission.BLUETOOTH_SCAN") {
+        @Override
+        public int getVersion() {
+            return Build.VERSION_CODES.S;
+        }
+    },
+
+    BluetoothAdvertise("android.permission.BLUETOOTH_ADVERTISE") {
+        @Override
+        public int getVersion() {
+            return Build.VERSION_CODES.S;
+        }
+    },
+
     // 悬浮窗
     FloatWindow("android.settings.action.MANAGE_OVERLAY_PERMISSION") {
         private static final String TAG = "FloatWindow";

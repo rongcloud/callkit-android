@@ -67,7 +67,10 @@ public class RongCallPermissionUtil {
                 && context.getApplicationInfo() != null
                 && context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S) {
             return new PermissionType[] {
-                PermissionType.AudioRecord, PermissionType.BluetoothConnect
+                PermissionType.AudioRecord,
+                PermissionType.BluetoothConnect,
+                PermissionType.BluetoothScan,
+                PermissionType.BluetoothAdvertise
             };
         } else {
             return new PermissionType[] {PermissionType.AudioRecord};
@@ -129,7 +132,9 @@ public class RongCallPermissionUtil {
             return new PermissionType[] {
                 PermissionType.CameraPermission,
                 PermissionType.AudioRecord,
-                PermissionType.BluetoothConnect
+                PermissionType.BluetoothConnect,
+                PermissionType.BluetoothScan,
+                PermissionType.BluetoothAdvertise,
             };
         } else {
             return new PermissionType[] {
@@ -182,7 +187,9 @@ public class RongCallPermissionUtil {
                                         new Intent(
                                                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                                                 Uri.parse("package:" + context.getPackageName()));
-                                context.startActivity(intent);
+                                if (intent.resolveActivity(context.getPackageManager()) != null) {
+                                    context.startActivity(intent);
+                                }
                             }
                         }
                     });
