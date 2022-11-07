@@ -137,6 +137,10 @@ public class CallFloatBoxView {
                 .setVoIPCallListener(
                         new IRongCallListener() {
                             @Override
+                            public void onCallIncoming(
+                                    RongCallSession callSession, SurfaceView localVideo) {}
+
+                            @Override
                             public void onCallOutgoing(
                                     RongCallSession callInfo, SurfaceView localVideo) {}
 
@@ -684,6 +688,10 @@ public class CallFloatBoxView {
         RongCallClient.getInstance()
                 .setVoIPCallListener(
                         new IRongCallListener() {
+                            @Override
+                            public void onCallIncoming(
+                                    RongCallSession callSession, SurfaceView localVideo) {}
+
                             @Override
                             public void onCallOutgoing(
                                     RongCallSession callInfo, SurfaceView localVideo) {}

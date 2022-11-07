@@ -22,7 +22,6 @@ import io.rong.callkit.util.RingingMode;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallSession;
 import io.rong.common.RLog;
-import io.rong.push.common.PushConst;
 import io.rong.push.notification.PushNotificationMessage;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -203,17 +202,8 @@ public class RongIncomingCallService {
                 createOpenAppIntent(
                         context, message, callSession, checkPermissions, requestCode, isMulti);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (Build.VERSION.SDK_INT >= 31
-                    && context.getApplicationInfo().targetSdkVersion >= 31) {
-                return PendingIntent.getActivity(
-                        context, 2314412, intent, PendingIntent.FLAG_IMMUTABLE);
-            } else {
-                return PendingIntent.getBroadcast(
-                        context,
-                        ACCEPT_REQUEST_CODE,
-                        intent,
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            }
+            return PendingIntent.getActivity(
+                    context, 2314412, intent, PendingIntent.FLAG_IMMUTABLE);
         } else {
             return PendingIntent.getBroadcast(
                     context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -227,18 +217,7 @@ public class RongIncomingCallService {
             boolean checkPermissions,
             int requestCode,
             boolean isMulti) {
-        if (Build.VERSION.SDK_INT >= 31 && context.getApplicationInfo().targetSdkVersion >= 31) {
-            return createIntentForAndroidS(context, callSession, checkPermissions);
-        } else {
-            Intent intent = new Intent();
-            intent.setAction(ACTION_CALLINVITEMESSAGE_CLICKED);
-            intent.putExtra(PushConst.MESSAGE, message);
-            intent.putExtra(KEY_CALL_SESSION, callSession);
-            intent.putExtra(KEY_CHECK_PERMISSIONS, checkPermissions);
-            intent.putExtra(PushConst.IS_MULTI, isMulti);
-            intent.setPackage(context.getPackageName());
-            return intent;
-        }
+        return createIntentForAndroidS(context, callSession, checkPermissions);
     }
 
     private PendingIntent createAnswerIntent(
@@ -253,18 +232,8 @@ public class RongIncomingCallService {
                         context, message, callSession, checkPermissions, requestCode, isMulti);
         intent.putExtra(KEY_NEED_AUTO_ANSWER, callSession.getCallId());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (Build.VERSION.SDK_INT >= 31
-                    && context.getApplicationInfo().targetSdkVersion >= 31) {
-                return PendingIntent.getActivity(
-                        context, 12345664, intent, PendingIntent.FLAG_IMMUTABLE);
-            } else {
-                intent.setClass(context, VoIPBroadcastReceiver.class);
-                return PendingIntent.getBroadcast(
-                        context,
-                        ACCEPT_REQUEST_CODE,
-                        intent,
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            }
+            return PendingIntent.getActivity(
+                    context, 12345664, intent, PendingIntent.FLAG_IMMUTABLE);
         } else {
             intent.setClass(context, VoIPBroadcastReceiver.class);
             return PendingIntent.getBroadcast(

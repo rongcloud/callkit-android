@@ -407,6 +407,25 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         }
     }
 
+    @Override
+    public void onCallIncoming(RongCallSession callSession, SurfaceView localVideo) {
+        super.onCallIncoming(callSession, localVideo);
+        this.callSession = callSession;
+        RongCallClient.getInstance().setEnableLocalAudio(true);
+        RongCallClient.getInstance().setEnableLocalVideo(true);
+        localView = localVideo;
+        ((RCRTCVideoView) localView)
+                .setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_BALANCED);
+        //        localView.setZOrderOnTop(true);
+        //        localView.setZOrderMediaOverlay(true);
+        localViewContainer.addView(localView);
+
+        // 加载观察者布局 默认不显示
+        localViewContainer.addView(getObserverLayout());
+        localViewUserId = RongIMClient.getInstance().getCurrentUserId();
+        localView.setTag(CallKitUtils.getStitchedContent(localViewUserId, REMOTE_FURFACEVIEW_TAG));
+    }
+
     /**
      * 电话已拨出。 主叫端拨出电话后
      *
@@ -625,13 +644,20 @@ public class MultiVideoCallActivity extends BaseCallActivity {
     @Override
     public void onRemoteUserPublishVideoStream(
             String userId, String streamId, String tag, SurfaceView surfaceView) {
-        if (RCRTCStream.TAG_DEFAULT.equals(tag)) {
-            return;
+        View singleRemoteView = null;
+        if (remoteViewContainer2 != null) {
+            // 先去找是否已经添加了对方的viewGroup，没有再创建
+            singleRemoteView =
+                    remoteViewContainer2.findViewWithTag(
+                            CallKitUtils.getStitchedContent(userId, REMOTE_VIEW_TAG));
         }
-        View singleRemoteView = addSingleRemoteView(streamId, 1);
+        if (singleRemoteView == null) {
+            singleRemoteView = addSingleRemoteView(streamId, 1);
+        }
         singleRemoteView.findViewById(R.id.user_status).setVisibility(View.GONE);
         singleRemoteView.findViewById(R.id.user_portrait).setVisibility(View.GONE);
         singleRemoteView.findViewById(R.id.user_name).setVisibility(View.GONE);
+        // 把最新的 surfaceView 展示出来，onRemoteUserJoined 返回的 surfaceView 已经失效了，流被绑定到新的 surfaceView 上了
         addRemoteVideo(singleRemoteView, surfaceView, streamId, true);
     }
 
@@ -698,6 +724,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
             localView = localVideo;
             //            localView.setZOrderOnTop(true);
             //            localView.setZOrderMediaOverlay(true);
+            localViewContainer.removeAllViews();
             localViewContainer.addView(localView);
             getObserverLayout();
             localViewContainer.addView(observerLayout);
@@ -1652,7 +1679,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
 
     @Override
     public void onUserUpdate(UserInfo userInfo) {
-        if (isFinishing()) {
+        if (isFinishing() || inflater == null) {
             return;
         }
         if (participantPortraitContainer.getVisibility() == View.VISIBLE) {

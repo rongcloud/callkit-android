@@ -370,8 +370,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                         inflater.inflate(
                                 R.layout.rc_voip_call_bottom_connected_button_layout, null);
         RelativeLayout userInfoLayout = null;
-        if (mediaType.equals(RongCallCommon.CallMediaType.AUDIO)
-                || callAction.equals(RongCallAction.ACTION_INCOMING_CALL)) {
+        if (mediaType.equals(RongCallCommon.CallMediaType.AUDIO)) {
             userInfoLayout =
                     (RelativeLayout)
                             inflater.inflate(R.layout.rc_voip_audio_call_user_info_incoming, null);
@@ -429,8 +428,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         } else if (mediaType.equals(RongCallCommon.CallMediaType.VIDEO)) {
             if (callAction.equals(RongCallAction.ACTION_INCOMING_CALL)) {
                 findViewById(R.id.rc_voip_call_information)
-                        .setBackgroundColor(
-                                getResources().getColor(R.color.rc_voip_background_color));
+                        .setBackgroundColor(getResources().getColor(android.R.color.transparent));
                 buttonLayout =
                         (RelativeLayout)
                                 inflater.inflate(
@@ -453,6 +451,17 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         mButtonContainer.addView(buttonLayout);
         mUserInfoContainer.removeAllViews();
         mUserInfoContainer.addView(userInfoLayout);
+    }
+
+    @Override
+    public void onCallIncoming(RongCallSession callSession, SurfaceView localVideo) {
+        super.onCallIncoming(callSession, localVideo);
+        this.callSession = callSession;
+        if (callSession.getMediaType().equals(RongCallCommon.CallMediaType.VIDEO)) {
+            mLPreviewContainer.setVisibility(View.VISIBLE);
+            localVideo.setTag(callSession.getSelfUserId());
+            mLPreviewContainer.addView(localVideo, mLargeLayoutParams);
+        }
     }
 
     @Override
@@ -604,6 +613,14 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         this.userType = userType;
         this.remoteVideo = remoteVideo;
         this.remoteUserId = userId;
+    }
+
+    @Override
+    public void onRemoteUserPublishVideoStream(
+            String userId, String streamId, String tag, SurfaceView surfaceView) {
+        super.onRemoteUserPublishVideoStream(userId, streamId, tag, surfaceView);
+        Log.v(TAG, "onRemoteUserPublishVideoStream userID=" + userId + ",streamId=" + streamId);
+        this.remoteVideo = surfaceView;
     }
 
     private void changeToConnectedState(

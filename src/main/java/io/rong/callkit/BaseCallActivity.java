@@ -254,6 +254,12 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     }
 
     @Override
+    public void onCallIncoming(RongCallSession callSession, SurfaceView localVideo) {
+        CallKitUtils.shouldShowFloat = true;
+        CallKitUtils.isDial = false;
+    }
+
+    @Override
     public void onCallOutgoing(RongCallSession callProfile, SurfaceView localVideo) {
         CallKitUtils.shouldShowFloat = true;
         CallKitUtils.isDial = true;

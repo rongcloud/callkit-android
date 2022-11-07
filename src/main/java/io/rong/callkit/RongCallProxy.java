@@ -53,6 +53,23 @@ public class RongCallProxy implements IRongCallListener {
     }
 
     @Override
+    public void onCallIncoming(RongCallSession callSession, SurfaceView localVideo) {
+        ReportUtil.appStatus(
+                ReportUtil.TAG.CALL_LISTENER,
+                callSession,
+                "state|desc",
+                "onCallIncoming",
+                getDescription());
+        if (mCallListener != null) {
+            mCallListener.onCallIncoming(callSession, localVideo);
+        }
+        if (RongCallClient.getInstance().getContext() != null) {
+            RCRTCAudioRouteManager.getInstance()
+                    .init(RongCallClient.getInstance().getContext().getApplicationContext());
+        }
+    }
+
+    @Override
     public void onCallOutgoing(RongCallSession callSession, SurfaceView localVideo) {
         ReportUtil.appStatus(
                 ReportUtil.TAG.CALL_LISTENER,
