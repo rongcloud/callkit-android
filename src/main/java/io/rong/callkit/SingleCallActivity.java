@@ -35,6 +35,7 @@ import io.rong.calllib.ReportUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallSession;
+import io.rong.calllib.StartIncomingPreviewCallback;
 import io.rong.calllib.message.CallSTerminateMessage;
 import io.rong.common.RLog;
 import io.rong.imkit.IMCenter;
@@ -254,6 +255,23 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             callSession = intent.getParcelableExtra("callSession");
             mediaType = callSession.getMediaType();
             targetId = callSession.getInviterUserId();
+            RongCallClient.getInstance()
+                    .startIncomingPreview(
+                            new StartIncomingPreviewCallback() {
+                                @Override
+                                public void onDone(boolean isFront, SurfaceView localVideo) {
+                                    if (callSession
+                                            .getMediaType()
+                                            .equals(RongCallCommon.CallMediaType.VIDEO)) {
+                                        mLPreviewContainer.setVisibility(View.VISIBLE);
+                                        localVideo.setTag(callSession.getSelfUserId());
+                                        mLPreviewContainer.addView(localVideo, mLargeLayoutParams);
+                                    }
+                                }
+
+                                @Override
+                                public void onError(int errorCode) {}
+                            });
         } else if (callAction.equals(RongCallAction.ACTION_OUTGOING_CALL)) {
             if (intent.getAction().equals(RongVoIPIntent.RONG_INTENT_ACTION_VOIP_SINGLEAUDIO)) {
                 mediaType = RongCallCommon.CallMediaType.AUDIO;
@@ -454,17 +472,6 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
     }
 
     @Override
-    public void onCallIncoming(RongCallSession callSession, SurfaceView localVideo) {
-        super.onCallIncoming(callSession, localVideo);
-        this.callSession = callSession;
-        if (callSession.getMediaType().equals(RongCallCommon.CallMediaType.VIDEO)) {
-            mLPreviewContainer.setVisibility(View.VISIBLE);
-            localVideo.setTag(callSession.getSelfUserId());
-            mLPreviewContainer.addView(localVideo, mLargeLayoutParams);
-        }
-    }
-
-    @Override
     public void onCallOutgoing(RongCallSession callSession, SurfaceView localVideo) {
         super.onCallOutgoing(callSession, localVideo);
         this.callSession = callSession;
@@ -593,6 +600,8 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
     int userType;
     SurfaceView remoteVideo;
     String remoteUserId;
+    /** 远端首帧是否到来, 音频帧跟视频帧其中一个到来就更改该标记, 从而更新连接状态 */
+    boolean isFirstRemoteFrame = false;
 
     @Override
     public void onRemoteUserJoined(
@@ -616,11 +625,22 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
     }
 
     @Override
+    public void onFirstRemoteAudioFrame(String userId) {
+        super.onFirstRemoteAudioFrame(userId);
+        Log.v(TAG, "onFirstRemoteAudioFrame ");
+        if (!isFirstRemoteFrame) {
+            changeToConnectedState(userId, remoteMediaType, userType, remoteVideo);
+            isFirstRemoteFrame = true;
+        }
+    }
+
+    @Override
     public void onRemoteUserPublishVideoStream(
             String userId, String streamId, String tag, SurfaceView surfaceView) {
         super.onRemoteUserPublishVideoStream(userId, streamId, tag, surfaceView);
         Log.v(TAG, "onRemoteUserPublishVideoStream userID=" + userId + ",streamId=" + streamId);
         this.remoteVideo = surfaceView;
+        addRemoteVideoView(userId, remoteVideo);
     }
 
     private void changeToConnectedState(
@@ -629,27 +649,10 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             int userType,
             SurfaceView remoteVideo) {
         mConnectionStateTextView.setVisibility(View.GONE);
-        if (mediaType.equals(RongCallCommon.CallMediaType.VIDEO)) {
-            findViewById(R.id.rc_voip_call_information)
-                    .setBackgroundColor(getResources().getColor(android.R.color.transparent));
-            mLPreviewContainer.setVisibility(View.VISIBLE);
-            mLPreviewContainer.removeAllViews();
-            remoteVideo.setTag(userId);
-
-            Log.v(TAG, "onRemoteUserJoined mLPreviewContainer.addView(remoteVideo)");
-            mLPreviewContainer.addView(remoteVideo, mLargeLayoutParams);
-            mLPreviewContainer.setOnClickListener(
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            if (isInformationShow) {
-                                hideVideoCallInformation();
-                            } else {
-                                showVideoCallInformation();
-                                handler.sendEmptyMessageDelayed(EVENT_FULL_SCREEN, 5 * 1000);
-                            }
-                        }
-                    });
+        if (RongCallCommon.CallMediaType.VIDEO.equals(mediaType)) {
+            if (remoteVideo != null) {
+                addRemoteVideoView(userId, remoteVideo);
+            }
             mSPreviewContainer.setVisibility(View.VISIBLE);
             mSPreviewContainer.removeAllViews();
             Log.d(TAG, "onRemoteUserJoined mLocalVideo != null=" + (mLocalVideo != null));
@@ -698,6 +701,52 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             mButtonContainer.setVisibility(View.GONE);
             mUserInfoContainer.setVisibility(View.GONE);
         }
+    }
+
+    /**
+     * 当前的布局中是否包含了 RemoteVideoView
+     *
+     * @param remoteVideo
+     * @return
+     */
+    protected boolean hasRemoteVideoView(SurfaceView remoteVideo) {
+        int count = mLPreviewContainer.getChildCount();
+        if (count == 0) {
+            return false;
+        }
+        for (int i = 0; i < count; i++) {
+            View view = mLPreviewContainer.getChildAt(i);
+            if (view == remoteVideo) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void addRemoteVideoView(String userId, SurfaceView remoteVideo) {
+        if (hasRemoteVideoView(remoteVideo)) {
+            return;
+        }
+        findViewById(R.id.rc_voip_call_information)
+                .setBackgroundColor(getResources().getColor(android.R.color.transparent));
+        mLPreviewContainer.setVisibility(View.VISIBLE);
+        mLPreviewContainer.removeAllViews();
+        remoteVideo.setTag(userId);
+
+        Log.v(TAG, "onRemoteUserJoined mLPreviewContainer.addView(remoteVideo)");
+        mLPreviewContainer.addView(remoteVideo, mLargeLayoutParams);
+        mLPreviewContainer.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (isInformationShow) {
+                            hideVideoCallInformation();
+                        } else {
+                            showVideoCallInformation();
+                            handler.sendEmptyMessageDelayed(EVENT_FULL_SCREEN, 5 * 1000);
+                        }
+                    }
+                });
     }
 
     /**
@@ -757,7 +806,10 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         Log.d(TAG, "onFirstRemoteVideoFrame for user::" + userId);
         if (userId.equals(remoteUserId)) {
             //            mConnectionStateTextView.setVisibility(View.GONE);
-            changeToConnectedState(userId, remoteMediaType, userType, remoteVideo);
+            if (!isFirstRemoteFrame) {
+                changeToConnectedState(userId, remoteMediaType, userType, remoteVideo);
+                isFirstRemoteFrame = true;
+            }
         }
     }
 

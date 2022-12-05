@@ -50,6 +50,7 @@ import io.rong.calllib.ReportUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallSession;
+import io.rong.calllib.StartIncomingPreviewCallback;
 import io.rong.calllib.StreamProfile;
 import io.rong.calllib.Utils;
 import io.rong.calllib.message.MultiCallEndMessage;
@@ -407,23 +408,33 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         }
     }
 
-    @Override
-    public void onCallIncoming(RongCallSession callSession, SurfaceView localVideo) {
-        super.onCallIncoming(callSession, localVideo);
-        this.callSession = callSession;
+    private void incomingPreview() {
         RongCallClient.getInstance().setEnableLocalAudio(true);
         RongCallClient.getInstance().setEnableLocalVideo(true);
-        localView = localVideo;
-        ((RCRTCVideoView) localView)
-                .setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_BALANCED);
-        //        localView.setZOrderOnTop(true);
-        //        localView.setZOrderMediaOverlay(true);
-        localViewContainer.addView(localView);
+        RongCallClient.getInstance()
+                .startIncomingPreview(
+                        new StartIncomingPreviewCallback() {
+                            @Override
+                            public void onDone(boolean isFront, SurfaceView localVideo) {
+                                localView = localVideo;
+                                ((RCRTCVideoView) localView)
+                                        .setScalingType(
+                                                RendererCommon.ScalingType.SCALE_ASPECT_BALANCED);
+                                //        localView.setZOrderOnTop(true);
+                                //        localView.setZOrderMediaOverlay(true);
+                                localViewContainer.addView(localView);
 
-        // 加载观察者布局 默认不显示
-        localViewContainer.addView(getObserverLayout());
-        localViewUserId = RongIMClient.getInstance().getCurrentUserId();
-        localView.setTag(CallKitUtils.getStitchedContent(localViewUserId, REMOTE_FURFACEVIEW_TAG));
+                                // 加载观察者布局 默认不显示
+                                localViewContainer.addView(getObserverLayout());
+                                localViewUserId = RongIMClient.getInstance().getCurrentUserId();
+                                localView.setTag(
+                                        CallKitUtils.getStitchedContent(
+                                                localViewUserId, REMOTE_FURFACEVIEW_TAG));
+                            }
+
+                            @Override
+                            public void onError(int errorCode) {}
+                        });
     }
 
     /**
@@ -652,13 +663,13 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                             CallKitUtils.getStitchedContent(userId, REMOTE_VIEW_TAG));
         }
         if (singleRemoteView == null) {
-            singleRemoteView = addSingleRemoteView(streamId, 1);
+            singleRemoteView = addSingleRemoteView(userId, 1);
         }
         singleRemoteView.findViewById(R.id.user_status).setVisibility(View.GONE);
         singleRemoteView.findViewById(R.id.user_portrait).setVisibility(View.GONE);
         singleRemoteView.findViewById(R.id.user_name).setVisibility(View.GONE);
         // 把最新的 surfaceView 展示出来，onRemoteUserJoined 返回的 surfaceView 已经失效了，流被绑定到新的 surfaceView 上了
-        addRemoteVideo(singleRemoteView, surfaceView, streamId, true);
+        addRemoteVideo(singleRemoteView, surfaceView, userId, true);
     }
 
     @Override
@@ -1315,6 +1326,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
             remoteViewContainer.setVisibility(View.GONE);
             participantPortraitContainer.setVisibility(View.VISIBLE);
             bottomButtonContainer.setVisibility(View.VISIBLE);
+            incomingPreview();
         } else if (callAction.equals(RongCallAction.ACTION_OUTGOING_CALL)) {
             Conversation.ConversationType conversationType =
                     Conversation.ConversationType.valueOf(
