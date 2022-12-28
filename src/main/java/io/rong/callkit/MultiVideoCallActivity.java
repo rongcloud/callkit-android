@@ -1439,12 +1439,12 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                                     for (CallUserProfile profile : list) {
                                         added.add(profile.getUserId());
                                     }
-                                    ArrayList<String> allObserver =
-                                            (ArrayList<String>)
-                                                    RongCallClient.getInstance()
-                                                            .getCallSession()
-                                                            .getObserverUserList();
-                                    intent.putStringArrayListExtra("allObserver", allObserver);
+                                    List<String> allObserver =
+                                            RongCallClient.getInstance()
+                                                    .getCallSession()
+                                                    .getObserverUserList();
+                                    intent.putStringArrayListExtra(
+                                            "allObserver", new ArrayList<>(allObserver));
                                     intent.putStringArrayListExtra(
                                             "allMembers",
                                             (ArrayList<String>) discussion.getMemberIdList());
@@ -1469,10 +1469,9 @@ public class MultiVideoCallActivity extends BaseCallActivity {
             for (CallUserProfile profile : list) {
                 added.add(profile.getUserId());
             }
-            ArrayList<String> allObserver =
-                    (ArrayList<String>)
-                            RongCallClient.getInstance().getCallSession().getObserverUserList();
-            intent.putStringArrayListExtra("allObserver", allObserver);
+            List<String> allObserver =
+                    RongCallClient.getInstance().getCallSession().getObserverUserList();
+            intent.putStringArrayListExtra("allObserver", new ArrayList<>(allObserver));
             intent.putStringArrayListExtra("invitedMembers", added);
             intent.putExtra("callId", callSession.getCallId());
             intent.putExtra("groupId", callSession.getTargetId());

@@ -647,13 +647,13 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                                                     for (CallUserProfile profile : list) {
                                                         added.add(profile.getUserId());
                                                     }
-                                                    ArrayList<String> allObserver =
-                                                            (ArrayList<String>)
-                                                                    RongCallClient.getInstance()
-                                                                            .getCallSession()
-                                                                            .getObserverUserList();
+                                                    List<String> allObserver =
+                                                            RongCallClient.getInstance()
+                                                                    .getCallSession()
+                                                                    .getObserverUserList();
                                                     intent.putStringArrayListExtra(
-                                                            "allObserver", allObserver);
+                                                            "allObserver",
+                                                            new ArrayList<>(allObserver));
                                                     intent.putStringArrayListExtra(
                                                             "allMembers",
                                                             (ArrayList<String>)
@@ -692,13 +692,13 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                             for (CallUserProfile profile : list) {
                                 added.add(profile.getUserId());
                             }
-                            ArrayList<String> allObserver =
-                                    (ArrayList<String>)
-                                            RongCallClient.getInstance()
-                                                    .getCallSession()
-                                                    .getObserverUserList();
+                            List<String> allObserver =
+                                    RongCallClient.getInstance()
+                                            .getCallSession()
+                                            .getObserverUserList();
                             intent.putExtra("callId", callSession.getCallId());
-                            intent.putStringArrayListExtra("allObserver", allObserver);
+                            intent.putStringArrayListExtra(
+                                    "allObserver", new ArrayList<>(allObserver));
                             intent.putStringArrayListExtra("invitedMembers", added);
                             intent.putExtra(
                                     "conversationType",
