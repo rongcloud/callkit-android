@@ -1,6 +1,7 @@
 package io.rong.callkit.util.permission;
 
 import android.Manifest;
+import android.Manifest.permission;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -19,6 +20,14 @@ import java.util.Map;
 
 /** @author gusd @Date 2021/09/17 别在多线程里面用 */
 public enum PermissionType {
+
+    /** {@link io.rong.callkit.util.RTCPhoneStateReceiver } 类逻辑需要该权限 用于监听SIM卡来电 */
+    ReadPhoneStatePermission(permission.READ_PHONE_STATE) {
+        @Override
+        public boolean checkPermission(Context context) {
+            return super.checkPermission(context);
+        }
+    },
 
     // 摄像头权限
     CameraPermission(Manifest.permission.CAMERA) {

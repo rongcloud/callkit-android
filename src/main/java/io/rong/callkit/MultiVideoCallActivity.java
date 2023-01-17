@@ -14,6 +14,7 @@ import android.media.AudioManager;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -22,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -422,6 +424,10 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                                                 RendererCommon.ScalingType.SCALE_ASPECT_BALANCED);
                                 //        localView.setZOrderOnTop(true);
                                 //        localView.setZOrderMediaOverlay(true);
+                                ViewParent parent = localView.getParent();
+                                if (parent != null) {
+                                    ((ViewGroup) parent).removeView(localView);
+                                }
                                 localViewContainer.addView(localView);
 
                                 // 加载观察者布局 默认不显示
@@ -466,14 +472,54 @@ public class MultiVideoCallActivity extends BaseCallActivity {
 
     @Override
     public void onFirstRemoteVideoFrame(String userId, int height, int width) {
-        if (remoteViewContainer2 != null) {
-            View singleRemoteView =
-                    remoteViewContainer2.findViewWithTag(
-                            CallKitUtils.getStitchedContent(userId, REMOTE_VIEW_TAG));
-            if (singleRemoteView == null) return;
-            View stateView = singleRemoteView.findViewById(R.id.user_status);
-            if (stateView != null) {
-                stateView.setVisibility(View.GONE);
+        Log.d("bugtags", "onFirstRemoteVideoFrame,uid :" + userId);
+        if (remoteViewContainer2 == null) {
+            Log.e(
+                    "bugtags",
+                    "onFirstRemoteVideoFrame()->remoteViewContainer2 is empty.userId : " + userId);
+            return;
+        }
+
+        View singleRemoteView =
+                remoteViewContainer2.findViewWithTag(
+                        CallKitUtils.getStitchedContent(userId, REMOTE_VIEW_TAG));
+        if (singleRemoteView == null) {
+            Log.e("bugtags", "onFirstRemoteVideoFrame(). singleRemoteView is empty");
+
+            if (localViewContainer == null || localViewContainer.getChildCount() == 0) {
+                Log.e("bugtags", "onFirstRemoteVideoFrame(). localViewContainer is empty");
+            } else {
+                for (int i = 0; i < localViewContainer.getChildCount(); i++) {
+                    if (localViewContainer.getChildAt(i) instanceof RCRTCVideoView) {
+                        ((RCRTCVideoView) localViewContainer.getChildAt(i)).setZOrderOnTop(false);
+                        ((RCRTCVideoView) localViewContainer.getChildAt(i))
+                                .setZOrderMediaOverlay(false);
+                        ((RCRTCVideoView) localViewContainer.getChildAt(i))
+                                .setBackgroundColor(Color.TRANSPARENT);
+                        break;
+                    }
+                }
+            }
+            return;
+        }
+        View stateView = singleRemoteView.findViewById(R.id.user_status);
+        if (stateView != null) {
+            stateView.setVisibility(View.GONE);
+        }
+
+        FrameLayout remoteVideoView =
+                (FrameLayout) singleRemoteView.findViewById(R.id.viewlet_remote_video_user);
+        if (remoteVideoView == null) {
+            return;
+        }
+        int childCount = remoteVideoView.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            if (remoteVideoView.getChildAt(i) != null
+                    && remoteVideoView.getChildAt(i) instanceof RCRTCVideoView) {
+                ((RCRTCVideoView) remoteVideoView.getChildAt(i)).setZOrderOnTop(true);
+                ((RCRTCVideoView) remoteVideoView.getChildAt(i)).setZOrderMediaOverlay(true);
+                remoteVideoView.getChildAt(i).setBackgroundColor(Color.TRANSPARENT);
+                break;
             }
         }
     }
@@ -492,6 +538,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
             RongCallCommon.CallMediaType mediaType,
             int userType,
             SurfaceView remoteVideo) {
+        remoteVideo.setBackgroundColor(Color.BLACK);
         stopRing();
         if (localViewContainer != null && localViewContainer.getVisibility() != View.VISIBLE) {
             localViewContainer.setVisibility(View.VISIBLE);
@@ -655,6 +702,9 @@ public class MultiVideoCallActivity extends BaseCallActivity {
     @Override
     public void onRemoteUserPublishVideoStream(
             String userId, String streamId, String tag, SurfaceView surfaceView) {
+        if (TextUtils.equals(userId, localViewUserId)) {
+            return;
+        }
         View singleRemoteView = null;
         if (remoteViewContainer2 != null) {
             // 先去找是否已经添加了对方的viewGroup，没有再创建
@@ -1628,6 +1678,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         fromView.setZOrderOnTop(false);
         fromView.setZOrderMediaOverlay(false);
         localViewContainer.addView(fromView); // 将点击的小屏视频流添加至本地大容器中
+        fromView.setVisibility(View.INVISIBLE);
         /** 本地容器添加观察者图层 */
         getObserverLayout();
         localViewContainer.addView(observerLayout);
@@ -1681,6 +1732,16 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         localView = fromView;
         localView.setTag(CallKitUtils.getStitchedContent(from, REMOTE_FURFACEVIEW_TAG));
         localViewUserId = from;
+
+        Handler handler = new Handler();
+        handler.postDelayed(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        localView.setVisibility(View.VISIBLE);
+                    }
+                },
+                30);
     }
 
     @Override
