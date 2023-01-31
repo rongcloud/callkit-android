@@ -571,7 +571,6 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity
         CallKitUtils.closeKeyBoard(CallSelectMemberActivity.this, null);
         Intent intent = new Intent();
         intent.putExtra("remote_hangup", val);
-        intent.setPackage(getPackageName());
         intent.putStringArrayListExtra("invited", selectedMember);
         intent.putStringArrayListExtra("observers", observerMember);
         setResult(RESULT_OK, intent);

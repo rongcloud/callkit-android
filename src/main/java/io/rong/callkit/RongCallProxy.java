@@ -53,23 +53,6 @@ public class RongCallProxy implements IRongCallListener {
     }
 
     @Override
-    public void onCallIncoming(RongCallSession callSession, SurfaceView localVideo) {
-        ReportUtil.appStatus(
-                ReportUtil.TAG.CALL_LISTENER,
-                callSession,
-                "state|desc",
-                "onCallIncoming",
-                getDescription());
-        if (mCallListener != null) {
-            mCallListener.onCallIncoming(callSession, localVideo);
-        }
-        if (RongCallClient.getInstance().getContext() != null) {
-            RCRTCAudioRouteManager.getInstance()
-                    .init(RongCallClient.getInstance().getContext().getApplicationContext());
-        }
-    }
-
-    @Override
     public void onCallOutgoing(RongCallSession callSession, SurfaceView localVideo) {
         ReportUtil.appStatus(
                 ReportUtil.TAG.CALL_LISTENER,
@@ -264,19 +247,6 @@ public class RongCallProxy implements IRongCallListener {
                 getDescription());
         if (mCallListener != null) {
             mCallListener.onFirstRemoteVideoFrame(userId, height, width);
-        }
-    }
-
-    @Override
-    public void onFirstRemoteAudioFrame(String userId) {
-        ReportUtil.appStatus(
-                ReportUtil.TAG.CALL_LISTENER,
-                "userId|state|desc",
-                userId,
-                "onFirstRemoteAudioFrame",
-                getDescription());
-        if (mCallListener != null) {
-            mCallListener.onFirstRemoteAudioFrame(userId);
         }
     }
 

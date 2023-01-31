@@ -1,6 +1,5 @@
 package io.rong.callkit;
 
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -18,7 +17,6 @@ import io.rong.callkit.util.IncomingCallExtraHandleUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallSession;
-import io.rong.common.fwlog.FwLog;
 import io.rong.imkit.userinfo.RongUserInfoManager;
 import io.rong.imlib.model.AndroidConfig;
 import io.rong.imlib.model.Conversation.ConversationType;
@@ -63,7 +61,9 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
                 RongCallClient.getInstance().hangUpCall(session.getCallId());
             }
             return;
-        } else if (ACTION_CLEAR_VOIP_NOTIFICATION.equals(action)) {
+        }
+
+        if (ACTION_CLEAR_VOIP_NOTIFICATION.equals(action)) {
             // 针对 Android 12 的业务逻辑
             IncomingCallExtraHandleUtil.removeNotification(context);
             IncomingCallExtraHandleUtil.clear();
@@ -72,10 +72,6 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
         }
 
         PushNotificationMessage message = intent.getParcelableExtra(PushConst.MESSAGE);
-        // bug fixed : https://rc-jira.rongcloud.net/browse/AC-903
-        if (message == null) {
-            return;
-        }
         RongCallSession callSession = null;
         boolean checkPermissions = false;
         if (intent.hasExtra("callsession")) {
@@ -120,9 +116,6 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
     }
 
     private boolean needShowNotification(Context context, PushNotificationMessage message) {
-        if (message == null || context == null) {
-            return false;
-        }
         if (INVITE.equals(message.getObjectName())
                 && Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
             // Android 10 以下允许后台运行，直接交由会话列表界面拉取消息
@@ -143,7 +136,6 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
         return true;
     }
 
-    @SuppressLint("QueryPermissionsNeeded")
     private void handleNotificationClickEvent(
             Context context,
             PushNotificationMessage message,
@@ -166,16 +158,7 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
         }
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setPackage(context.getPackageName());
-        // bug fixed : https://rc-jira.rongcloud.net/browse/AC-864
-        if (intent.resolveActivity(context.getPackageManager()) != null) {
-            context.startActivity(intent);
-        } else {
-            StringBuilder builder = new StringBuilder("start activity with scheme : ");
-            if (intent.getData() != null) {
-                builder.append(intent.getData().toString());
-            }
-            FwLog.write(FwLog.I, FwLog.IM, "L-VoIP_notify_scheme", "scheme", builder.toString());
-        }
+        context.startActivity(intent);
     }
 
     private void sendNotification(
@@ -186,7 +169,7 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
             UserInfo userInfo) {
         String pushContent;
         boolean isAudio = callSession.getMediaType() == RongCallCommon.CallMediaType.AUDIO;
-        if (HANGUP.equals(message.getObjectName())) {
+        if (message.getObjectName().equals(HANGUP)) {
             pushContent =
                     context.getResources().getString(R.string.rc_voip_call_terminalted_notify);
             if (callSession.getConversationType().equals(ConversationType.GROUP)
@@ -348,7 +331,7 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
                             + notificationId
                             + " notification: "
                             + notification.toString());
-            if (INVITE.equals(message.getObjectName())) {
+            if (message.getObjectName().equals(INVITE)) {
                 notificationCache.put(callSession.getCallId(), notificationId);
                 nm.notify(notificationId, notification);
                 IncomingCallExtraHandleUtil.VOIP_NOTIFICATION_ID++;
