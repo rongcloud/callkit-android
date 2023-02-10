@@ -190,6 +190,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
             // Android 12 禁止了通过广播和服务跳板的方式启动 Activity，此代码是为了兼容之前的逻辑
             Intent intent = new Intent();
             intent.setAction(VoIPBroadcastReceiver.ACTION_CLEAR_VOIP_NOTIFICATION);
+            intent.setPackage(getPackageName());
             sendBroadcast(intent);
         }
     }
@@ -250,6 +251,12 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     @SuppressLint("MissingPermission")
     protected void stopRing() {
         CallRingingUtil.getInstance().stopRinging();
+    }
+
+    @Override
+    public void onCallIncoming(RongCallSession callSession, SurfaceView localVideo) {
+        CallKitUtils.shouldShowFloat = true;
+        CallKitUtils.isDial = false;
     }
 
     @Override
@@ -493,6 +500,9 @@ public class BaseCallActivity extends BaseNoActionBarActivity
 
     @Override
     public void onFirstRemoteVideoFrame(String userId, int height, int width) {}
+
+    @Override
+    public void onFirstRemoteAudioFrame(String userId) {}
 
     @Override
     public void onAudioLevelSend(String audioLevel) {}
@@ -868,4 +878,5 @@ public class BaseCallActivity extends BaseNoActionBarActivity
             }
         }
     }
+    //
 }

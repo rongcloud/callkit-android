@@ -35,6 +35,7 @@ public enum DeviceAdapter {
                         "com.miui.securitycenter",
                         "com.miui.permcenter.permissions.PermissionsEditorActivity");
                 localIntent.putExtra("extra_pkgname", context.getPackageName());
+                localIntent.setPackage(context.getPackageName());
                 context.startActivity(localIntent);
             } catch (Exception e) {
                 try { // MIUI 5/6/7
@@ -43,6 +44,7 @@ public enum DeviceAdapter {
                             "com.miui.securitycenter",
                             "com.miui.permcenter.permissions.AppPermissionsEditorActivity");
                     localIntent.putExtra("extra_pkgname", context.getPackageName());
+                    localIntent.setPackage(context.getPackageName());
                     context.startActivity(localIntent);
                 } catch (Exception e1) { // 否则跳转到应用详情
                     super.gotoAppPermissionSettingPage(context);
@@ -92,6 +94,7 @@ public enum DeviceAdapter {
                 Intent intent = new Intent("com.meizu.safe.security.SHOW_APPSEC");
                 intent.addCategory(Intent.CATEGORY_DEFAULT);
                 intent.putExtra("packageName", context.getApplicationInfo().processName);
+                intent.setPackage(context.getPackageName());
                 context.startActivity(intent);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -150,6 +153,7 @@ public enum DeviceAdapter {
                                 "com.huawei.systemmanager",
                                 "com.huawei.permissionmanager.ui.MainActivity"); // 华为权限管理
                 intent.setComponent(comp);
+                intent.setPackage(context.getPackageName());
                 context.startActivity(intent);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -172,6 +176,7 @@ public enum DeviceAdapter {
                                 "com.coloros.securitypermission",
                                 "com.coloros.securitypermission.permission.PermissionAppAllPermissionActivity"); // R11t 7.1.1 os-v3.2
                 intent.setComponent(comp);
+                intent.setPackage(context.getPackageName());
                 context.startActivity(intent);
             } catch (Exception e) {
                 super.gotoAppPermissionSettingPage(context);
@@ -236,6 +241,7 @@ public enum DeviceAdapter {
         Intent intent = new Intent();
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        intent.setPackage(context.getPackageName());
         intent.setData(Uri.fromParts("package", context.getPackageName(), null));
         context.startActivity(intent);
     }

@@ -137,6 +137,10 @@ public class CallFloatBoxView {
                 .setVoIPCallListener(
                         new IRongCallListener() {
                             @Override
+                            public void onCallIncoming(
+                                    RongCallSession callSession, SurfaceView localVideo) {}
+
+                            @Override
                             public void onCallOutgoing(
                                     RongCallSession callInfo, SurfaceView localVideo) {}
 
@@ -501,6 +505,16 @@ public class CallFloatBoxView {
                             }
 
                             @Override
+                            public void onFirstRemoteAudioFrame(String userId) {
+                                ReportUtil.appStatus(
+                                        ReportUtil.TAG.CALL_LISTENER,
+                                        "userId|state|desc",
+                                        userId,
+                                        "onFirstRemoteAudioFrame",
+                                        TAG);
+                            }
+
+                            @Override
                             public void onAudioLevelSend(String audioLevel) {}
 
                             public void onRemoteUserPublishVideoStream(
@@ -674,6 +688,10 @@ public class CallFloatBoxView {
         RongCallClient.getInstance()
                 .setVoIPCallListener(
                         new IRongCallListener() {
+                            @Override
+                            public void onCallIncoming(
+                                    RongCallSession callSession, SurfaceView localVideo) {}
+
                             @Override
                             public void onCallOutgoing(
                                     RongCallSession callInfo, SurfaceView localVideo) {}
@@ -959,6 +977,16 @@ public class CallFloatBoxView {
                             }
 
                             @Override
+                            public void onFirstRemoteAudioFrame(String userId) {
+                                ReportUtil.appStatus(
+                                        ReportUtil.TAG.CALL_LISTENER,
+                                        "userId|state|desc",
+                                        userId,
+                                        "onFirstRemoteAudioFrame",
+                                        TAG);
+                            }
+
+                            @Override
                             public void onAudioLevelSend(String audioLevel) {}
 
                             public void onRemoteUserPublishVideoStream(
@@ -1038,6 +1066,7 @@ public class CallFloatBoxView {
         RongCallClient.getInstance().setVoIPCallListener(RongCallProxy.getInstance());
         Intent intent = new Intent(mBundle.getString("action"));
         intent.putExtra("floatbox", mBundle);
+        intent.setPackage(mContext.getPackageName());
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("callAction", RongCallAction.ACTION_RESUME_CALL.getName());
 

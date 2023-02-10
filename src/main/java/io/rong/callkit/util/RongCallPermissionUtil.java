@@ -14,6 +14,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.core.app.AppOpsManagerCompat;
+import io.rong.callkit.util.permission.PermissionShowDetail;
 import io.rong.callkit.util.permission.PermissionType;
 import io.rong.calllib.RongCallCommon;
 import io.rong.common.RLog;
@@ -66,7 +67,10 @@ public class RongCallPermissionUtil {
                 && context.getApplicationInfo() != null
                 && context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S) {
             return new PermissionType[] {
-                PermissionType.AudioRecord, PermissionType.BluetoothConnect
+                PermissionType.AudioRecord,
+                PermissionType.BluetoothConnect,
+                PermissionType.BluetoothScan,
+                PermissionType.BluetoothAdvertise
             };
         } else {
             return new PermissionType[] {PermissionType.AudioRecord};
@@ -128,7 +132,9 @@ public class RongCallPermissionUtil {
             return new PermissionType[] {
                 PermissionType.CameraPermission,
                 PermissionType.AudioRecord,
-                PermissionType.BluetoothConnect
+                PermissionType.BluetoothConnect,
+                PermissionType.BluetoothScan,
+                PermissionType.BluetoothAdvertise,
             };
         } else {
             return new PermissionType[] {
@@ -181,7 +187,9 @@ public class RongCallPermissionUtil {
                                         new Intent(
                                                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                                                 Uri.parse("package:" + context.getPackageName()));
-                                context.startActivity(intent);
+                                if (intent.resolveActivity(context.getPackageManager()) != null) {
+                                    context.startActivity(intent);
+                                }
                             }
                         }
                     });
@@ -240,7 +248,7 @@ public class RongCallPermissionUtil {
 
     public static void showRequestPermissionFailedAlter(
             final Context context, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        String content = getNotGrantedPermissionMsg(context, permissions, grantResults);
+        final String content = getNotGrantedPermissionMsg(context, permissions, grantResults);
         if (TextUtils.isEmpty(content)) {
             return;
         }
@@ -250,11 +258,7 @@ public class RongCallPermissionUtil {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which) {
                             case DialogInterface.BUTTON_POSITIVE:
-                                Intent intent =
-                                        new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                Uri uri = Uri.fromParts("package", context.getPackageName(), null);
-                                intent.setData(uri);
-                                context.startActivity(intent);
+                                PermissionShowDetail.showPermissionDetail(context);
                                 break;
                             case DialogInterface.BUTTON_NEGATIVE:
                             default:

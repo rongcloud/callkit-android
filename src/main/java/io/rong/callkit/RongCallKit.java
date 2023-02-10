@@ -37,23 +37,41 @@ public class RongCallKit {
      * @param mediaType 会话媒体类型
      */
     public static void startSingleCall(Context context, String targetId, CallMediaType mediaType) {
-        if (checkEnvironment(context, mediaType)) {
-            String action;
-            if (mediaType.equals(CallMediaType.CALL_MEDIA_TYPE_AUDIO)) {
-                action = RongVoIPIntent.RONG_INTENT_ACTION_VOIP_SINGLEAUDIO;
-            } else {
-                action = RongVoIPIntent.RONG_INTENT_ACTION_VOIP_SINGLEVIDEO;
-            }
-            Intent intent = new Intent(action);
-            intent.putExtra(
-                    "conversationType",
-                    Conversation.ConversationType.PRIVATE.getName().toLowerCase());
-            intent.putExtra("targetId", targetId);
-            intent.putExtra("callAction", RongCallAction.ACTION_OUTGOING_CALL.getName());
-            intent.setPackage(context.getPackageName());
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
+        startSingleCallInternal(context, targetId, mediaType, RongCallCommon.RoomType.NORMAL);
+    }
+
+    /**
+     * 发起单人跨APP通话。
+     *
+     * @param context 上下文
+     * @param targetId 目标会话 id ，单人通话为对方 UserId
+     * @param mediaType 会话媒体类型
+     */
+    public static void startSingleCrossCall(
+            Context context, String targetId, CallMediaType mediaType) {
+        startSingleCallInternal(context, targetId, mediaType, RongCallCommon.RoomType.CROSS);
+    }
+
+    private static void startSingleCallInternal(
+            Context context,
+            String targetId,
+            CallMediaType mediaType,
+            RongCallCommon.RoomType roomType) {
+        String action;
+        if (mediaType.equals(CallMediaType.CALL_MEDIA_TYPE_AUDIO)) {
+            action = RongVoIPIntent.RONG_INTENT_ACTION_VOIP_SINGLEAUDIO;
+        } else {
+            action = RongVoIPIntent.RONG_INTENT_ACTION_VOIP_SINGLEVIDEO;
         }
+        Intent intent = new Intent(action);
+        intent.putExtra(
+                "conversationType", Conversation.ConversationType.PRIVATE.getName().toLowerCase());
+        intent.putExtra("targetId", targetId);
+        intent.putExtra("roomType", roomType);
+        intent.putExtra("callAction", RongCallAction.ACTION_OUTGOING_CALL.getName());
+        intent.setPackage(context.getPackageName());
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
     }
 
     /**

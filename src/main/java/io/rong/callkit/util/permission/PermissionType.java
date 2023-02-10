@@ -1,6 +1,7 @@
 package io.rong.callkit.util.permission;
 
 import android.Manifest;
+import android.Manifest.permission;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -19,6 +20,14 @@ import java.util.Map;
 
 /** @author gusd @Date 2021/09/17 别在多线程里面用 */
 public enum PermissionType {
+
+    /** {@link io.rong.callkit.util.RTCPhoneStateReceiver } 类逻辑需要该权限 用于监听SIM卡来电 */
+    ReadPhoneStatePermission(permission.READ_PHONE_STATE) {
+        @Override
+        public boolean checkPermission(Context context) {
+            return super.checkPermission(context);
+        }
+    },
 
     // 摄像头权限
     CameraPermission(Manifest.permission.CAMERA) {
@@ -40,6 +49,21 @@ public enum PermissionType {
             return Build.VERSION_CODES.S;
         }
     },
+
+    BluetoothScan("android.permission.BLUETOOTH_SCAN") {
+        @Override
+        public int getVersion() {
+            return Build.VERSION_CODES.S;
+        }
+    },
+
+    BluetoothAdvertise("android.permission.BLUETOOTH_ADVERTISE") {
+        @Override
+        public int getVersion() {
+            return Build.VERSION_CODES.S;
+        }
+    },
+
     // 悬浮窗
     FloatWindow("android.settings.action.MANAGE_OVERLAY_PERMISSION") {
         private static final String TAG = "FloatWindow";
@@ -118,6 +142,7 @@ public enum PermissionType {
                         new Intent(
                                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                                 Uri.parse("package:" + context.getPackageName()));
+                intent.setPackage(context.getPackageName());
                 context.startActivity(intent);
             }
         }
@@ -152,6 +177,7 @@ public enum PermissionType {
                 return;
             }
             Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS);
+            intent.setPackage(context.getPackageName());
             intent.putExtra(Settings.EXTRA_APP_PACKAGE, context.getPackageName());
             intent.putExtra(Settings.EXTRA_CHANNEL_ID, channelId);
             context.startActivity(intent);
@@ -168,6 +194,7 @@ public enum PermissionType {
         public void gotoSettingPage(Context context) {
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 Intent intent = new Intent();
+                intent.setPackage(context.getPackageName());
                 intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
                 intent.putExtra("app_package", context.getPackageName());
                 intent.putExtra("app_uid", context.getApplicationInfo().uid);
@@ -176,6 +203,7 @@ public enum PermissionType {
                 Intent intent = new Intent();
                 intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                 intent.addCategory(Intent.CATEGORY_DEFAULT);
+                intent.setPackage(context.getPackageName());
                 intent.setData(Uri.parse("package:" + context.getPackageName()));
                 context.startActivity(intent);
             }
