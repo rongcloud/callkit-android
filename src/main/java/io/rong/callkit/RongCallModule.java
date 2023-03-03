@@ -28,6 +28,7 @@ import io.rong.imkit.conversation.extension.IExtensionModule;
 import io.rong.imkit.conversation.extension.RongExtension;
 import io.rong.imkit.conversation.extension.component.emoticon.IEmoticonTab;
 import io.rong.imkit.conversation.extension.component.plugin.IPluginModule;
+import io.rong.imlib.IRongCoreEnum;
 import io.rong.imlib.RongIMClient;
 import io.rong.imlib.model.Conversation;
 import io.rong.imlib.model.Message;
@@ -117,10 +118,10 @@ public class RongCallModule implements IExtensionModule {
                                 multiCallEndMessage.setReason(reason);
                                 if (callSession.getMediaType()
                                         == RongCallCommon.CallMediaType.AUDIO) {
-                                    multiCallEndMessage.setMediaType(RongIMClient.MediaType.AUDIO);
+                                    multiCallEndMessage.setMediaType(IRongCoreEnum.MediaType.AUDIO);
                                 } else if (callSession.getMediaType()
                                         == RongCallCommon.CallMediaType.VIDEO) {
-                                    multiCallEndMessage.setMediaType(RongIMClient.MediaType.VIDEO);
+                                    multiCallEndMessage.setMediaType(IRongCoreEnum.MediaType.VIDEO);
                                 }
                                 IMCenter.getInstance()
                                         .insertIncomingMessage(

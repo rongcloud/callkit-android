@@ -15,7 +15,7 @@ import io.rong.calllib.message.CallSTerminateMessage;
 import io.rong.calllib.message.MultiCallEndMessage;
 import io.rong.common.RLog;
 import io.rong.imkit.IMCenter;
-import io.rong.imlib.RongIMClient;
+import io.rong.imlib.IRongCoreEnum;
 import io.rong.imlib.model.Conversation;
 import java.util.HashMap;
 import java.util.Queue;
@@ -396,9 +396,9 @@ public class RongCallProxy implements IRongCallListener {
                 MultiCallEndMessage multiCallEndMessage = new MultiCallEndMessage();
                 multiCallEndMessage.setReason(reason);
                 if (callSession.getMediaType() == RongCallCommon.CallMediaType.AUDIO) {
-                    multiCallEndMessage.setMediaType(RongIMClient.MediaType.AUDIO);
+                    multiCallEndMessage.setMediaType(IRongCoreEnum.MediaType.AUDIO);
                 } else if (callSession.getMediaType() == RongCallCommon.CallMediaType.VIDEO) {
-                    multiCallEndMessage.setMediaType(RongIMClient.MediaType.VIDEO);
+                    multiCallEndMessage.setMediaType(IRongCoreEnum.MediaType.VIDEO);
                 }
                 IMCenter.getInstance()
                         .insertIncomingMessage(

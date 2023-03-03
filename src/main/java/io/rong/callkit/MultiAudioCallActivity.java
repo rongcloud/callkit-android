@@ -779,7 +779,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
 
         MultiCallEndMessage multiCallEndMessage = new MultiCallEndMessage();
         multiCallEndMessage.setReason(reason);
-        multiCallEndMessage.setMediaType(RongIMClient.MediaType.AUDIO);
+        multiCallEndMessage.setMediaType(IRongCoreEnum.MediaType.AUDIO);
         long serverTime = System.currentTimeMillis() - RongIMClient.getInstance().getDeltaTime();
         IMCenter.getInstance()
                 .insertIncomingMessage(

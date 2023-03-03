@@ -140,6 +140,7 @@ public class DefaultPushConfig {
                                 .setChannelIdHW(hw) //
                                 .setChannelIdMi(mi) //
                                 .setChannelIdOPPO(oppo) //
+                                .setCategoryHW("VOIP")
                                 .build()) //
                 .setIOSConfig(new IOSConfig(threadId, apnsId))
                 .build(); //

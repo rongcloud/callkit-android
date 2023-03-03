@@ -1114,7 +1114,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         }
 
         MultiCallEndMessage multiCallEndMessage = new MultiCallEndMessage();
-        multiCallEndMessage.setMediaType(RongIMClient.MediaType.VIDEO);
+        multiCallEndMessage.setMediaType(IRongCoreEnum.MediaType.VIDEO);
         multiCallEndMessage.setReason(reason);
         long serverTime = System.currentTimeMillis() - RongIMClient.getInstance().getDeltaTime();
         IMCenter.getInstance()
