@@ -194,26 +194,12 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
                 return; // 群组消息，getCallSession不为空，说明收到的hangup并不是最后一个人发出的，此时不需要生成通知
             }
         } else {
-            if (userInfo == null) {
-                pushContent =
-                        context.getResources()
-                                .getString(
-                                        isAudio
-                                                ? R.string
-                                                        .rc_voip_notificatio_audio_call_inviting_general
-                                                : R.string
-                                                        .rc_voip_notificatio_video_call_inviting_general);
-            } else {
-                pushContent =
-                        userInfo.getName()
-                                + context.getResources()
-                                        .getString(
-                                                isAudio
-                                                        ? R.string
-                                                                .rc_voip_notificatio_audio_call_inviting
-                                                        : R.string
-                                                                .rc_voip_notificatio_video_call_inviting);
-            }
+            pushContent =
+                    context.getResources()
+                            .getString(
+                                    isAudio
+                                            ? R.string.rc_voip_audio_call_inviting
+                                            : R.string.rc_voip_video_call_inviting);
         }
         message.setPushContent(pushContent);
         if (callSession.getConversationType().equals(ConversationType.PRIVATE)) {
@@ -233,7 +219,7 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
             }
             if (!TextUtils.isEmpty(messagePushConfig.getPushContent())
                     && !messagePushConfig.getPushContent().equals("voip")) {
-                message.setPushContent(messagePushConfig.getPushContent());
+                // message.setPushContent(messagePushConfig.getPushContent());
             }
             if (messagePushConfig.isForceShowDetailContent()) {
                 message.setShowDetail(messagePushConfig.isForceShowDetailContent());

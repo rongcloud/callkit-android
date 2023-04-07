@@ -36,6 +36,7 @@ import io.rong.push.RongPushClient;
 import io.rong.push.notification.PushNotificationMessage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /** Created by weiqinxiao on 16/8/15. */
 public class RongCallModule implements IExtensionModule {
@@ -78,12 +79,18 @@ public class RongCallModule implements IExtensionModule {
                                 if (time >= 3600) {
                                     extra =
                                             String.format(
+                                                    Locale.ROOT,
                                                     "%d:%02d:%02d",
-                                                    time / 3600, (time % 3600) / 60, (time % 60));
+                                                    time / 3600,
+                                                    (time % 3600) / 60,
+                                                    (time % 60));
                                 } else {
                                     extra =
                                             String.format(
-                                                    "%02d:%02d", (time % 3600) / 60, (time % 60));
+                                                    Locale.ROOT,
+                                                    "%02d:%02d",
+                                                    (time % 3600) / 60,
+                                                    (time % 60));
                                 }
                                 message.setExtra(extra);
 

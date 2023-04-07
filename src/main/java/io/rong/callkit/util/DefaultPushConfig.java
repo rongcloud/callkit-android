@@ -38,15 +38,11 @@ public class DefaultPushConfig {
         String content = sharedPreferences.getString("content", "");
         String invitePushContent =
                 TextUtils.isEmpty(content)
-                        ? (userName
-                                + " "
-                                + context.getResources()
-                                        .getString(
-                                                isAudio
-                                                        ? R.string
-                                                                .rc_voip_notificatio_audio_call_inviting
-                                                        : R.string
-                                                                .rc_voip_notificatio_video_call_inviting))
+                        ? (context.getResources()
+                                .getString(
+                                        isAudio
+                                                ? R.string.rc_voip_notificatio_audio_call_inviting
+                                                : R.string.rc_voip_notificatio_video_call_inviting))
                         : content;
         String data = sharedPreferences.getString("data", "");
         String hw = sharedPreferences.getString("hw", "");

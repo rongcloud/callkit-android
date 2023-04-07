@@ -53,6 +53,12 @@ public class RTCPhoneStateReceiver extends BroadcastReceiver {
 
         if (!TextUtils.isEmpty(state) && !twice.equals(state)) {
             twice = state;
+
+            if (RongCallClient.getInstance() == null) {
+                Log.e(TAG, "RongCallClient is empty");
+                return;
+            }
+
             RongCallSession callSession = RongCallClient.getInstance().getCallSession();
             if (callSession == null) {
                 Log.e(TAG, "callSession is empty");

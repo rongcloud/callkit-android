@@ -43,6 +43,7 @@ import io.rong.imlib.RongIMClient;
 import io.rong.imlib.model.Conversation;
 import io.rong.message.InformationNotificationMessage;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -175,6 +176,7 @@ public class CallFloatBoxView {
                                 if (mTime >= 3600) {
                                     extra =
                                             String.format(
+                                                    Locale.ROOT,
                                                     "%d:%02d:%02d",
                                                     mTime / 3600,
                                                     (mTime % 3600) / 60,
@@ -182,7 +184,10 @@ public class CallFloatBoxView {
                                 } else {
                                     extra =
                                             String.format(
-                                                    "%02d:%02d", (mTime % 3600) / 60, (mTime % 60));
+                                                    Locale.ROOT,
+                                                    "%02d:%02d",
+                                                    (mTime % 3600) / 60,
+                                                    (mTime % 60));
                                 }
                                 if (!TextUtils.isEmpty(senderId)) {
                                     switch (callProfile.getConversationType()) {
@@ -727,6 +732,7 @@ public class CallFloatBoxView {
                                 if (mTime >= 3600) {
                                     extra =
                                             String.format(
+                                                    Locale.ROOT,
                                                     "%d:%02d:%02d",
                                                     mTime / 3600,
                                                     (mTime % 3600) / 60,
@@ -734,7 +740,10 @@ public class CallFloatBoxView {
                                 } else {
                                     extra =
                                             String.format(
-                                                    "%02d:%02d", (mTime % 3600) / 60, (mTime % 60));
+                                                    Locale.ROOT,
+                                                    "%02d:%02d",
+                                                    (mTime % 3600) / 60,
+                                                    (mTime % 60));
                                 }
                                 if (!TextUtils.isEmpty(senderId)) {
                                     switch (callProfile.getConversationType()) {
@@ -1141,6 +1150,7 @@ public class CallFloatBoxView {
                                             if (mTime >= 3600) {
                                                 timeView.setText(
                                                         String.format(
+                                                                Locale.ROOT,
                                                                 "%d:%02d:%02d",
                                                                 mTime / 3600,
                                                                 (mTime % 3600) / 60,
@@ -1149,8 +1159,10 @@ public class CallFloatBoxView {
                                             } else {
                                                 timeView.setText(
                                                         String.format(
+                                                                Locale.ROOT,
                                                                 "%02d:%02d",
-                                                                (mTime % 3600) / 60, (mTime % 60)));
+                                                                (mTime % 3600) / 60,
+                                                                (mTime % 60)));
                                                 timeView.setVisibility(View.VISIBLE);
                                             }
                                         }

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="callkit_selected_contacts_count">%d contact(s) selected</string>
-    <string name="callkit_voip_ok">OK</string>
+    <string name="callkit_selected_contacts_count">%d members selected</string>
+    <string name="callkit_voip_ok">Confirm</string>
     <string name="rc_voip_video">Video Call</string>
     <string name="rc_voip_audio">Voice Call</string>
-    <string name="rc_voip_call_waiting">Waiting for response...</string>
+    <string name="rc_voip_call_waiting">Awaiting response...</string>
     <string name="rc_voip_call_connecting">Connecting</string>
     <string name="rc_voip_call_busy">Busy line</string>
     <string name="rc_voip_call_no_response">No answer</string>
     <string name="rc_voip_call_hangup">Cancelled</string>
-    <string name="rc_voip_call_network_error">Network connection is not reachable, please check it</string>
+    <string name="rc_voip_call_network_error">Network is unavailable, please check your network</string>
     <string name="rc_voip_call_interrupt">Interrupt</string>
     <string name="rc_voip_call_terminalted">Call ended</string>
     <string name="rc_voip_call_started">Call started</string>
-    <string name="rc_voip_select_member">Select members</string>
+    <string name="rc_voip_select_member">Select Members</string>
     <string name="rc_voip_call_audio_start_fail">Voice call is on. Try again later.</string>
     <string name="rc_voip_call_video_start_fail">Video call is on. Try again later.</string>
     <string name="rc_voip_call_audio_start_fail_callidfailed">A voice call is in progress. New calls are not allowed</string>
@@ -29,12 +29,12 @@
     <string name="rc_voip_notificatio_video_call_inviting_general">You\'ve got a video chat invitation</string>
 
 
-    <string name="rc_voip_video_ended">Video call ended</string>
-    <string name="rc_voip_video_no_response">Video call no answer</string>
-    <string name="rc_voip_video_cancel">Video call canceled</string>
-    <string name="rc_voip_audio_ended">Voice call ended</string>
-    <string name="rc_voip_audio_no_response">Voice call no answer</string>
-    <string name="rc_voip_audio_cancel">Voice call canceled</string>
+    <string name="rc_voip_video_ended">Call ended</string>
+    <string name="rc_voip_video_no_response">Call No answer</string>
+    <string name="rc_voip_video_cancel">Call Cancelled</string>
+    <string name="rc_voip_audio_ended">Call ended</string>
+    <string name="rc_voip_audio_no_response">Call No answer</string>
+    <string name="rc_voip_audio_cancel">Call Cancelled</string>
     <string name="rc_voip_mute">Mute</string>
     <string name="rc_voip_hangup">Hang up</string>
     <string name="rc_voip_answer">Accept</string>
@@ -50,28 +50,28 @@
     <string name="rc_voip_mt_reject">Remote Declined</string>
     <string name="rc_voip_mt_no_response">Remote No answer</string>
     <string name="rc_voip_call_time_length">Duration&#160;</string>
-    <string name="rc_voip_mt_busy">The other user may be busy now.</string>
+    <string name="rc_voip_mt_busy">Busy line</string>
     <string name="rc_voip_mt_busy_toast">The other user may be busy now, Try again later.</string>
     <string name="rc_voip_message_audio">[Voice Call]</string>
     <string name="rc_voip_message_video">[Video Call]</string>
     <string name="rc_voip_switch_to_audio">Switch to voice call</string>
     <string name="rc_voip_remote_switched_to_audio">Other user switched to voice call.</string>
-    <string name="rc_voip_switched_to_audio">Switch to voice call</string>
+    <string name="rc_voip_switched_to_audio">Switched to voice call</string>
     <string name="rc_voip_float_window_not_allowed">Please enable floating windows</string>
     <string name="rc_call_on_going">Call in progress</string>
-    <string name="rc_audio_call_on_going">Tap to continue as voice call in progress</string>
+    <string name="rc_audio_call_on_going">Tap to continue as voice call is on</string>
     <string name="rc_video_call_on_going">Tap to continue as video call is on</string>
     <string name="rc_voip_over_limit">Up to %d members</string>
     <string name="rc_voip_connecting">Connecting...</string>
-    <string name="rc_voip_unstable_call_connection">Unstable call connection</string>
+    <string name="rc_voip_unstable_call_connection">Network is unstable</string>
     <string name="rc_voip_add_member">Select Members</string>
     <string name="rc_voip_engine_notfound">Audio and video services are turned off</string>
     <string name="rc_voip_mo_rejected_by_blocklist">Has been blacklisted by receiver</string>
 
-    <string name="rc_select_contact">Select contacts</string>
+    <string name="rc_select_contact">Select Members</string>
     <string name="rc_search">Search</string>
-    <string name="rc_background_start_actvity_deny">Your system turned off \"Display pop-up windows while running in the background\" permission,
-Please turn it on in the application permission management page of \"Settings\"</string>
+    <string name="rc_background_start_actvity_deny">Your system turned off \""Display pop-up windows while running in the background\"" permission,
+Please turn it on in the application permission management page of \""Settings\""</string>
 
     <string name="rc_voip_audio_refuse">Voice call rejected</string>
     <string name="rc_voip_video_refuse">Video call rejected</string>
@@ -79,7 +79,19 @@ Please turn it on in the application permission management page of \"Settings\"<
     <string name="rc_voip_loading_whiteboard">Whiteboard loading...</string>
     <string name="rc_voip_web_page_cetificate_invalid">The web page certificate you visited is invalid, Do you want to continue your visit?</string>
     <string name="rc_voip_im_connection_abnormal">IM connection is abnormal. Please check the network and try again</string>
-    <string name="rc_voip_search_no_member">There are no data available to search!</string>
+    <string name="rc_voip_search_no_member">no search results</string>
 
     <string name="rc_voip_call_terminalted_notify">[Call ended]</string>
+    <string name="rc_voip_hand_up">Raise hand to speak</string>
+    <string name="rc_voip_whiteboard">whiteboard</string>
+    <string name="rc_voip_ok">ok</string>
+    <string name="rc_voip_cancel">cancel</string>
+    <string name="rc_voip_mic">microphone</string>
+    <string name="rc_voip_camera_mic">camera and mic</string>
+    <string name="rc_voip_open">open</string>
+    <string name="rc_voip_close">close</string>
+    <string name="rc_voip_video_observer">Need to join the meeting as an audience, continue or not</string>
+    <string name="rc_voip_observer_hint">You are an observer, please raise your hand if you wish to speak</string>
+    <string name="rc_voip_video_numberofobservers">Up to %d members</string>
+    <string name="rc_voip_audio_numberofobservers">Up to %d members</string>
 </resources>

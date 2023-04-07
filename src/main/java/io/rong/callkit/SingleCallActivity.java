@@ -11,11 +11,13 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -103,6 +105,13 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         mButtonContainer = (FrameLayout) findViewById(R.id.rc_voip_btn);
         mUserInfoContainer = (LinearLayout) findViewById(R.id.rc_voip_user_info);
         mConnectionStateTextView = findViewById(R.id.rc_tv_connection_state);
+
+        if (CallKitUtils.findConfigurationLanguage(SingleCallActivity.this, "ar")) {
+            // android:layout_gravity="right|top"
+            FrameLayout.LayoutParams params = (LayoutParams) mSPreviewContainer.getLayoutParams();
+            params.gravity = Gravity.LEFT | Gravity.TOP;
+            mSPreviewContainer.setLayoutParams(params);
+        }
 
         startForCheckPermissions = intent.getBooleanExtra("checkPermissions", false);
         RongCallAction callAction = RongCallAction.valueOf(intent.getStringExtra("callAction"));
@@ -734,20 +743,27 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
 
     private void addRemoteVideoView(String userId, SurfaceView remoteVideo) {
         if (hasRemoteVideoView(remoteVideo)) {
+            Log.v(TAG, "onRemoteUserJoined hasRemoteVideoView");
             return;
         }
+
+        if (remoteVideo.getParent() != null) {
+            Log.v(TAG, "onRemoteUserJoined remoteVideo.getParent() != null");
+            return;
+        }
+
         findViewById(R.id.rc_voip_call_information)
                 .setBackgroundColor(getResources().getColor(android.R.color.transparent));
         mLPreviewContainer.setVisibility(View.VISIBLE);
         mLPreviewContainer.removeAllViews();
         remoteVideo.setTag(userId);
-
         Log.v(TAG, "onRemoteUserJoined mLPreviewContainer.addView(remoteVideo)");
         mLPreviewContainer.addView(remoteVideo, mLargeLayoutParams);
         mLPreviewContainer.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        Log.v(TAG, "setOnClickListener. isInformationShow : " + isInformationShow);
                         if (isInformationShow) {
                             hideVideoCallInformation();
                         } else {
@@ -1023,9 +1039,15 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         long time = getTime(callSession.getActiveTime());
         if (time > 0) {
             if (time >= 3600) {
-                extra = String.format("%d:%02d:%02d", time / 3600, (time % 3600) / 60, (time % 60));
+                extra =
+                        String.format(
+                                Locale.ROOT,
+                                "%d:%02d:%02d",
+                                time / 3600,
+                                (time % 3600) / 60,
+                                (time % 60));
             } else {
-                extra = String.format("%02d:%02d", (time % 3600) / 60, (time % 60));
+                extra = String.format(Locale.ROOT, "%02d:%02d", (time % 3600) / 60, (time % 60));
             }
         }
         cancelTime();
