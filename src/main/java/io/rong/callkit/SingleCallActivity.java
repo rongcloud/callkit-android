@@ -127,6 +127,17 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             callSession = intent.getParcelableExtra("callSession");
             mediaType = callSession.getMediaType();
             receivedCallId = callSession.getCallId();
+            // 正常在收到呼叫后，RongCallClient 和 CallSession均不会为空
+            if (RongCallClient.getInstance() == null
+                    || RongCallClient.getInstance().getCallSession() == null) {
+                // 如果为空 表示通话已经结束 但依然启动了本页面，这样会导致页面无法销毁问题
+                // 所以 需要在这里 finish 结束当前页面  推荐开发者在结束当前页面前跳转至APP主页或者其他页面
+                RLog.e(
+                        TAG,
+                        "SingleCallActivity#onCreate()->RongCallClient or CallSession is empty---->finish()");
+                finish();
+                return;
+            }
         } else {
             callSession = RongCallClient.getInstance().getCallSession();
             if (callSession != null) {
