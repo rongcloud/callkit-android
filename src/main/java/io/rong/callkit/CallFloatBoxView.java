@@ -84,11 +84,9 @@ public class CallFloatBoxView {
         if (mTime > 0) {
             setAudioMode(AudioManager.MODE_IN_COMMUNICATION);
         }
-
         mBundle = bundle;
         wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         WindowManager.LayoutParams params = createLayoutParams(context);
-
         RongCallCommon.CallMediaType mediaType =
                 RongCallCommon.CallMediaType.valueOf(bundle.getInt("mediaType"));
         if (mediaType == RongCallCommon.CallMediaType.VIDEO
@@ -568,7 +566,7 @@ public class CallFloatBoxView {
                 WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                         | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-
+        params.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         params.format = PixelFormat.TRANSLUCENT;
         params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
         params.height = ViewGroup.LayoutParams.WRAP_CONTENT;

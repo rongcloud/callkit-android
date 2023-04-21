@@ -25,8 +25,8 @@
     <string name="rc_voip_video_call_inviting">邀请您进行视频通话...</string>
     <string name="rc_voip_notificatio_video_call_inviting">邀请您进行视频通话</string>
     <string name="rc_voip_notificatio_audio_call_inviting">邀请您进行语音通话</string>
-    <string name="rc_voip_notificatio_audio_call_inviting_general">你有一个语音通话邀请</string>
-    <string name="rc_voip_notificatio_video_call_inviting_general">你有一个视频通话邀请</string>
+    <string name="rc_voip_notificatio_audio_call_inviting_general">您有一个语音通话邀请</string>
+    <string name="rc_voip_notificatio_video_call_inviting_general">您有一个视频通话邀请</string>
     <string name="rc_voip_video_ended">通话已结束</string>
     <string name="rc_voip_video_no_response">通话未接听</string>
     <string name="rc_voip_video_cancel">已取消通话</string>
