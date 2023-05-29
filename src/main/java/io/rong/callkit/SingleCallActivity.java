@@ -753,6 +753,10 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
     }
 
     private void addRemoteVideoView(String userId, SurfaceView remoteVideo) {
+        if (remoteVideo == null) {
+            Log.e(TAG, "addRemoteVideoView: remoteVideo is null!");
+            return;
+        }
         if (hasRemoteVideoView(remoteVideo)) {
             Log.v(TAG, "onRemoteUserJoined hasRemoteVideoView");
             return;

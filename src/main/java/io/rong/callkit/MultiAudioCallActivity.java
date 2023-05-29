@@ -203,7 +203,8 @@ public class MultiAudioCallActivity extends BaseCallActivity {
             }
             // 添加数据
             for (CallUserProfile item : participantProfiles) {
-                if (!item.getUserId().equals(callSession.getSelfUserId())) {
+                if (!item.getUserId().equals(callSession.getSelfUserId())
+                        && memberContainer.findChildById(item.getUserId()) == null) {
                     if (item.getCallStatus().equals(RongCallCommon.CallStatus.CONNECTED)) {
                         memberContainer.addChild(
                                 item.getUserId(),
