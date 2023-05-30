@@ -28,7 +28,6 @@ import io.rong.imkit.conversation.extension.IExtensionModule;
 import io.rong.imkit.conversation.extension.RongExtension;
 import io.rong.imkit.conversation.extension.component.emoticon.IEmoticonTab;
 import io.rong.imkit.conversation.extension.component.plugin.IPluginModule;
-import io.rong.imlib.IRongCoreEnum;
 import io.rong.imlib.RongIMClient;
 import io.rong.imlib.model.Conversation;
 import io.rong.imlib.model.Message;
@@ -36,7 +35,6 @@ import io.rong.push.RongPushClient;
 import io.rong.push.notification.PushNotificationMessage;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /** Created by weiqinxiao on 16/8/15. */
 public class RongCallModule implements IExtensionModule {
@@ -79,18 +77,12 @@ public class RongCallModule implements IExtensionModule {
                                 if (time >= 3600) {
                                     extra =
                                             String.format(
-                                                    Locale.ROOT,
                                                     "%d:%02d:%02d",
-                                                    time / 3600,
-                                                    (time % 3600) / 60,
-                                                    (time % 60));
+                                                    time / 3600, (time % 3600) / 60, (time % 60));
                                 } else {
                                     extra =
                                             String.format(
-                                                    Locale.ROOT,
-                                                    "%02d:%02d",
-                                                    (time % 3600) / 60,
-                                                    (time % 60));
+                                                    "%02d:%02d", (time % 3600) / 60, (time % 60));
                                 }
                                 message.setExtra(extra);
 
@@ -125,10 +117,10 @@ public class RongCallModule implements IExtensionModule {
                                 multiCallEndMessage.setReason(reason);
                                 if (callSession.getMediaType()
                                         == RongCallCommon.CallMediaType.AUDIO) {
-                                    multiCallEndMessage.setMediaType(IRongCoreEnum.MediaType.AUDIO);
+                                    multiCallEndMessage.setMediaType(RongIMClient.MediaType.AUDIO);
                                 } else if (callSession.getMediaType()
                                         == RongCallCommon.CallMediaType.VIDEO) {
-                                    multiCallEndMessage.setMediaType(IRongCoreEnum.MediaType.VIDEO);
+                                    multiCallEndMessage.setMediaType(RongIMClient.MediaType.VIDEO);
                                 }
                                 IMCenter.getInstance()
                                         .insertIncomingMessage(

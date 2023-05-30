@@ -11,13 +11,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -106,13 +104,6 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         mUserInfoContainer = (LinearLayout) findViewById(R.id.rc_voip_user_info);
         mConnectionStateTextView = findViewById(R.id.rc_tv_connection_state);
 
-        if (CallKitUtils.findConfigurationLanguage(SingleCallActivity.this, "ar")) {
-            // android:layout_gravity="right|top"
-            FrameLayout.LayoutParams params = (LayoutParams) mSPreviewContainer.getLayoutParams();
-            params.gravity = Gravity.LEFT | Gravity.TOP;
-            mSPreviewContainer.setLayoutParams(params);
-        }
-
         startForCheckPermissions = intent.getBooleanExtra("checkPermissions", false);
         RongCallAction callAction = RongCallAction.valueOf(intent.getStringExtra("callAction"));
 
@@ -127,17 +118,6 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             callSession = intent.getParcelableExtra("callSession");
             mediaType = callSession.getMediaType();
             receivedCallId = callSession.getCallId();
-            // 正常在收到呼叫后，RongCallClient 和 CallSession均不会为空
-            if (RongCallClient.getInstance() == null
-                    || RongCallClient.getInstance().getCallSession() == null) {
-                // 如果为空 表示通话已经结束 但依然启动了本页面，这样会导致页面无法销毁问题
-                // 所以 需要在这里 finish 结束当前页面  推荐开发者在结束当前页面前跳转至APP主页或者其他页面
-                RLog.e(
-                        TAG,
-                        "SingleCallActivity#onCreate()->RongCallClient or CallSession is empty---->finish()");
-                finish();
-                return;
-            }
         } else {
             callSession = RongCallClient.getInstance().getCallSession();
             if (callSession != null) {
@@ -753,32 +733,21 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
     }
 
     private void addRemoteVideoView(String userId, SurfaceView remoteVideo) {
-        if (remoteVideo == null) {
-            Log.e(TAG, "addRemoteVideoView: remoteVideo is null!");
-            return;
-        }
         if (hasRemoteVideoView(remoteVideo)) {
-            Log.v(TAG, "onRemoteUserJoined hasRemoteVideoView");
             return;
         }
-
-        if (remoteVideo.getParent() != null) {
-            Log.v(TAG, "onRemoteUserJoined remoteVideo.getParent() != null");
-            return;
-        }
-
         findViewById(R.id.rc_voip_call_information)
                 .setBackgroundColor(getResources().getColor(android.R.color.transparent));
         mLPreviewContainer.setVisibility(View.VISIBLE);
         mLPreviewContainer.removeAllViews();
         remoteVideo.setTag(userId);
+
         Log.v(TAG, "onRemoteUserJoined mLPreviewContainer.addView(remoteVideo)");
         mLPreviewContainer.addView(remoteVideo, mLargeLayoutParams);
         mLPreviewContainer.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Log.v(TAG, "setOnClickListener. isInformationShow : " + isInformationShow);
                         if (isInformationShow) {
                             hideVideoCallInformation();
                         } else {
@@ -1054,15 +1023,9 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         long time = getTime(callSession.getActiveTime());
         if (time > 0) {
             if (time >= 3600) {
-                extra =
-                        String.format(
-                                Locale.ROOT,
-                                "%d:%02d:%02d",
-                                time / 3600,
-                                (time % 3600) / 60,
-                                (time % 60));
+                extra = String.format("%d:%02d:%02d", time / 3600, (time % 3600) / 60, (time % 60));
             } else {
-                extra = String.format(Locale.ROOT, "%02d:%02d", (time % 3600) / 60, (time % 60));
+                extra = String.format("%02d:%02d", (time % 3600) / 60, (time % 60));
             }
         }
         cancelTime();

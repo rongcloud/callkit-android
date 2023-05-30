@@ -5,8 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -23,11 +21,9 @@ import androidx.core.app.AppOpsManagerCompat;
 import androidx.core.content.ContextCompat;
 import io.rong.callkit.R;
 import io.rong.calllib.RongCallCommon;
-import io.rong.common.RLog;
 import io.rong.imlib.model.Message;
 import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 /** Created by dengxudong on 2018/5/17. */
@@ -238,33 +234,5 @@ public class CallKitUtils {
         }
         // 默认是已读状态
         return new Message.ReceivedStatus(1);
-    }
-
-    /** @param language zh en ar */
-    public static boolean findConfigurationLanguage(Context context, String language) {
-        if (context == null || TextUtils.isEmpty(language)) {
-            RLog.w("bugtags", "findConfigurationLanguage->Resources is empty");
-            return false;
-        }
-        Resources resources = context.getResources();
-        if (resources == null) {
-            RLog.w("bugtags", "findConfigurationLanguage->Resources is empty");
-            return false;
-        }
-        Configuration configuration = resources.getConfiguration();
-        if (configuration == null || configuration.locale == null) {
-            RLog.w("bugtags", "findConfigurationLanguage->configuration is empty");
-            return false;
-        }
-
-        Locale locale = configuration.locale;
-        String languageApp = locale.getLanguage();
-        RLog.d(
-                "bugtags",
-                "findConfigurationLanguage->languageApp : "
-                        + languageApp
-                        + " ,language : "
-                        + language);
-        return TextUtils.equals(languageApp, language);
     }
 }

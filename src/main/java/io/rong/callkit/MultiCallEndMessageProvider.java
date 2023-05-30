@@ -13,7 +13,7 @@ import io.rong.imkit.conversation.messgelist.provider.BaseNotificationMessageIte
 import io.rong.imkit.model.UiMessage;
 import io.rong.imkit.widget.adapter.IViewProviderListener;
 import io.rong.imkit.widget.adapter.ViewHolder;
-import io.rong.imlib.IRongCoreEnum;
+import io.rong.imlib.RongIMClient;
 import io.rong.imlib.model.MessageContent;
 import java.util.List;
 
@@ -40,36 +40,36 @@ public class MultiCallEndMessageProvider
         Context context = holder.getContext();
         String msg = "";
         RongCallCommon.CallDisconnectedReason reason = multiCallEndMessage.getReason();
-        IRongCoreEnum.MediaType mediaType = multiCallEndMessage.getMediaType();
+        RongIMClient.MediaType mediaType = multiCallEndMessage.getMediaType();
         if (reason == RongCallCommon.CallDisconnectedReason.OTHER_DEVICE_HAD_ACCEPTED) {
             msg = context.getResources().getString(R.string.rc_voip_call_other);
         } else if (reason == RongCallCommon.CallDisconnectedReason.REMOTE_HANGUP
                 || reason == RongCallCommon.CallDisconnectedReason.HANGUP) {
-            if (mediaType == IRongCoreEnum.MediaType.AUDIO) {
+            if (mediaType == RongIMClient.MediaType.AUDIO) {
                 msg = context.getResources().getString(R.string.rc_voip_audio_ended);
-            } else if (mediaType == IRongCoreEnum.MediaType.VIDEO) {
+            } else if (mediaType == RongIMClient.MediaType.VIDEO) {
                 msg = context.getResources().getString(R.string.rc_voip_video_ended);
             }
         } else if (reason == RongCallCommon.CallDisconnectedReason.REMOTE_REJECT
                 || reason == RongCallCommon.CallDisconnectedReason.REJECT) {
-            if (mediaType == IRongCoreEnum.MediaType.AUDIO) {
+            if (mediaType == RongIMClient.MediaType.AUDIO) {
                 msg = context.getResources().getString(R.string.rc_voip_audio_refuse);
-            } else if (mediaType == IRongCoreEnum.MediaType.VIDEO) {
+            } else if (mediaType == RongIMClient.MediaType.VIDEO) {
                 msg = context.getResources().getString(R.string.rc_voip_video_refuse);
             }
         } else if (reason == RongCallCommon.CallDisconnectedReason.SERVICE_NOT_OPENED
                 || reason == RongCallCommon.CallDisconnectedReason.REMOTE_ENGINE_UNSUPPORTED) {
             msg = context.getResources().getString(R.string.rc_voip_engine_notfound);
         } else if (reason == RongCallCommon.CallDisconnectedReason.CANCEL) {
-            if (mediaType == IRongCoreEnum.MediaType.AUDIO) {
+            if (mediaType == RongIMClient.MediaType.AUDIO) {
                 msg = context.getResources().getString(R.string.rc_voip_audio_cancel);
-            } else if (mediaType == IRongCoreEnum.MediaType.VIDEO) {
+            } else if (mediaType == RongIMClient.MediaType.VIDEO) {
                 msg = context.getResources().getString(R.string.rc_voip_video_cancel);
             }
         } else {
-            if (mediaType == IRongCoreEnum.MediaType.AUDIO) {
+            if (mediaType == RongIMClient.MediaType.AUDIO) {
                 msg = context.getResources().getString(R.string.rc_voip_audio_no_response);
-            } else if (mediaType == IRongCoreEnum.MediaType.VIDEO) {
+            } else if (mediaType == RongIMClient.MediaType.VIDEO) {
                 msg = context.getResources().getString(R.string.rc_voip_video_no_response);
             }
         }
@@ -86,15 +86,15 @@ public class MultiCallEndMessageProvider
     public Spannable getSummarySpannable(Context context, MultiCallEndMessage multiCallEndMessage) {
         String msg = "";
         if (multiCallEndMessage.getReason() == RongCallCommon.CallDisconnectedReason.NO_RESPONSE) {
-            if (multiCallEndMessage.getMediaType() == IRongCoreEnum.MediaType.AUDIO) {
+            if (multiCallEndMessage.getMediaType() == RongIMClient.MediaType.AUDIO) {
                 msg = context.getResources().getString(R.string.rc_voip_audio_no_response);
-            } else if (multiCallEndMessage.getMediaType() == IRongCoreEnum.MediaType.VIDEO) {
+            } else if (multiCallEndMessage.getMediaType() == RongIMClient.MediaType.VIDEO) {
                 msg = context.getResources().getString(R.string.rc_voip_video_no_response);
             }
         } else {
-            if (multiCallEndMessage.getMediaType() == IRongCoreEnum.MediaType.AUDIO) {
+            if (multiCallEndMessage.getMediaType() == RongIMClient.MediaType.AUDIO) {
                 msg = context.getResources().getString(R.string.rc_voip_message_audio);
-            } else if (multiCallEndMessage.getMediaType() == IRongCoreEnum.MediaType.VIDEO) {
+            } else if (multiCallEndMessage.getMediaType() == RongIMClient.MediaType.VIDEO) {
                 msg = context.getResources().getString(R.string.rc_voip_message_video);
             }
         }

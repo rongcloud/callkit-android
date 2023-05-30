@@ -65,7 +65,6 @@ import io.rong.push.notification.RongNotificationInterface;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 /** Created by weiqinxiao on 16/3/9. */
 public class BaseCallActivity extends BaseNoActionBarActivity
@@ -139,8 +138,6 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     public static final String EXTRA_BUNDLE_KEY_MEDIATYPE = "mediaType";
     public static final String EXTRA_BUNDLE_KEY_USER_TOP_NAME = "rc_voip_user_top_name";
     public static final String EXTRA_BUNDLE_KEY_USER_TOP_NAME_TAG = "rc_voip_user_top_name_tag";
-    public static final String EXTRA_BUNDLE_KEY_USER_PROFILE_TAG_ORDER_TAG =
-            "extra_bundle_key_user_profile_tag_order_tag";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -527,7 +524,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
                 text = getString(R.string.rc_voip_mo_no_response);
                 break;
             case REMOTE_BUSY_LINE:
-                text = getString(R.string.rc_voip_mt_busy);
+                text = getString(R.string.rc_voip_mt_busy_toast);
                 break;
             case REMOTE_CANCEL:
                 text = getString(R.string.rc_voip_mt_cancel);
@@ -687,21 +684,15 @@ public class BaseCallActivity extends BaseNoActionBarActivity
             this.timeView = timeView;
         }
 
-        @SuppressLint("DefaultLocale")
         @Override
         public void run() {
             time++;
             if (time >= 3600) {
                 timeView.setText(
                         String.format(
-                                Locale.ROOT,
-                                "%d:%02d:%02d",
-                                time / 3600,
-                                (time % 3600) / 60,
-                                (time % 60)));
+                                "%d:%02d:%02d", time / 3600, (time % 3600) / 60, (time % 60)));
             } else {
-                timeView.setText(
-                        String.format(Locale.ROOT, "%02d:%02d", (time % 3600) / 60, (time % 60)));
+                timeView.setText(String.format("%02d:%02d", (time % 3600) / 60, (time % 60)));
             }
             handler.postDelayed(this, 1000);
         }

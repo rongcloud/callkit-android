@@ -43,7 +43,6 @@ import io.rong.imlib.RongIMClient;
 import io.rong.imlib.model.Conversation;
 import io.rong.message.InformationNotificationMessage;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -84,9 +83,11 @@ public class CallFloatBoxView {
         if (mTime > 0) {
             setAudioMode(AudioManager.MODE_IN_COMMUNICATION);
         }
+
         mBundle = bundle;
         wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         WindowManager.LayoutParams params = createLayoutParams(context);
+
         RongCallCommon.CallMediaType mediaType =
                 RongCallCommon.CallMediaType.valueOf(bundle.getInt("mediaType"));
         if (mediaType == RongCallCommon.CallMediaType.VIDEO
@@ -174,7 +175,6 @@ public class CallFloatBoxView {
                                 if (mTime >= 3600) {
                                     extra =
                                             String.format(
-                                                    Locale.ROOT,
                                                     "%d:%02d:%02d",
                                                     mTime / 3600,
                                                     (mTime % 3600) / 60,
@@ -182,10 +182,7 @@ public class CallFloatBoxView {
                                 } else {
                                     extra =
                                             String.format(
-                                                    Locale.ROOT,
-                                                    "%02d:%02d",
-                                                    (mTime % 3600) / 60,
-                                                    (mTime % 60));
+                                                    "%02d:%02d", (mTime % 3600) / 60, (mTime % 60));
                                 }
                                 if (!TextUtils.isEmpty(senderId)) {
                                     switch (callProfile.getConversationType()) {
@@ -566,7 +563,7 @@ public class CallFloatBoxView {
                 WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                         | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        params.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+
         params.format = PixelFormat.TRANSLUCENT;
         params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
         params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -730,7 +727,6 @@ public class CallFloatBoxView {
                                 if (mTime >= 3600) {
                                     extra =
                                             String.format(
-                                                    Locale.ROOT,
                                                     "%d:%02d:%02d",
                                                     mTime / 3600,
                                                     (mTime % 3600) / 60,
@@ -738,10 +734,7 @@ public class CallFloatBoxView {
                                 } else {
                                     extra =
                                             String.format(
-                                                    Locale.ROOT,
-                                                    "%02d:%02d",
-                                                    (mTime % 3600) / 60,
-                                                    (mTime % 60));
+                                                    "%02d:%02d", (mTime % 3600) / 60, (mTime % 60));
                                 }
                                 if (!TextUtils.isEmpty(senderId)) {
                                     switch (callProfile.getConversationType()) {
@@ -1148,7 +1141,6 @@ public class CallFloatBoxView {
                                             if (mTime >= 3600) {
                                                 timeView.setText(
                                                         String.format(
-                                                                Locale.ROOT,
                                                                 "%d:%02d:%02d",
                                                                 mTime / 3600,
                                                                 (mTime % 3600) / 60,
@@ -1157,10 +1149,8 @@ public class CallFloatBoxView {
                                             } else {
                                                 timeView.setText(
                                                         String.format(
-                                                                Locale.ROOT,
                                                                 "%02d:%02d",
-                                                                (mTime % 3600) / 60,
-                                                                (mTime % 60)));
+                                                                (mTime % 3600) / 60, (mTime % 60)));
                                                 timeView.setVisibility(View.VISIBLE);
                                             }
                                         }

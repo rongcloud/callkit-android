@@ -13,12 +13,6 @@
         android:orientation="vertical">
 
         <FrameLayout
-          android:id="@+id/viewlet_remote_video_user"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          android:onClick="onSwitchRemoteUsers"/>
-
-        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -46,9 +40,13 @@
                 android:lines="1"
                 android:layout_marginLeft="5dp"
                 android:layout_gravity="left|bottom"/>
-
         </FrameLayout>
 
+        <FrameLayout
+            android:id="@+id/viewlet_remote_video_user"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:onClick="onSwitchRemoteUsers"/>
     </RelativeLayout>
 
 </RelativeLayout>
