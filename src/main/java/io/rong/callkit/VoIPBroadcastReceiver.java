@@ -1,5 +1,7 @@
 package io.rong.callkit;
 
+import static android.content.Context.NOTIFICATION_SERVICE;
+
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -13,8 +15,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
+import androidx.core.app.NotificationCompat;
 import io.rong.callkit.util.CallRingingUtil;
 import io.rong.callkit.util.IncomingCallExtraHandleUtil;
+import io.rong.callkit.util.RingingMode;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallSession;
@@ -89,7 +94,8 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
 
         if (TextUtils.equals(ACTION_CALLINVITEMESSAGE, action)) {
             if (callSession == null) {
-                RLog.e(TAG, "push:: callsession is null !!");
+                // fcm voip 走的是透传，处理一下这种情况下，单独弹起一个通知拉起应用
+                fcmShowNotification(context, message);
                 return;
             }
             String objName = message.getObjectName();
@@ -116,6 +122,70 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
                     callSession,
                     checkPermissions,
                     intent.getStringExtra(RongIncomingCallService.KEY_NEED_AUTO_ANSWER));
+        }
+    }
+
+    private static int notificationId = 4000;
+
+    public void fcmShowNotification(final Context context, PushNotificationMessage message) {
+
+        try {
+            CallRingingUtil.getInstance().createNotificationChannel(context);
+            int smallIcon =
+                    context.getResources()
+                            .getIdentifier(
+                                    "notification_small_icon",
+                                    "drawable",
+                                    context.getPackageName());
+            if (smallIcon <= 0) {
+                smallIcon = context.getApplicationInfo().icon;
+            }
+            Uri uri =
+                    Uri.parse("rong://" + context.getPackageName())
+                            .buildUpon()
+                            .appendPath("conversationlist")
+                            .build();
+            Intent intent = new Intent();
+            intent.setData(uri);
+            intent.setPackage(context.getPackageName());
+            // 目标activity的包名和类名
+            PendingIntent pendingIntent;
+            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                pendingIntent =
+                        PendingIntent.getActivity(
+                                context,
+                                1000,
+                                intent,
+                                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            } else {
+                pendingIntent =
+                        PendingIntent.getActivity(
+                                context, 1000, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            }
+            NotificationCompat.Builder notificationBuilder =
+                    new NotificationCompat.Builder(
+                                    context,
+                                    CallRingingUtil.getInstance().getNotificationChannelId())
+                            .setContentText(message.getPushContent())
+                            .setContentTitle(message.getPushTitle())
+                            .setSmallIcon(smallIcon)
+                            .setPriority(NotificationCompat.PRIORITY_HIGH)
+                            .setCategory(NotificationCompat.CATEGORY_CALL)
+                            .setContentIntent(pendingIntent)
+                            .setAutoCancel(true)
+                            .setOngoing(true);
+            Notification notification = notificationBuilder.build();
+            NotificationManager notificationManager = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                notificationManager = context.getSystemService(NotificationManager.class);
+            }
+            if (notificationManager != null) {
+                notificationManager.notify(++notificationId, notification);
+            }
+            CallRingingUtil.getInstance().startRinging(context, RingingMode.Incoming);
+        } catch (Exception e) {
+            io.rong.common.RLog.e(TAG, "onStartCommand = " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -194,26 +264,12 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
                 return; // 群组消息，getCallSession不为空，说明收到的hangup并不是最后一个人发出的，此时不需要生成通知
             }
         } else {
-            if (userInfo == null) {
-                pushContent =
-                        context.getResources()
-                                .getString(
-                                        isAudio
-                                                ? R.string
-                                                        .rc_voip_notificatio_audio_call_inviting_general
-                                                : R.string
-                                                        .rc_voip_notificatio_video_call_inviting_general);
-            } else {
-                pushContent =
-                        userInfo.getName()
-                                + context.getResources()
-                                        .getString(
-                                                isAudio
-                                                        ? R.string
-                                                                .rc_voip_notificatio_audio_call_inviting
-                                                        : R.string
-                                                                .rc_voip_notificatio_video_call_inviting);
-            }
+            pushContent =
+                    context.getResources()
+                            .getString(
+                                    isAudio
+                                            ? R.string.rc_voip_audio_call_inviting
+                                            : R.string.rc_voip_video_call_inviting);
         }
         message.setPushContent(pushContent);
         if (callSession.getConversationType().equals(ConversationType.PRIVATE)) {
@@ -233,7 +289,7 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
             }
             if (!TextUtils.isEmpty(messagePushConfig.getPushContent())
                     && !messagePushConfig.getPushContent().equals("voip")) {
-                message.setPushContent(messagePushConfig.getPushContent());
+                // message.setPushContent(messagePushConfig.getPushContent());
             }
             if (messagePushConfig.isForceShowDetailContent()) {
                 message.setShowDetail(messagePushConfig.isForceShowDetailContent());
@@ -297,6 +353,7 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
                 startIncomingService(context, message, callSession, checkPermissions);
             } else if (HANGUP.equals(objName)) {
                 stopIncomingService(context);
+                Log.e("AAAA", "tttt");
                 sendHangupNotification(context, message, callSession, checkPermissions);
             }
             return;
@@ -324,7 +381,7 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
                         RongNotificationInterface.SoundType.VOIP,
                         message.isShowDetail());
         NotificationManager nm =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             int importance = NotificationManager.IMPORTANCE_HIGH;
@@ -365,6 +422,7 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
             RongCallSession callSession,
             boolean checkPermissions) {
         try {
+            Log.e("AAAA", "fdsfdsf");
             String content =
                     context.getResources().getString(R.string.rc_voip_call_terminalted_notify);
             String title = message.getPushTitle();
@@ -387,7 +445,7 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
                 return;
             }
             NotificationManager nm =
-                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                    (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
             notification.flags |= Notification.FLAG_AUTO_CANCEL;
             CallRingingUtil.getInstance().createNotificationChannel(context);
             RLog.i(

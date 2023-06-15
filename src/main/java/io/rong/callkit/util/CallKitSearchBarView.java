@@ -30,6 +30,9 @@ public class CallKitSearchBarView extends RelativeLayout {
         inflate(context, R.layout.callkit_view_search_bar_layout, this);
         searchIV = findViewById(R.id.iv_icon);
         editSearch = findViewById(R.id.et_search);
+        if (CallKitUtils.findConfigurationLanguage(context, "ar")) {
+            editSearch.setTextDirection(View.TEXT_DIRECTION_RTL);
+        }
         handler = new Handler();
         editSearch.addTextChangedListener(
                 new TextWatcher() {

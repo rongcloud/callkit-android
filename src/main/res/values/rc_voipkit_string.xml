@@ -4,16 +4,16 @@
     <string name="callkit_voip_ok">确定</string>
     <string name="rc_voip_video">视频通话</string>
     <string name="rc_voip_audio">语音通话</string>
-    <string name="rc_voip_call_waiting">正在等待对方接受邀请...</string>
+    <string name="rc_voip_call_waiting">等待对方接受邀请...</string>
     <string name="rc_voip_call_connecting">连接中</string>
-    <string name="rc_voip_call_busy">忙线中</string>
-    <string name="rc_voip_call_no_response">无响应</string>
-    <string name="rc_voip_call_hangup">已挂断</string>
+    <string name="rc_voip_call_busy">对方忙</string>
+    <string name="rc_voip_call_no_response">通话未接听</string>
+    <string name="rc_voip_call_hangup">挂断</string>
     <string name="rc_voip_call_network_error">当前网络不可用,请检查你的网络设置</string>
     <string name="rc_voip_call_interrupt">异常挂断</string>
-    <string name="rc_voip_call_terminalted">通话结束</string>
+    <string name="rc_voip_call_terminalted">通话已结束</string>
     <string name="rc_voip_call_started">开始通话</string>
-    <string name="rc_voip_select_member">选择成员</string>
+    <string name="rc_voip_select_member">添加成员</string>
     <string name="rc_voip_call_audio_start_fail">正在进行语音通话，请稍后再试</string>
     <string name="rc_voip_call_video_start_fail">正在进行视频通话，请稍后再试</string>
     <string name="rc_voip_call_audio_start_fail_callidfailed">正在进行语音通话，不允许发起新的通话</string>
@@ -25,14 +25,14 @@
     <string name="rc_voip_video_call_inviting">邀请您进行视频通话...</string>
     <string name="rc_voip_notificatio_video_call_inviting">邀请您进行视频通话</string>
     <string name="rc_voip_notificatio_audio_call_inviting">邀请您进行语音通话</string>
-    <string name="rc_voip_notificatio_audio_call_inviting_general">你有一个语音通话邀请</string>
-    <string name="rc_voip_notificatio_video_call_inviting_general">你有一个视频通话邀请</string>
-    <string name="rc_voip_video_ended">视频通话已结束</string>
-    <string name="rc_voip_video_no_response">视频通话未接听</string>
-    <string name="rc_voip_video_cancel">视频通话已取消</string>
-    <string name="rc_voip_audio_ended">语音通话已结束</string>
-    <string name="rc_voip_audio_no_response">语音通话未接听</string>
-    <string name="rc_voip_audio_cancel">语音通话已取消</string>
+    <string name="rc_voip_notificatio_audio_call_inviting_general">您有一个语音通话邀请</string>
+    <string name="rc_voip_notificatio_video_call_inviting_general">您有一个视频通话邀请</string>
+    <string name="rc_voip_video_ended">通话已结束</string>
+    <string name="rc_voip_video_no_response">通话未接听</string>
+    <string name="rc_voip_video_cancel">已取消通话</string>
+    <string name="rc_voip_audio_ended">通话已结束</string>
+    <string name="rc_voip_audio_no_response">通话未接听</string>
+    <string name="rc_voip_audio_cancel">已取消通话</string>
     <string name="rc_voip_mute">静音</string>
     <string name="rc_voip_hangup">挂断</string>
     <string name="rc_voip_answer">接听</string>
@@ -65,22 +65,22 @@
     <string name="rc_voip_whiteboard">白板</string>
     <string name="rc_voip_ok">确认</string>
     <string name="rc_voip_cancel">取消</string>
-    <string name="rc_voip_invite_to_normal">主持人邀请您参与讨论\n是否接受?</string>
-    <string name="rc_voip_ask_to_do">主持人请求您%1$s%2$s\n是否接受?</string>
+    <string name="rc_voip_invite_to_normal">主持人邀请您参与讨论 是否接受?</string>
+    <string name="rc_voip_ask_to_do">主持人请求您%1$s%2$s 是否接受?</string>
     <string name="rc_voip_mic">麦克风</string>
     <string name="rc_voip_camera_mic">摄像头和麦克风</string>
     <string name="rc_voip_open">打开</string>
     <string name="rc_voip_close">关闭</string>
-    <string name="rc_voip_video_observer">为了保证会议流畅，后续用户只能以观众模式加入，是否继续？</string>
-    <string name="rc_voip_observer_hint">当前您的身份是观察者，其他人看不见您。\n如需发言请举手。</string>
-    <string name="rc_voip_video_numberofobservers">最多允许%d人同时视频通话</string>
-    <string name="rc_voip_audio_numberofobservers">最多允许%d人同时语音通话</string>
-    <string name="rc_voip_unstable_call_connection">当前通话连接质量不佳</string>
+    <string name="rc_voip_video_observer">为了保障会议流畅进行，需要您以观众模式加入，是否继续？</string>
+    <string name="rc_voip_observer_hint">您的身份为观察者，如需发言请举手</string>
+    <string name="rc_voip_video_numberofobservers">您最多只能选择%d人</string>
+    <string name="rc_voip_audio_numberofobservers">您最多只能选择%d人</string>
+    <string name="rc_voip_unstable_call_connection">网络质量不佳</string>
     <string name="rc_voip_connecting">连接中...</string>
     <string name="rc_voip_engine_notfound">音视频服务已关闭</string>
     <string name="rc_voip_mo_rejected_by_blocklist">已被对方加入黑名单</string>
 
-    <string name="rc_select_contact">选择联系人</string>
+    <string name="rc_select_contact">添加成员</string>
     <string name="rc_search">搜索</string>
     <string name="rc_background_start_actvity_deny">您的系统当前关闭了【后台启动界面】权限，请到系统设置的应用权限管理页面开启。</string>
 
@@ -91,7 +91,7 @@
     <string name="rc_voip_loading_whiteboard">白板加载中...</string>
     <string name="rc_voip_web_page_cetificate_invalid">您访问的网页证书无效，是否继续访问?</string>
     <string name="rc_voip_im_connection_abnormal">IM连接异常，请检查网络后重试</string>
-    <string name="rc_voip_search_no_member">暂无数据提供搜索！</string>
+    <string name="rc_voip_search_no_member">无搜索结果</string>
 
     <string name="rc_voip_call_terminalted_notify">[结束通话]</string>
 </resources>

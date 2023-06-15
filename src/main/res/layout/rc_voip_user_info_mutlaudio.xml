@@ -16,23 +16,24 @@
             android:id="@id/rc_user_portrait"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+          android:alpha="0.5"
             android:background="@android:color/transparent"/>
 
         <TextView
             android:id="@+id/rc_voip_member_state"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:background="#75000000"
             android:gravity="center"
             android:text="连接中..."
             android:textColor="#ffffff" />
 
-        <ImageView
-            android:id="@+id/callkit_mutilAudio_Floatinglayer"
-            android:layout_width="match_parent"
-            android:background="@drawable/callkit_multiaudiouesrinfocontners"
-            android:layout_height="match_parent" />
+<!--        <ImageView-->
+<!--            android:id="@+id/callkit_mutilAudio_Floatinglayer"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:background="@drawable/callkit_multiaudiouesrinfocontners"-->
+<!--            android:layout_height="match_parent"-->
+<!--          android:visibility="gone"/>-->
     </FrameLayout>
 
     <TextView

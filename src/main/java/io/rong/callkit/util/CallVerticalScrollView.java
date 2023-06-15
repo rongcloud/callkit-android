@@ -244,9 +244,10 @@ public class CallVerticalScrollView extends ScrollView implements ICallScrollVie
             if (child != null) {
                 TextView textView = (TextView) child.findViewById(R.id.rc_voip_member_state);
                 textView.setVisibility(visible ? VISIBLE : GONE);
-                ImageView imageView =
-                        (ImageView) child.findViewById(R.id.callkit_mutilAudio_Floatinglayer);
-                imageView.setVisibility(visible ? VISIBLE : GONE);
+                //                ImageView imageView =
+                //                        (ImageView)
+                // child.findViewById(R.id.callkit_mutilAudio_Floatinglayer);
+                //                imageView.setVisibility(visible ? VISIBLE : GONE);
             }
         }
     }

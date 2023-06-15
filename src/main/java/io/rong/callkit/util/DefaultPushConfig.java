@@ -27,7 +27,6 @@ public class DefaultPushConfig {
                 RongUserInfoManager.getInstance()
                         .getUserInfo(RongIM.getInstance().getCurrentUserId());
         String userName = userInfo == null ? "" : userInfo.getName();
-
         // 自定义音视频通话推送内容测试代码，融云SealTalk测试时配置写入SharedPreferences，
         // 开发者根据实际需求定义发起通话和挂断时的push配置，在 startCall 前设置即可
         SharedPreferences sharedPreferences =
@@ -36,18 +35,27 @@ public class DefaultPushConfig {
         String title = sharedPreferences.getString("title", "");
         String pushTile = TextUtils.isEmpty(title) ? (isPrivate ? userName : groupName) : title;
         String content = sharedPreferences.getString("content", "");
-        String invitePushContent =
-                TextUtils.isEmpty(content)
-                        ? (userName
-                                + " "
-                                + context.getResources()
-                                        .getString(
-                                                isAudio
-                                                        ? R.string
-                                                                .rc_voip_notificatio_audio_call_inviting
-                                                        : R.string
-                                                                .rc_voip_notificatio_video_call_inviting))
-                        : content;
+        if (TextUtils.isEmpty(content)) {
+            content =
+                    TextUtils.isEmpty(userName)
+                            ? context.getResources()
+                                    .getString(
+                                            isAudio
+                                                    ? R.string
+                                                            .rc_voip_notificatio_audio_call_inviting_general
+                                                    : R.string
+                                                            .rc_voip_notificatio_video_call_inviting_general)
+                            : userName
+                                    + " "
+                                    + context.getResources()
+                                            .getString(
+                                                    isAudio
+                                                            ? R.string
+                                                                    .rc_voip_notificatio_audio_call_inviting
+                                                            : R.string
+                                                                    .rc_voip_notificatio_video_call_inviting);
+        }
+        String invitePushContent = content;
         String data = sharedPreferences.getString("data", "");
         String hw = sharedPreferences.getString("hw", "");
         String mi = sharedPreferences.getString("mi", "");
@@ -140,6 +148,8 @@ public class DefaultPushConfig {
                                 .setChannelIdHW(hw) //
                                 .setChannelIdMi(mi) //
                                 .setChannelIdOPPO(oppo) //
+                                .setCategoryHW("VOIP")
+                                .setCategoryVivo("IM")
                                 .build()) //
                 .setIOSConfig(new IOSConfig(threadId, apnsId))
                 .build(); //
