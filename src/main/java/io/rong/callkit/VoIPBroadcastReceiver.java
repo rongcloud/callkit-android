@@ -42,6 +42,7 @@ import java.util.Map;
  */
 public class VoIPBroadcastReceiver extends BroadcastReceiver {
 
+    public static final int DEFAULT_FCM_NOTIFICATION_ID = 5000;
     private static final String HANGUP = "RC:VCHangup";
     private static final String INVITE = "RC:VCInvite";
     public static final String ACTION_CALLINVITEMESSAGE = "action.push.CallInviteMessage";
@@ -94,10 +95,12 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
 
         if (TextUtils.equals(ACTION_CALLINVITEMESSAGE, action)) {
             if (callSession == null) {
+                RLog.d(TAG, "callSession is null: " + message);
                 // fcm voip 走的是透传，处理一下这种情况下，单独弹起一个通知拉起应用
                 fcmShowNotification(context, message);
                 return;
             }
+            clearFcmNotification(context);
             String objName = message.getObjectName();
             if (TextUtils.equals(objName, INVITE)) {
                 IncomingCallExtraHandleUtil.cacheCallSession(callSession, checkPermissions);
@@ -125,7 +128,14 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
         }
     }
 
-    private static int notificationId = 4000;
+    private void clearFcmNotification(Context context) {
+        RLog.d(TAG, "clearFcmNotification");
+        NotificationManager nm =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (nm != null) {
+            nm.cancel(DEFAULT_FCM_NOTIFICATION_ID);
+        }
+    }
 
     public void fcmShowNotification(final Context context, PushNotificationMessage message) {
 
@@ -180,7 +190,7 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
                 notificationManager = context.getSystemService(NotificationManager.class);
             }
             if (notificationManager != null) {
-                notificationManager.notify(++notificationId, notification);
+                notificationManager.notify(DEFAULT_FCM_NOTIFICATION_ID, notification);
             }
             CallRingingUtil.getInstance().startRinging(context, RingingMode.Incoming);
         } catch (Exception e) {
@@ -254,6 +264,7 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
             RongCallSession callSession,
             boolean checkPermissions,
             UserInfo userInfo) {
+        RLog.d(TAG, "sendNotification: " + message.getObjectName());
         String pushContent;
         boolean isAudio = callSession.getMediaType() == RongCallCommon.CallMediaType.AUDIO;
         if (HANGUP.equals(message.getObjectName())) {
