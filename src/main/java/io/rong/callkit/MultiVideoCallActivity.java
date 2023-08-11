@@ -679,15 +679,13 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                         CallKitUtils.getStitchedContent(firstUserId, VOIP_USERNAME_TAG));
                 if (firstUserInfo != null) {
                     userNameView.setText(CallKitUtils.nickNameRestrict(firstUserInfo.getName()));
-                    if (firstUserInfo.getPortraitUri() != null) {
-                        RongCallKit.getKitImageEngine()
-                                .loadPortrait(
-                                        getBaseContext(),
-                                        firstUserInfo.getPortraitUri(),
-                                        R.drawable.rc_default_portrait,
-                                        userPortrait);
-                        userPortrait.setVisibility(View.VISIBLE);
-                    }
+                    RongCallKit.getKitImageEngine()
+                            .loadPortrait(
+                                    getBaseContext(),
+                                    firstUserInfo.getPortraitUri(),
+                                    R.drawable.rc_default_portrait,
+                                    userPortrait);
+                    userPortrait.setVisibility(View.VISIBLE);
                 } else {
                     userNameView.setText(firstUserId);
                 }
@@ -1023,10 +1021,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         remoteVideoView.removeAllViews();
         ImageView userPortraitView = (ImageView) singleRemoteView.findViewById(R.id.user_portrait);
         if (userInfo != null) {
-            if (userInfo.getPortraitUri() != null) {
-                GlideUtils.showBlurTransformation(
-                        getBaseContext(), userPortraitView, userInfo.getPortraitUri());
-            }
+            GlideUtils.showPortrait(getBaseContext(), userPortraitView, userInfo.getPortraitUri());
         }
         if (video.getParent() != null) {
             ((ViewGroup) video.getParent()).removeView(video);
@@ -1070,10 +1065,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         TextView nameView = (TextView) singleRemoteView.findViewById(R.id.user_name);
         ImageView userPortraitView = (ImageView) singleRemoteView.findViewById(R.id.user_portrait);
         if (userInfo != null) {
-            if (userInfo.getPortraitUri() != null) {
-                GlideUtils.showBlurTransformation(
-                        getBaseContext(), userPortraitView, userInfo.getPortraitUri());
-            }
+            GlideUtils.showPortrait(getBaseContext(), userPortraitView, userInfo.getPortraitUri());
             if (!TextUtils.isEmpty(userInfo.getName())) {
                 nameView.setText(userInfo.getName());
             }
@@ -1107,10 +1099,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         ImageView userPortraitView = (ImageView) singleRemoteView.findViewById(R.id.user_portrait);
         TextView nameView = (TextView) singleRemoteView.findViewById(R.id.user_name);
         if (userInfo != null) {
-            if (userInfo.getPortraitUri() != null) {
-                GlideUtils.showBlurTransformation(
-                        getBaseContext(), userPortraitView, userInfo.getPortraitUri());
-            }
+            GlideUtils.showPortrait(getBaseContext(), userPortraitView, userInfo.getPortraitUri());
             if (!TextUtils.isEmpty(userInfo.getName())) {
                 nameView.setText(userInfo.getName());
             }
@@ -1351,17 +1340,15 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                                 callSession.getInviterUserId(), VOIP_USERNAME_TAG));
                 if (userInfo != null) {
                     userNameView.setText(CallKitUtils.nickNameRestrict(userInfo.getName()));
-                    if (userInfo.getPortraitUri() != null) {
-                        RongCallKit.getKitImageEngine()
-                                .loadPortrait(
-                                        getBaseContext(),
-                                        userInfo.getPortraitUri(),
-                                        R.drawable.rc_default_portrait,
-                                        userPortrait);
-                        userPortrait.setVisibility(View.VISIBLE);
-                    }
+                    RongCallKit.getKitImageEngine()
+                            .loadPortrait(
+                                    getBaseContext(),
+                                    userInfo.getPortraitUri(),
+                                    R.drawable.rc_default_portrait,
+                                    userPortrait);
+                    userPortrait.setVisibility(View.VISIBLE);
                     //
-                    // GlideUtils.showBlurTransformation(MultiVideoCallActivity.this,iv_large_preview_mutilvideo,null!=userInfo?userInfo.getPortraitUri():null);
+                    // GlideUtils.showPortrait(MultiVideoCallActivity.this,iv_large_preview_mutilvideo,null!=userInfo?userInfo.getPortraitUri():null);
                     //                    iv_large_preview_mutilvideo.setVisibility(View.VISIBLE);
                     //                    iv_large_preview_Mask.setVisibility(View.VISIBLE);
                 } else {
@@ -1387,8 +1374,8 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                     ImageView portraitView =
                             (ImageView) userPortraitView.findViewById(R.id.rc_user_portrait);
                     userInfo = RongUserInfoManager.getInstance().getUserInfo(invitedList.get(i));
-                    if (userInfo != null && userInfo.getPortraitUri() != null) {
-                        GlideUtils.showBlurTransformation(
+                    if (userInfo != null) {
+                        GlideUtils.showPortrait(
                                 getBaseContext(), portraitView, userInfo.getPortraitUri());
                     }
                     portraitContainer1 =
@@ -1798,22 +1785,18 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         }
 
         if (toUserInfo != null) {
-            if (toUserInfo.getPortraitUri() != null) {
-                Uri portraitUri = toUserInfo.getPortraitUri();
-                GlideUtils.showBlurTransformation(getBaseContext(), userPortraitView, portraitUri);
-                Log.d(
-                        TAG,
-                        "onSwitchRemoteUsers-> getKitImageEngine->PortraitUri: "
-                                + portraitUri.toString()
-                                + " , userPortraitViewVisibility : "
-                                + (userPortraitView.getVisibility() == View.VISIBLE)
-                                + " , wxh: "
-                                + userPortraitView.getWidth()
-                                + " x "
-                                + userPortraitView.getHeight());
-            } else {
-                Log.e(TAG, "onSwitchRemoteUsers-> toUserInfo.getPortraitUri() is empty");
-            }
+            Uri portraitUri = toUserInfo.getPortraitUri();
+            GlideUtils.showPortrait(getBaseContext(), userPortraitView, portraitUri);
+            Log.d(
+                    TAG,
+                    "onSwitchRemoteUsers-> getKitImageEngine->PortraitUri: "
+                            + portraitUri.toString()
+                            + " , userPortraitViewVisibility : "
+                            + (userPortraitView.getVisibility() == View.VISIBLE)
+                            + " , wxh: "
+                            + userPortraitView.getWidth()
+                            + " x "
+                            + userPortraitView.getHeight());
         } else {
             Log.e(
                     TAG,
@@ -1903,25 +1886,19 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                     participantPortraitContainer.findViewWithTag(
                             CallKitUtils.getStitchedContent(
                                     userInfo.getUserId(), VOIP_PARTICIPANT_PORTAIT_CONTAINER_TAG));
-            if (participantView != null && userInfo.getPortraitUri() != null) {
+            if (participantView != null) {
                 ImageView portraitView =
                         (ImageView) participantView.findViewById(R.id.rc_user_portrait);
-                RongCallKit.getKitImageEngine()
-                        .loadPortrait(
-                                getBaseContext(),
-                                userInfo.getPortraitUri(),
-                                R.drawable.rc_default_portrait,
-                                portraitView);
+                GlideUtils.showPortrait(getBaseContext(), portraitView, userInfo.getPortraitUri());
             }
         }
         if (remoteViewContainer.getVisibility() == View.VISIBLE) {
             View remoteView =
                     remoteViewContainer.findViewWithTag(
                             CallKitUtils.getStitchedContent(userInfo.getUserId(), REMOTE_VIEW_TAG));
-            if (remoteView != null && userInfo.getPortraitUri() != null) {
+            if (remoteView != null) {
                 ImageView portraitView = (ImageView) remoteView.findViewById(R.id.user_portrait);
-                GlideUtils.showBlurTransformation(
-                        getBaseContext(), portraitView, userInfo.getPortraitUri());
+                GlideUtils.showPortrait(getBaseContext(), portraitView, userInfo.getPortraitUri());
             }
         }
         if (topContainer.getVisibility() == View.VISIBLE) {

@@ -9,18 +9,21 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.AssetFileDescriptor;
 import android.media.AudioAttributes;
+import android.media.AudioAttributes.Builder;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.RequiresApi;
-import cn.rongcloud.rtc.api.RCRTCEngine;
 import io.rong.callkit.R;
 import io.rong.callkit.RongIncomingCallService;
 import io.rong.common.RLog;
@@ -133,6 +136,7 @@ public class CallRingingUtil {
     }
 
     protected void startVibrator(Context context) {
+        Log.d(TAG, "startVibrator: ");
         if (mVibrator == null) {
             mVibrator =
                     (Vibrator)
@@ -141,7 +145,18 @@ public class CallRingingUtil {
         } else {
             mVibrator.cancel();
         }
-        mVibrator.vibrate(new long[] {500, 1000}, 0);
+
+        long[] pattern = {500, 1000};
+        if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+            AudioAttributes build =
+                    new Builder()
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                            .build();
+            mVibrator.vibrate(pattern, 0, build);
+        } else {
+            mVibrator.vibrate(pattern, 0);
+        }
     }
 
     /** 判断系统是否设置了 响铃时振动 */
@@ -191,10 +206,8 @@ public class CallRingingUtil {
                     (AudioManager)
                             context.getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
             if (am != null) {
-                RCRTCEngine.getInstance()
-                        .enableSpeaker(
-                                mode == RingingMode.Incoming
-                                        || mode == RingingMode.Incoming_Custom);
+                am.setSpeakerphoneOn(
+                        mode == RingingMode.Incoming || mode == RingingMode.Incoming_Custom);
                 // 设置此值可在拨打时控制响铃音量
                 am.setMode(AudioManager.MODE_IN_COMMUNICATION);
                 // 设置拨打时响铃音量默认值

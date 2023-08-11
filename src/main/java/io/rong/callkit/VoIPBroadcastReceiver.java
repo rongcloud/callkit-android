@@ -192,7 +192,12 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
             if (notificationManager != null) {
                 notificationManager.notify(DEFAULT_FCM_NOTIFICATION_ID, notification);
             }
-            CallRingingUtil.getInstance().startRinging(context, RingingMode.Incoming);
+            if (HANGUP.equals(message.getObjectName())) {
+                CallRingingUtil.getInstance().stopRinging();
+            } else {
+                CallRingingUtil.getInstance().startRinging(context, RingingMode.Incoming);
+            }
+
         } catch (Exception e) {
             io.rong.common.RLog.e(TAG, "onStartCommand = " + e.getMessage());
             e.printStackTrace();
@@ -207,17 +212,22 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
                 && Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
             // Android 10 以下允许后台运行，直接交由会话列表界面拉取消息
             RLog.d(TAG, "handle VoIP event.");
-            Intent newIntent = new Intent();
-            newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            Uri uri =
-                    Uri.parse("rong://" + context.getPackageName())
-                            .buildUpon()
-                            .appendPath("conversationlist")
-                            .appendQueryParameter("isFromPush", "false")
-                            .build();
-            newIntent.setData(uri);
-            newIntent.setPackage(context.getPackageName());
-            context.startActivity(newIntent);
+            try {
+                Intent newIntent = new Intent();
+                newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                Uri uri =
+                        Uri.parse("rong://" + context.getPackageName())
+                                .buildUpon()
+                                .appendPath("conversationlist")
+                                .appendQueryParameter("isFromPush", "false")
+                                .build();
+                newIntent.setData(uri);
+                newIntent.setPackage(context.getPackageName());
+                context.startActivity(newIntent);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return true;
+            }
             return false;
         }
         return true;
