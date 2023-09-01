@@ -37,6 +37,7 @@ import io.rong.calllib.CallUserProfile;
 import io.rong.calllib.ReportUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
+import io.rong.calllib.RongCallCommon.RoomType;
 import io.rong.calllib.RongCallSession;
 import io.rong.calllib.StartIncomingPreviewCallback;
 import io.rong.calllib.message.CallSTerminateMessage;
@@ -305,7 +306,11 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             targetId = intent.getStringExtra("targetId");
             RongCallCommon.RoomType roomType = RongCallCommon.RoomType.NORMAL;
             if (intent.hasExtra("roomType")) {
-                roomType = RongCallCommon.RoomType.valueOf(intent.getIntExtra("roomType", 0));
+                try {
+                    roomType = (RoomType) intent.getSerializableExtra("roomType");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             List<String> userIds = new ArrayList<>();
             userIds.add(targetId);

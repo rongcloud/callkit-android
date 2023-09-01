@@ -261,7 +261,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                     (CallUserGridView)
                             audioContainer.findViewById(R.id.rc_voip_members_container_gridView);
             SPUtils.put(MultiAudioCallActivity.this, "ICallScrollView", "CallUserGridView");
-
+            memberContainer.removeAllChild();
             memberContainer.setChildPortraitSize(memberContainer.dip2pix(55));
             List<CallUserProfile> list = callSession.getParticipantProfileList();
             for (CallUserProfile profile : list) {

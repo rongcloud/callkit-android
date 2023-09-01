@@ -4,16 +4,11 @@ import static io.rong.callkit.CallSelectMemberActivity.DISCONNECT_ACTION;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.net.http.SslError;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -25,10 +20,6 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.webkit.SslErrorHandler;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -103,8 +94,6 @@ public class MultiVideoCallActivity extends BaseCallActivity {
     LinearLayout infoLayout;
     ImageView signalView;
     TextView userNameView;
-    private WebView whiteboardView;
-    private RelativeLayout mRelativeWebView;
     private int remoteUserViewWidth;
     //    private int  remoteUserViewHeight;
     // 主叫、通话中 远端View
@@ -1245,33 +1234,18 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         bottomButtonContainer = (LinearLayout) findViewById(R.id.rc_bottom_button_container);
         participantPortraitContainer =
                 (LinearLayout) findViewById(R.id.rc_participant_portait_container);
+        portraitContainer1 =
+                (LinearLayout)
+                        participantPortraitContainer.findViewById(
+                                R.id.rc_participant_portait_container_1);
         minimizeButton = (ImageView) findViewById(R.id.rc_voip_call_minimize);
         rc_voip_multiVideoCall_minimize =
                 (ImageView) findViewById(R.id.rc_voip_multiVideoCall_minimize);
         userPortrait = (ImageView) findViewById(R.id.rc_voip_user_portrait);
         moreButton = (ImageView) findViewById(R.id.rc_voip_call_more);
         switchCameraButton = (ImageView) findViewById(R.id.rc_voip_switch_camera);
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setCancelable(false);
-        progressDialog.setMessage("白板加载中...");
-        mRelativeWebView = (RelativeLayout) findViewById(R.id.rc_whiteboard);
-        whiteboardView = new WebView(getApplicationContext());
-        ViewGroup.LayoutParams params =
-                new ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        whiteboardView.setLayoutParams(params);
-        mRelativeWebView.addView(whiteboardView);
         iv_large_preview_mutilvideo = (ImageView) findViewById(R.id.iv_large_preview_mutilvideo);
         iv_large_preview_Mask = (ImageView) findViewById(R.id.iv_large_preview_Mask);
-        WebSettings settings = whiteboardView.getSettings();
-        settings.setJavaScriptEnabled(true);
-        settings.setUseWideViewPort(true);
-        settings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
-        settings.setLoadWithOverviewMode(true);
-        settings.setBlockNetworkImage(false);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-        }
 
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -1280,6 +1254,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         localView = null;
         localViewContainer.removeAllViews();
         remoteViewContainer2.removeAllViews();
+        portraitContainer1.removeAllViews();
 
         minimizeButton.setOnClickListener(
                 new View.OnClickListener() {
@@ -1378,10 +1353,6 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                         GlideUtils.showPortrait(
                                 getBaseContext(), portraitView, userInfo.getPortraitUri());
                     }
-                    portraitContainer1 =
-                            (LinearLayout)
-                                    participantPortraitContainer.findViewById(
-                                            R.id.rc_participant_portait_container_1);
                     LinearLayout.LayoutParams params =
                             new LinearLayout.LayoutParams(
                                     LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -1910,71 +1881,6 @@ public class MultiVideoCallActivity extends BaseCallActivity {
             if (nameView != null && userInfo.getName() != null)
                 nameView.setText(userInfo.getName());
         }
-    }
-
-    private ProgressDialog progressDialog;
-
-    private void loadWhiteBoard(String url, boolean isReload) {
-        if (isReload) {
-            whiteboardView.reload();
-            progressDialog.show();
-            return;
-        }
-
-        if (TextUtils.isEmpty(url)) {
-            return;
-        }
-
-        progressDialog.show();
-        mRelativeWebView.setVisibility(View.VISIBLE);
-        whiteboardView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-        // https://web.blinktalk.online/ewbweb/blink-wb.html?roomKey=1234567890abcdefg1dg%40blinktest&token=eyJhbGciOiJIUzUxMiJ9.eyJyb29tS2V5IjoiMTIzNDU2Nzg5MGFiY2RlZmcxZGdAYmxpbmt0ZXN0IiwiZXhwIjoxNTE2MzQ0MTc1fQ.6izAdEW6yfYns7ACmKBVL6ymASq_28crvseMCIsjv-ITjfCXB2S8O7gcKv1CUclkSSfCGOvgfo4Pycl_Z0yM0Q&type=android
-
-        // https://web.blinkcloud.cn/ewbweb/blink-wb.html?roomKey=1234567890abcdefg1dg%40blink&token=eyJhbGciOiJIUzUxMiJ9.eyJyb29tS2V5IjoiMTIzNDU2Nzg5MGFiY2RlZmcxZGdAYmxpbmsiLCJleHAiOjE1MTYzNDM3NjJ9.DJCa1mt67xW_5sfzxHUWi5O143UjgFl-LDNLfc8GlWp-khWACXIzYipA_L-9SIU7h8_16N2Pu-fLmePOeRX6pA&type=android
-        whiteboardView.loadUrl(url);
-        whiteboardView.setWebViewClient(
-                new WebViewClient() {
-                    @Override
-                    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                        // TODO Auto-generated method stub
-                        // 返回值是true的时候控制去WebView打开，为false调用系统浏览器或第三方浏览器
-                        view.loadUrl(url);
-                        return true;
-                    }
-
-                    @Override
-                    public void onPageFinished(WebView view, String url) {
-                        super.onPageFinished(view, url);
-                        view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-                        progressDialog.dismiss();
-                    }
-
-                    @Override
-                    public void onReceivedSslError(
-                            WebView view, final SslErrorHandler handler, SslError error) {
-                        final AlertDialog.Builder builder =
-                                new AlertDialog.Builder(MultiVideoCallActivity.this);
-                        builder.setMessage(getString(R.string.rc_voip_web_page_cetificate_invalid));
-                        builder.setPositiveButton(
-                                R.string.rc_voip_ok,
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        handler.proceed();
-                                    }
-                                });
-                        builder.setNegativeButton(
-                                R.string.rc_voip_cancel,
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        handler.cancel();
-                                    }
-                                });
-                        final AlertDialog dialog = builder.create();
-                        dialog.show();
-                    }
-                });
     }
 
     public void onHeadsetPlugUpdate(HeadsetInfo headsetInfo) {
