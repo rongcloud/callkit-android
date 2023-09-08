@@ -2,7 +2,6 @@ package io.rong.callkit.util;
 
 import android.content.Context;
 import android.net.Uri;
-import android.util.Log;
 import android.widget.ImageView;
 import cn.rongcloud.rtc.utils.FinLog;
 import com.bumptech.glide.Glide;
@@ -34,15 +33,12 @@ public class GlideUtils {
         }
     }
 
-    public static void showPortrait(Context context, ImageView imageView, Uri val) {
+    public static void showRemotePortrait(Context context, ImageView imageView, Uri val) {
         RequestOptions requestOptions = new RequestOptions();
-        requestOptions
-                .transform(new GlideBlurformation(context))
-                .priority(Priority.HIGH)
-                .placeholder(R.drawable.rc_default_portrait)
-                .apply(new RequestOptions().centerCrop());
+        requestOptions.transform(new GlideRoundTransform());
+        requestOptions.priority(Priority.HIGH);
+        requestOptions.placeholder(R.drawable.rc_default_portrait);
         if (val == null) {
-            Log.d(TAG, "showPortrait: val is Null");
             Glide.with(context)
                     .load(R.drawable.rc_default_portrait)
                     .apply(requestOptions)

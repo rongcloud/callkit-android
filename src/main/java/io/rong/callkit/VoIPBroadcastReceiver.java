@@ -42,7 +42,6 @@ import java.util.Map;
  */
 public class VoIPBroadcastReceiver extends BroadcastReceiver {
 
-    public static final int DEFAULT_FCM_NOTIFICATION_ID = 5000;
     private static final String HANGUP = "RC:VCHangup";
     private static final String INVITE = "RC:VCInvite";
     public static final String ACTION_CALLINVITEMESSAGE = "action.push.CallInviteMessage";
@@ -95,12 +94,10 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
 
         if (TextUtils.equals(ACTION_CALLINVITEMESSAGE, action)) {
             if (callSession == null) {
-                RLog.d(TAG, "callSession is null: " + message);
                 // fcm voip 走的是透传，处理一下这种情况下，单独弹起一个通知拉起应用
                 fcmShowNotification(context, message);
                 return;
             }
-            clearFcmNotification(context);
             String objName = message.getObjectName();
             if (TextUtils.equals(objName, INVITE)) {
                 IncomingCallExtraHandleUtil.cacheCallSession(callSession, checkPermissions);
@@ -128,14 +125,7 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
         }
     }
 
-    private void clearFcmNotification(Context context) {
-        RLog.d(TAG, "clearFcmNotification");
-        NotificationManager nm =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (nm != null) {
-            nm.cancel(DEFAULT_FCM_NOTIFICATION_ID);
-        }
-    }
+    private static int notificationId = 4000;
 
     public void fcmShowNotification(final Context context, PushNotificationMessage message) {
 
@@ -190,14 +180,9 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
                 notificationManager = context.getSystemService(NotificationManager.class);
             }
             if (notificationManager != null) {
-                notificationManager.notify(DEFAULT_FCM_NOTIFICATION_ID, notification);
+                notificationManager.notify(++notificationId, notification);
             }
-            if (HANGUP.equals(message.getObjectName())) {
-                CallRingingUtil.getInstance().stopRinging();
-            } else {
-                CallRingingUtil.getInstance().startRinging(context, RingingMode.Incoming);
-            }
-
+            CallRingingUtil.getInstance().startRinging(context, RingingMode.Incoming);
         } catch (Exception e) {
             io.rong.common.RLog.e(TAG, "onStartCommand = " + e.getMessage());
             e.printStackTrace();
@@ -212,22 +197,17 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
                 && Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
             // Android 10 以下允许后台运行，直接交由会话列表界面拉取消息
             RLog.d(TAG, "handle VoIP event.");
-            try {
-                Intent newIntent = new Intent();
-                newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                Uri uri =
-                        Uri.parse("rong://" + context.getPackageName())
-                                .buildUpon()
-                                .appendPath("conversationlist")
-                                .appendQueryParameter("isFromPush", "false")
-                                .build();
-                newIntent.setData(uri);
-                newIntent.setPackage(context.getPackageName());
-                context.startActivity(newIntent);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return true;
-            }
+            Intent newIntent = new Intent();
+            newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            Uri uri =
+                    Uri.parse("rong://" + context.getPackageName())
+                            .buildUpon()
+                            .appendPath("conversationlist")
+                            .appendQueryParameter("isFromPush", "false")
+                            .build();
+            newIntent.setData(uri);
+            newIntent.setPackage(context.getPackageName());
+            context.startActivity(newIntent);
             return false;
         }
         return true;
@@ -274,7 +254,6 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
             RongCallSession callSession,
             boolean checkPermissions,
             UserInfo userInfo) {
-        RLog.d(TAG, "sendNotification: " + message.getObjectName());
         String pushContent;
         boolean isAudio = callSession.getMediaType() == RongCallCommon.CallMediaType.AUDIO;
         if (HANGUP.equals(message.getObjectName())) {

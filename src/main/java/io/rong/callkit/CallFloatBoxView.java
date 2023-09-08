@@ -161,7 +161,6 @@ public class CallFloatBoxView {
                                         "onCallDisconnected",
                                         reason.getValue(),
                                         TAG);
-                                stopForegroundService(mContext);
                                 setExcludeFromRecents(mContext, false);
                                 String senderId;
                                 String extra = "";
@@ -551,17 +550,6 @@ public class CallFloatBoxView {
                         });
     }
 
-    private static void stopForegroundService(Context context) {
-        if (context == null) {
-            return;
-        }
-        try {
-            context.stopService(new Intent(context, CallForegroundService.class));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     private static WindowManager.LayoutParams createLayoutParams(Context context) {
         WindowManager.LayoutParams params = new WindowManager.LayoutParams();
 
@@ -729,7 +717,6 @@ public class CallFloatBoxView {
                                         "onCallDisconnected",
                                         reason.getValue(),
                                         TAG);
-                                stopForegroundService(mContext);
                                 setExcludeFromRecents(mContext, false);
                                 String senderId;
                                 String extra = "";

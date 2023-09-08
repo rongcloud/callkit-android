@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
 import io.rong.callkit.RongCallModule;
-import io.rong.callkit.RongVoIPIntent;
 
 public class ActivityStartCheckUtils {
     public interface ActivityStartResultCallback {
@@ -22,12 +21,6 @@ public class ActivityStartCheckUtils {
     private Activity topActivity;
     private Context mAppContext;
     private ActivityStartResultCallback activityStartResultCallback;
-    private static final String[] CALL_ACTIONS = {
-        RongVoIPIntent.RONG_INTENT_ACTION_VOIP_MULTIVIDEO,
-        RongVoIPIntent.RONG_INTENT_ACTION_VOIP_MULTIAUDIO,
-        RongVoIPIntent.RONG_INTENT_ACTION_VOIP_SINGLEVIDEO,
-        RongVoIPIntent.RONG_INTENT_ACTION_VOIP_SINGLEAUDIO
-    };
 
     private static class SingletonHolder {
 
@@ -58,7 +51,7 @@ public class ActivityStartCheckUtils {
                     @Override
                     public void onActivityResumed(Activity activity) {
                         topActivity = activity;
-                        handleIncomingCallNotify(topActivity);
+                        handleIncomingCallNotify();
                     }
 
                     @Override
@@ -132,19 +125,10 @@ public class ActivityStartCheckUtils {
      * Android 10 以上禁止后台启动 Activity callKit 适配方案是后台来电时弹通知栏通知，但是如果用户不点击通知栏，
      * 通过桌面图标打开应用，需要增加一种补偿机制启动来电界面
      */
-    private void handleIncomingCallNotify(Activity activity) {
-        if (activity != null && IncomingCallExtraHandleUtil.needNotify()) {
-            String action = activity.getIntent().getAction();
-            if (!TextUtils.isEmpty(action)) {
-                for (String ac : CALL_ACTIONS) {
-                    if (TextUtils.equals(ac, action)) {
-                        return;
-                    }
-                }
-            }
-
+    private void handleIncomingCallNotify() {
+        if (mAppContext != null && IncomingCallExtraHandleUtil.needNotify()) {
             IncomingCallExtraHandleUtil.removeNotification(mAppContext);
-            activity.startActivity(
+            mAppContext.startActivity(
                     RongCallModule.createVoIPIntent(
                             mAppContext,
                             IncomingCallExtraHandleUtil.getCallSession(),
