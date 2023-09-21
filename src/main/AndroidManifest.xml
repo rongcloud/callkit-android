@@ -28,7 +28,7 @@
 
         <activity
             android:name=".MultiVideoCallActivity"
-            android:exported="true"
+            android:exported="false"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden|adjustResize">
@@ -40,7 +40,7 @@
 
         <activity
             android:name=".SingleCallActivity"
-            android:exported="true"
+            android:exported="false"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden|adjustResize">
@@ -56,7 +56,7 @@
 
         <activity
             android:name=".MultiAudioCallActivity"
-            android:exported="true"
+            android:exported="false"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden|adjustResize">
@@ -69,7 +69,7 @@
         <!-- Android Q 后台无法弹出Activity，通过通知栏提醒用户-->
         <receiver
             android:name="io.rong.callkit.VoIPBroadcastReceiver"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="action.push.CallInviteMessage" />
                 <action android:name="action.push.CallInviteMessage.CLICKED" />
@@ -82,7 +82,7 @@
 
         <receiver
             android:name=".util.RTCPhoneStateReceiver"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE" />
             </intent-filter>

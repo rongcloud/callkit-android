@@ -111,7 +111,11 @@ public class CallRingingUtil {
         IntentFilter filter = new IntentFilter();
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         isFirstReceivedBroadcast = true;
-        applicationContext.registerReceiver(mRingModeReceiver, filter);
+        applicationContext.registerReceiver(
+                mRingModeReceiver,
+                filter,
+                context.getApplicationInfo().packageName + ".permission.RONG_ACCESS_RECEIVER",
+                null);
 
         if (mode == RingingMode.Incoming || mode == RingingMode.Incoming_Custom) {
             int ringerMode = NotificationUtil.getInstance().getRingerMode(context);

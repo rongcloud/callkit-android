@@ -324,11 +324,6 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity
         rlSearchTop = (RelativeLayout) findViewById(R.id.rl_search_top);
         ivBack = (ImageView) findViewById(R.id.iv_back);
         searchBar = (CallKitSearchBarView) findViewById(R.id.search_bar);
-        if (CallKitUtils.findConfigurationLanguage(CallSelectMemberActivity.this, "ar")) {
-            rlSearchTop.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
-            searchBar.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
-        }
-
         ivBack.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
@@ -373,7 +368,11 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity
     private void registerDisconnectBroadcastReceiver() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(DISCONNECT_ACTION);
-        registerReceiver(disconnectBroadcastReceiver, intentFilter);
+        registerReceiver(
+                disconnectBroadcastReceiver,
+                intentFilter,
+                this.getApplicationInfo().packageName + ".permission.RONG_ACCESS_RECEIVER",
+                null);
     }
 
     private void startSearchMember(String searchEditContent) {

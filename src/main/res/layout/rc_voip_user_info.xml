@@ -16,7 +16,6 @@
             android:id="@id/rc_user_portrait"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-          android:alpha="0.5"
             android:background="@android:color/transparent"/>
 
         <TextView
@@ -24,6 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
+            android:background="#75000000"
             android:gravity="center"
             android:text="连接中..."
             android:textColor="#ffffff" />
