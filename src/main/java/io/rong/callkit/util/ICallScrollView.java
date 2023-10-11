@@ -7,6 +7,8 @@ import io.rong.imlib.model.UserInfo;
 public interface ICallScrollView {
     void setScrollViewOverScrollMode(int mode);
 
+    void removeAllChild();
+
     void removeChild(String childId);
 
     View findChildById(String childId);

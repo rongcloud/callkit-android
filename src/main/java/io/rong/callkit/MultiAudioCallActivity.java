@@ -203,7 +203,8 @@ public class MultiAudioCallActivity extends BaseCallActivity {
             }
             // 添加数据
             for (CallUserProfile item : participantProfiles) {
-                if (!item.getUserId().equals(callSession.getSelfUserId())) {
+                if (!item.getUserId().equals(callSession.getSelfUserId())
+                        && memberContainer.findChildById(item.getUserId()) == null) {
                     if (item.getCallStatus().equals(RongCallCommon.CallStatus.CONNECTED)) {
                         memberContainer.addChild(
                                 item.getUserId(),
@@ -238,6 +239,17 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         }
         ArrayList<String> invitedList = new ArrayList<>();
         if (callAction.equals(RongCallAction.ACTION_INCOMING_CALL)) {
+            // 正常在收到呼叫后，RongCallClient 和 CallSession均不会为空
+            if (RongCallClient.getInstance() == null
+                    || RongCallClient.getInstance().getCallSession() == null) {
+                // 如果为空 表示通话已经结束 但依然启动了本页面，这样会导致页面无法销毁问题
+                // 所以 需要在这里 finish 结束当前页面  推荐开发者在结束当前页面前跳转至APP主页或者其他页面
+                RLog.e(
+                        TAG,
+                        "MultiAudioCallActivity#initView()->RongCallClient or CallSession is empty---->finish()");
+                finish();
+                return;
+            }
             audioContainer.removeAllViews();
             callSession = RongCallClient.getInstance().getCallSession();
             UserInfo userInfo =
@@ -249,7 +261,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                     (CallUserGridView)
                             audioContainer.findViewById(R.id.rc_voip_members_container_gridView);
             SPUtils.put(MultiAudioCallActivity.this, "ICallScrollView", "CallUserGridView");
-
+            memberContainer.removeAllChild();
             memberContainer.setChildPortraitSize(memberContainer.dip2pix(55));
             List<CallUserProfile> list = callSession.getParticipantProfileList();
             for (CallUserProfile profile : list) {
@@ -779,7 +791,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
 
         MultiCallEndMessage multiCallEndMessage = new MultiCallEndMessage();
         multiCallEndMessage.setReason(reason);
-        multiCallEndMessage.setMediaType(RongIMClient.MediaType.AUDIO);
+        multiCallEndMessage.setMediaType(IRongCoreEnum.MediaType.AUDIO);
         long serverTime = System.currentTimeMillis() - RongIMClient.getInstance().getDeltaTime();
         IMCenter.getInstance()
                 .insertIncomingMessage(

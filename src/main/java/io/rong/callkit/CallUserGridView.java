@@ -154,6 +154,11 @@ public class CallUserGridView extends HorizontalScrollView implements ICallScrol
         this.setOverScrollMode(mode);
     }
 
+    @Override
+    public void removeAllChild() {
+        linearLayout.removeAllViews();
+    }
+
     public void removeChild(String childId) {
         int containerCount = linearLayout.getChildCount();
 

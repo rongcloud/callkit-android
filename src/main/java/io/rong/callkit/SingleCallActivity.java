@@ -10,12 +10,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -27,6 +28,7 @@ import cn.rongcloud.rtc.utils.FinLog;
 import io.rong.callkit.util.BluetoothUtil;
 import io.rong.callkit.util.CallKitUtils;
 import io.rong.callkit.util.DefaultPushConfig;
+import io.rong.callkit.util.GlideUtils;
 import io.rong.callkit.util.HeadsetInfo;
 import io.rong.callkit.util.RingingMode;
 import io.rong.callkit.util.RongCallPermissionUtil;
@@ -34,6 +36,7 @@ import io.rong.calllib.CallUserProfile;
 import io.rong.calllib.ReportUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
+import io.rong.calllib.RongCallCommon.RoomType;
 import io.rong.calllib.RongCallSession;
 import io.rong.calllib.StartIncomingPreviewCallback;
 import io.rong.calllib.message.CallSTerminateMessage;
@@ -85,7 +88,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.rc_voip_activity_single_call);
-        Log.i(
+        RLog.i(
                 "AudioPlugin",
                 "savedInstanceState != null="
                         + (savedInstanceState != null)
@@ -93,7 +96,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                         + (RongCallClient.getInstance() == null));
         if (savedInstanceState != null && RongCallClient.getInstance() == null) {
             // 音视频请求权限时，用户在设置页面取消权限，导致应用重启，退出当前activity.
-            Log.i("AudioPlugin", "音视频请求权限时，用户在设置页面取消权限，导致应用重启，退出当前activity");
+            RLog.i("AudioPlugin", "音视频请求权限时，用户在设置页面取消权限，导致应用重启，退出当前activity");
             finish();
             return;
         }
@@ -103,6 +106,13 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         mButtonContainer = (FrameLayout) findViewById(R.id.rc_voip_btn);
         mUserInfoContainer = (LinearLayout) findViewById(R.id.rc_voip_user_info);
         mConnectionStateTextView = findViewById(R.id.rc_tv_connection_state);
+
+        if (CallKitUtils.findConfigurationLanguage(SingleCallActivity.this, "ar")) {
+            // android:layout_gravity="right|top"
+            FrameLayout.LayoutParams params = (LayoutParams) mSPreviewContainer.getLayoutParams();
+            params.gravity = Gravity.LEFT | Gravity.TOP;
+            mSPreviewContainer.setLayoutParams(params);
+        }
 
         startForCheckPermissions = intent.getBooleanExtra("checkPermissions", false);
         RongCallAction callAction = RongCallAction.valueOf(intent.getStringExtra("callAction"));
@@ -118,6 +128,17 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             callSession = intent.getParcelableExtra("callSession");
             mediaType = callSession.getMediaType();
             receivedCallId = callSession.getCallId();
+            // 正常在收到呼叫后，RongCallClient 和 CallSession均不会为空
+            if (RongCallClient.getInstance() == null
+                    || RongCallClient.getInstance().getCallSession() == null) {
+                // 如果为空 表示通话已经结束 但依然启动了本页面，这样会导致页面无法销毁问题
+                // 所以 需要在这里 finish 结束当前页面  推荐开发者在结束当前页面前跳转至APP主页或者其他页面
+                RLog.e(
+                        TAG,
+                        "SingleCallActivity#onCreate()->RongCallClient or CallSession is empty---->finish()");
+                finish();
+                return;
+            }
         } else {
             callSession = RongCallClient.getInstance().getCallSession();
             if (callSession != null) {
@@ -211,7 +232,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                         startForCheckPermissions = false;
                         RongCallClient.getInstance().onPermissionDenied();
                     } else {
-                        Log.i("AudioPlugin", "--onRequestPermissionsResult--finish");
+                        RLog.i("AudioPlugin", "--onRequestPermissionsResult--finish");
                         finish();
                     }
                 }
@@ -234,7 +255,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                 if (startForCheckPermissions) {
                     RongCallClient.getInstance().onPermissionDenied();
                 } else {
-                    Log.i("AudioPlugin", "onActivityResult finish");
+                    RLog.i("AudioPlugin", "onActivityResult finish");
                     finish();
                 }
             }
@@ -284,7 +305,11 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             targetId = intent.getStringExtra("targetId");
             RongCallCommon.RoomType roomType = RongCallCommon.RoomType.NORMAL;
             if (intent.hasExtra("roomType")) {
-                roomType = RongCallCommon.RoomType.valueOf(intent.getIntExtra("roomType", 0));
+                try {
+                    roomType = (RoomType) intent.getSerializableExtra("roomType");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             List<String> userIds = new ArrayList<>();
             userIds.add(targetId);
@@ -343,12 +368,8 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                     (ImageView) mUserInfoContainer.findViewById(R.id.iv_icoming_backgroud);
             if (iv_icoming_backgroud != null) {
                 iv_icoming_backgroud.setVisibility(View.VISIBLE);
-                RongCallKit.getKitImageEngine()
-                        .loadPortrait(
-                                getBaseContext(),
-                                userInfo.getPortraitUri(),
-                                R.drawable.rc_default_portrait,
-                                iv_icoming_backgroud);
+                GlideUtils.showBlurTransformation(
+                        SingleCallActivity.this, iv_icoming_backgroud, userInfo.getPortraitUri());
             }
         }
         createPickupDetector();
@@ -497,12 +518,10 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                 if (null != InviterUserIdInfo && null != InviterUserIdInfo.getPortraitUri()) {
                     ImageView iv_icoming_backgroud =
                             mUserInfoContainer.findViewById(R.id.iv_icoming_backgroud);
-                    RongCallKit.getKitImageEngine()
-                            .loadPortrait(
-                                    getBaseContext(),
-                                    InviterUserIdInfo.getPortraitUri(),
-                                    R.drawable.rc_default_portrait,
-                                    iv_icoming_backgroud);
+                    GlideUtils.showBlurTransformation(
+                            SingleCallActivity.this,
+                            iv_icoming_backgroud,
+                            InviterUserIdInfo.getPortraitUri());
                     iv_icoming_backgroud.setVisibility(View.VISIBLE);
                     mUserInfoContainer
                             .findViewById(R.id.iv_large_preview_Mask)
@@ -733,21 +752,32 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
     }
 
     private void addRemoteVideoView(String userId, SurfaceView remoteVideo) {
-        if (hasRemoteVideoView(remoteVideo)) {
+        if (remoteVideo == null) {
+            RLog.e(TAG, "addRemoteVideoView: remoteVideo is null!");
             return;
         }
+        if (hasRemoteVideoView(remoteVideo)) {
+            RLog.v(TAG, "onRemoteUserJoined hasRemoteVideoView");
+            return;
+        }
+
+        if (remoteVideo.getParent() != null) {
+            RLog.v(TAG, "onRemoteUserJoined remoteVideo.getParent() != null");
+            return;
+        }
+
         findViewById(R.id.rc_voip_call_information)
                 .setBackgroundColor(getResources().getColor(android.R.color.transparent));
         mLPreviewContainer.setVisibility(View.VISIBLE);
         mLPreviewContainer.removeAllViews();
         remoteVideo.setTag(userId);
-
         RLog.v(TAG, "onRemoteUserJoined mLPreviewContainer.addView(remoteVideo)");
         mLPreviewContainer.addView(remoteVideo, mLargeLayoutParams);
         mLPreviewContainer.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        RLog.v(TAG, "setOnClickListener. isInformationShow : " + isInformationShow);
                         if (isInformationShow) {
                             hideVideoCallInformation();
                         } else {
@@ -897,12 +927,8 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
 
         if (null != userInfo
                 && callSession.getMediaType().equals(RongCallCommon.CallMediaType.AUDIO)) {
-            RongCallKit.getKitImageEngine()
-                    .loadPortrait(
-                            getBaseContext(),
-                            userInfo.getPortraitUri(),
-                            R.drawable.rc_default_portrait,
-                            iv_large_preview);
+            GlideUtils.showBlurTransformation(
+                    SingleCallActivity.this, iv_large_preview, userInfo.getPortraitUri());
             iv_large_preview.setVisibility(View.VISIBLE);
         }
 
@@ -1023,9 +1049,15 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         long time = getTime(callSession.getActiveTime());
         if (time > 0) {
             if (time >= 3600) {
-                extra = String.format("%d:%02d:%02d", time / 3600, (time % 3600) / 60, (time % 60));
+                extra =
+                        String.format(
+                                Locale.ROOT,
+                                "%d:%02d:%02d",
+                                time / 3600,
+                                (time % 3600) / 60,
+                                (time % 60));
             } else {
-                extra = String.format("%02d:%02d", (time % 3600) / 60, (time % 60));
+                extra = String.format(Locale.ROOT, "%02d:%02d", (time % 3600) / 60, (time % 60));
             }
         }
         cancelTime();

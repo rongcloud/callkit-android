@@ -5,10 +5,6 @@ import static io.rong.callkit.util.CallKitUtils.isDial;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
@@ -17,9 +13,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -61,10 +58,10 @@ import io.rong.imkit.userinfo.RongUserInfoManager;
 import io.rong.imkit.userinfo.model.GroupUserInfo;
 import io.rong.imlib.model.Group;
 import io.rong.imlib.model.UserInfo;
-import io.rong.push.notification.RongNotificationInterface;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 /** Created by weiqinxiao on 16/3/9. */
 public class BaseCallActivity extends BaseNoActionBarActivity
@@ -138,6 +135,8 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     public static final String EXTRA_BUNDLE_KEY_MEDIATYPE = "mediaType";
     public static final String EXTRA_BUNDLE_KEY_USER_TOP_NAME = "rc_voip_user_top_name";
     public static final String EXTRA_BUNDLE_KEY_USER_TOP_NAME_TAG = "rc_voip_user_top_name_tag";
+    public static final String EXTRA_BUNDLE_KEY_USER_PROFILE_TAG_ORDER_TAG =
+            "extra_bundle_key_user_profile_tag_order_tag";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -274,6 +273,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     @Override
     public void onCallDisconnected(
             RongCallSession callProfile, RongCallCommon.CallDisconnectedReason reason) {
+        stopForegroundService();
         if (RongCallKit.getCustomerHandlerListener() != null) {
             RongCallKit.getCustomerHandlerListener().onCallDisconnected(callProfile, reason);
         }
@@ -372,18 +372,13 @@ public class BaseCallActivity extends BaseNoActionBarActivity
         super.onStop();
         RLog.d(TAG, "BaseCallActivity onStop");
         if (CallKitUtils.shouldShowFloat && !checkingOverlaysPermission) {
+            showForegroundService();
             Bundle bundle = new Bundle();
             String action = onSaveFloatBoxState(bundle);
             if (checkDrawOverlaysPermission(true)) {
                 if (action != null) {
                     bundle.putString("action", action);
                     showFB(getApplicationContext(), bundle);
-                    int mediaType = bundle.getInt("mediaType");
-                    showOnGoingNotification(
-                            getString(R.string.rc_call_on_going),
-                            mediaType == RongCallCommon.CallMediaType.AUDIO.getValue()
-                                    ? getString(R.string.rc_audio_call_on_going)
-                                    : getString(R.string.rc_video_call_on_going));
                     if (!isFinishing()) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                             RLog.d(TAG, "BaseCallActivity onStop finishAndRemoveTask()");
@@ -401,12 +396,51 @@ public class BaseCallActivity extends BaseNoActionBarActivity
                                 Toast.LENGTH_SHORT)
                         .show();
             }
+        } else if (checkingOverlaysPermission) {
+            showForegroundService();
+        }
+    }
+
+    private void showForegroundService() {
+        RongCallSession callSession = RongCallClient.getInstance().getCallSession();
+        if (callSession == null) {
+            Log.e(TAG, "showForegroundService: RongCallSession is Null!");
+            return;
+        }
+
+        String content =
+                callSession.getMediaType().getValue() == CallMediaType.AUDIO.getValue()
+                        ? getString(R.string.rc_audio_call_on_going)
+                        : getString(R.string.rc_video_call_on_going);
+        String action = getIntent().getAction();
+        String title = getString(R.string.rc_call_on_going);
+        Intent intent = new Intent(this, CallForegroundService.class);
+        intent.putExtra("content", content);
+        intent.putExtra("action", action);
+        intent.putExtra("title", title);
+        Bundle bundle = new Bundle();
+        onSaveFloatBoxState(bundle);
+        bundle.putBoolean("isDial", isDial);
+        intent.putExtra("floatbox", bundle);
+        if (VERSION.SDK_INT >= VERSION_CODES.O) {
+            startForegroundService(intent);
+        } else {
+            startService(intent);
+        }
+    }
+
+    private void stopForegroundService() {
+        try {
+            stopService(new Intent(this, CallForegroundService.class));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        stopForegroundService();
         RLog.d(TAG, "BaseCallActivity onResume");
         try {
             RongCallSession session = RongCallClient.getInstance().getCallSession();
@@ -524,7 +558,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
                 text = getString(R.string.rc_voip_mo_no_response);
                 break;
             case REMOTE_BUSY_LINE:
-                text = getString(R.string.rc_voip_mt_busy_toast);
+                text = getString(R.string.rc_voip_mt_busy);
                 break;
             case REMOTE_CANCEL:
                 text = getString(R.string.rc_voip_mt_cancel);
@@ -582,70 +616,6 @@ public class BaseCallActivity extends BaseNoActionBarActivity
         return null;
     }
 
-    public void showOnGoingNotification(String title, String content) {
-        Intent intent = new Intent(getIntent().getAction());
-        Bundle bundle = new Bundle();
-        onSaveFloatBoxState(bundle);
-        bundle.putBoolean("isDial", isDial);
-        intent.putExtra("floatbox", bundle);
-        intent.putExtra("callAction", RongCallAction.ACTION_RESUME_CALL.getName());
-        PendingIntent pendingIntent;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            pendingIntent =
-                    PendingIntent.getActivity(
-                            this,
-                            1000,
-                            intent,
-                            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        } else {
-            pendingIntent =
-                    PendingIntent.getActivity(
-                            this, 1000, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        }
-        showNotification(this, title, content, pendingIntent, CALL_NOTIFICATION_ID);
-    }
-
-    private void showNotification(
-            Context context,
-            String title,
-            String content,
-            PendingIntent pendingIntent,
-            int notificationId) {
-        String channelId = CallRingingUtil.getInstance().getNotificationChannelId();
-        Notification notification =
-                RongNotificationInterface.createNotification(
-                        context,
-                        title,
-                        pendingIntent,
-                        content,
-                        RongNotificationInterface.SoundType.SILENT,
-                        channelId);
-        NotificationManager nm =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            int importance = NotificationManager.IMPORTANCE_LOW;
-            String channelName = CallRingingUtil.getInstance().getNotificationChannelName(this);
-            NotificationChannel notificationChannel =
-                    new NotificationChannel(channelId, channelName, importance);
-            notificationChannel.enableLights(false);
-            notificationChannel.setLightColor(Color.GREEN);
-            notificationChannel.enableVibration(false);
-            notificationChannel.setSound(null, null);
-            nm.createNotificationChannel(notificationChannel);
-        }
-
-        if (notification != null) {
-            io.rong.push.common.RLog.i(
-                    TAG,
-                    "sendNotification() real notify! notificationId: "
-                            + notificationId
-                            + " notification: "
-                            + notification.toString());
-            nm.notify(notificationId, notification);
-        }
-    }
-
     @TargetApi(23)
     boolean requestCallPermissions(RongCallCommon.CallMediaType type, int requestCode) {
         //        String[] permissions = null;
@@ -684,15 +654,21 @@ public class BaseCallActivity extends BaseNoActionBarActivity
             this.timeView = timeView;
         }
 
+        @SuppressLint("DefaultLocale")
         @Override
         public void run() {
             time++;
             if (time >= 3600) {
                 timeView.setText(
                         String.format(
-                                "%d:%02d:%02d", time / 3600, (time % 3600) / 60, (time % 60)));
+                                Locale.ROOT,
+                                "%d:%02d:%02d",
+                                time / 3600,
+                                (time % 3600) / 60,
+                                (time % 60)));
             } else {
-                timeView.setText(String.format("%02d:%02d", (time % 3600) / 60, (time % 60)));
+                timeView.setText(
+                        String.format(Locale.ROOT, "%02d:%02d", (time % 3600) / 60, (time % 60)));
             }
             handler.postDelayed(this, 1000);
         }
