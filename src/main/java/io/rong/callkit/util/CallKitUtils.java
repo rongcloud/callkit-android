@@ -22,8 +22,12 @@ import androidx.annotation.NonNull;
 import androidx.core.app.AppOpsManagerCompat;
 import androidx.core.content.ContextCompat;
 import io.rong.callkit.R;
+import io.rong.calllib.ReportUtil;
+import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.common.RLog;
+import io.rong.imlib.IRongCoreListener;
+import io.rong.imlib.RongCoreClient;
 import io.rong.imlib.model.Message;
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -266,5 +270,26 @@ public class CallKitUtils {
                         + " ,language : "
                         + language);
         return TextUtils.equals(languageApp, language);
+    }
+
+    /**
+     * 检查RongCallClient是否有效
+     *
+     * @return 如果RongCallClient有效，则返回true；否则返回false
+     */
+    public static boolean CheckRongCallClientValid(String desc) {
+        if (RongCallClient.getInstance() == null) {
+            // 获取当前IM的登录状态，如果IM未登录，RongCallClient.getInstance()的实例会为空
+            IRongCoreListener.ConnectionStatusListener.ConnectionStatus connectionStatus =
+                    RongCoreClient.getInstance().getCurrentConnectionStatus();
+            // 报告日志
+            ReportUtil.appError(
+                    ReportUtil.TAG.INTERNAL_ERROR,
+                    "desc|connectionStatus",
+                    desc,
+                    connectionStatus.name());
+            return false;
+        }
+        return true;
     }
 }

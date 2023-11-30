@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageView;
@@ -115,7 +116,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         }
 
         startForCheckPermissions = intent.getBooleanExtra("checkPermissions", false);
-        RongCallAction callAction = RongCallAction.valueOf(intent.getStringExtra("callAction"));
+        RongCallAction callAction = RongCallAction.getAction(intent.getStringExtra("callAction"));
 
         String receivedCallId = "";
         if (callAction.equals(RongCallAction.ACTION_OUTGOING_CALL)) {
@@ -140,12 +141,17 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                 return;
             }
         } else {
+            if (!CallKitUtils.CheckRongCallClientValid(
+                    "SingleCallActivity#onCreate().RongCallClient ie empty")) {
+                return;
+            }
             callSession = RongCallClient.getInstance().getCallSession();
             if (callSession != null) {
                 mediaType = callSession.getMediaType();
                 receivedCallId = callSession.getCallId();
             }
         }
+
         if (!RongCallClient.getInstance().canCallContinued(receivedCallId)) {
             RLog.w(TAG, "Already received hangup message before, finish current activity");
             ReportUtil.libStatus(ReportUtil.TAG.ACTIVITYFINISH, "reason", "canCallContinued not");
@@ -170,7 +176,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
     @Override
     protected void onNewIntent(Intent intent) {
         startForCheckPermissions = intent.getBooleanExtra("checkPermissions", false);
-        RongCallAction callAction = RongCallAction.valueOf(intent.getStringExtra("callAction"));
+        RongCallAction callAction = RongCallAction.getAction(intent.getStringExtra("callAction"));
         if (callAction == null) {
             return;
         }
@@ -266,9 +272,13 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
     }
 
     private void setupIntent() {
+        if (!CallKitUtils.CheckRongCallClientValid(
+                "SingleCallActivity#setupIntent().RongCallClient ie empty")) {
+            return;
+        }
         RongCallCommon.CallMediaType mediaType;
         Intent intent = getIntent();
-        RongCallAction callAction = RongCallAction.valueOf(intent.getStringExtra("callAction"));
+        RongCallAction callAction = RongCallAction.getAction(intent.getStringExtra("callAction"));
         //        if (callAction.equals(RongCallAction.ACTION_RESUME_CALL)) {
         //            return;
         //        }
@@ -286,6 +296,10 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                                             .equals(RongCallCommon.CallMediaType.VIDEO)) {
                                         mLPreviewContainer.setVisibility(View.VISIBLE);
                                         localVideo.setTag(callSession.getSelfUserId());
+                                        ViewParent parent = localVideo.getParent();
+                                        if (parent != null) {
+                                            ((ViewGroup) parent).removeView(localVideo);
+                                        }
                                         mLPreviewContainer.addView(localVideo, mLargeLayoutParams);
                                     }
                                 }
@@ -1029,7 +1043,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
     public void onCallDisconnected(
             RongCallSession callSession, RongCallCommon.CallDisconnectedReason reason) {
         super.onCallDisconnected(callSession, reason);
-
+        RongCallClient.getInstance().resetAVStatus();
         String senderId;
         String extra = "";
 
@@ -1154,7 +1168,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         }
         RongCallCommon.CallMediaType mediaType = callSession.getMediaType();
         RongCallAction callAction =
-                RongCallAction.valueOf(getIntent().getStringExtra("callAction"));
+                RongCallAction.getAction(getIntent().getStringExtra("callAction"));
         inflater = LayoutInflater.from(this);
         initView(mediaType, callAction);
         targetId = callSession.getTargetId();

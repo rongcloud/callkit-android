@@ -61,6 +61,7 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
         if (ACTION_CALL_HANGUP_CLICKED.equals(action)) {
             RongCallSession session =
                     intent.getParcelableExtra(RongIncomingCallService.KEY_CALL_SESSION);
+            if (RongCallClient.getInstance() == null) return;
             stopIncomingService(context);
             if (session == null) {
                 RongCallClient.getInstance().hangUpCall();

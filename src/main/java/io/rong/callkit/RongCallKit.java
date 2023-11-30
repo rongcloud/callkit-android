@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
+import io.rong.callkit.util.CallKitUtils;
 import io.rong.callkit.util.RongCallPermissionUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
@@ -225,9 +226,6 @@ public class RongCallKit {
             }
         }
 
-        if (isInVoipCall(context)) {
-            return false;
-        }
         if (!RongIMClient.getInstance()
                 .getCurrentConnectionStatus()
                 .equals(RongIMClient.ConnectionStatusListener.ConnectionStatus.CONNECTED)) {
@@ -236,6 +234,10 @@ public class RongCallKit {
                             context.getResources().getString(R.string.rc_voip_call_network_error),
                             Toast.LENGTH_SHORT)
                     .show();
+            return false;
+        }
+
+        if (isInVoipCall(context)) {
             return false;
         }
         return true;
@@ -248,6 +250,10 @@ public class RongCallKit {
      * @return 是否在VOIP通话中
      */
     public static boolean isInVoipCall(Context context) {
+        if (!CallKitUtils.CheckRongCallClientValid("RongCallkit#isInVoipCall()")) {
+            return false;
+        }
+
         RongCallSession callSession = RongCallClient.getInstance().getCallSession();
         if (callSession != null && callSession.getStartTime() > 0) {
             Toast.makeText(

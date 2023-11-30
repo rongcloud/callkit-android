@@ -229,7 +229,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
 
     void initView() {
         Intent intent = getIntent();
-        callAction = RongCallAction.valueOf(intent.getStringExtra("callAction"));
+        callAction = RongCallAction.getAction(intent.getStringExtra("callAction"));
         if (callAction == null || callAction.equals(RongCallAction.ACTION_RESUME_CALL)) {
             RelativeLayout relativeLayout =
                     (RelativeLayout)

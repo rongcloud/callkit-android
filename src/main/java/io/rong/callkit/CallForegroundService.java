@@ -83,6 +83,9 @@ public class CallForegroundService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent == null) {
+            return super.onStartCommand(null, flags, startId);
+        }
         String action = intent.getStringExtra("action");
         String title = intent.getStringExtra("title");
         String content = intent.getStringExtra("content");

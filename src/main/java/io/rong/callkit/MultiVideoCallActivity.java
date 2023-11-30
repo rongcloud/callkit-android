@@ -288,7 +288,8 @@ public class MultiVideoCallActivity extends BaseCallActivity {
             RLog.i(TAG, "--- onRestoreFloatBox  ------");
             callSession = RongCallClient.getInstance().getCallSession();
             if (bundle != null) {
-                RongCallAction callAction = RongCallAction.valueOf(bundle.getString("callAction"));
+                RongCallAction callAction =
+                        RongCallAction.getAction(bundle.getString("callAction"));
                 if (!callAction.equals(RongCallAction.ACTION_RESUME_CALL)) {
                     return;
                 }
@@ -1273,7 +1274,11 @@ public class MultiVideoCallActivity extends BaseCallActivity {
 
     protected void setupIntent() {
         Intent intent = getIntent();
-        RongCallAction callAction = RongCallAction.valueOf(intent.getStringExtra("callAction"));
+        String name = intent.getStringExtra("callAction");
+        if (TextUtils.isEmpty(name)) {
+            return;
+        }
+        RongCallAction callAction = RongCallAction.valueOf(name);
         if (callAction == null || callAction.equals(RongCallAction.ACTION_RESUME_CALL)) {
             return;
         }
