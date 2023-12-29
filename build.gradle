@@ -1,12 +1,12 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 31
-        versionName "5.6.7_OpenSourceCode"
+        targetSdkVersion 33
+        versionName "5.6.8_OpenSourceCode"
     }
 
     sourceSets {
