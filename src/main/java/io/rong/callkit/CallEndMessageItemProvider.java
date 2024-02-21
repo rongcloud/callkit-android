@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,129 +50,142 @@ public class CallEndMessageItemProvider extends BaseMessageItemProvider<CallSTer
             IViewProviderListener<UiMessage> listener) {
         Message message = uiMessage.getMessage();
         final TextView view = holder.getView(io.rong.imkit.R.id.rc_text);
-        if (message.getMessageDirection() == Message.MessageDirection.SEND) {
-            view.setBackgroundResource(R.drawable.rc_ic_bubble_right);
+        if (view != null) {
+            if (message.getMessageDirection() == Message.MessageDirection.SEND) {
+                view.setBackgroundResource(R.drawable.rc_ic_bubble_right);
+            } else {
+                view.setBackgroundResource(R.drawable.rc_ic_bubble_left);
+            }
         } else {
-            view.setBackgroundResource(R.drawable.rc_ic_bubble_left);
+            Log.e(TAG, "bindMessageContentViewHolder(). TextView is empty");
         }
 
-        RongCallCommon.CallMediaType mediaType = callSTerminateMessage.getMediaType();
-        String direction = callSTerminateMessage.getDirection();
-        Drawable drawable = null;
+        try {
+            RongCallCommon.CallMediaType mediaType = callSTerminateMessage.getMediaType();
+            String direction = callSTerminateMessage.getDirection();
+            Drawable drawable = null;
 
-        String msgContent = "";
-        switch (callSTerminateMessage.getReason()) {
-            case CANCEL:
-                msgContent = view.getResources().getString(R.string.rc_voip_mo_cancel);
-                break;
-            case REJECT:
-                msgContent = view.getResources().getString(R.string.rc_voip_mo_reject);
-                break;
-            case NO_RESPONSE:
-            case BUSY_LINE:
-                msgContent = view.getResources().getString(R.string.rc_voip_mo_no_response);
-                break;
-            case REMOTE_BUSY_LINE:
-                msgContent = view.getResources().getString(R.string.rc_voip_mt_busy);
-                break;
-            case REMOTE_CANCEL:
-                msgContent = view.getResources().getString(R.string.rc_voip_mt_cancel);
-                break;
-            case REMOTE_REJECT:
-                msgContent = view.getResources().getString(R.string.rc_voip_mt_reject);
-                break;
-            case REMOTE_NO_RESPONSE:
-                msgContent = view.getResources().getString(R.string.rc_voip_mt_no_response);
-                break;
-            case NETWORK_ERROR:
-            case REMOTE_NETWORK_ERROR:
-            case INIT_VIDEO_ERROR:
-                msgContent = view.getResources().getString(R.string.rc_voip_call_interrupt);
-                break;
-            case OTHER_DEVICE_HAD_ACCEPTED:
-                msgContent = view.getResources().getString(R.string.rc_voip_call_other);
-                break;
-            case SERVICE_NOT_OPENED:
-            case REMOTE_ENGINE_UNSUPPORTED:
-                msgContent = view.getResources().getString(R.string.rc_voip_engine_notfound);
-                break;
-            case REJECTED_BY_BLACKLIST:
-                msgContent =
-                        view.getResources().getString(R.string.rc_voip_mo_rejected_by_blocklist);
-                break;
-            default:
-                String mo_reject = view.getResources().getString(R.string.rc_voip_mo_reject);
-                String mt_reject = view.getResources().getString(R.string.rc_voip_mt_reject);
-                String extra = callSTerminateMessage.getExtra();
-                String timeRegex = "([0-9]?[0-9]:)?([0-5][0-9]:)?([0-5][0-9])$";
-                if (!TextUtils.isEmpty(extra)) {
-                    boolean val = extra.matches(timeRegex);
-                    if (val) {
-                        msgContent =
-                                view.getResources().getString(R.string.rc_voip_call_time_length);
-                        msgContent += extra;
+            String msgContent = "";
+            switch (callSTerminateMessage.getReason()) {
+                case CANCEL:
+                    msgContent = view.getResources().getString(R.string.rc_voip_mo_cancel);
+                    break;
+                case REJECT:
+                    msgContent = view.getResources().getString(R.string.rc_voip_mo_reject);
+                    break;
+                case NO_RESPONSE:
+                case BUSY_LINE:
+                    msgContent = view.getResources().getString(R.string.rc_voip_mo_no_response);
+                    break;
+                case REMOTE_BUSY_LINE:
+                    msgContent = view.getResources().getString(R.string.rc_voip_mt_busy);
+                    break;
+                case REMOTE_CANCEL:
+                    msgContent = view.getResources().getString(R.string.rc_voip_mt_cancel);
+                    break;
+                case REMOTE_REJECT:
+                    msgContent = view.getResources().getString(R.string.rc_voip_mt_reject);
+                    break;
+                case REMOTE_NO_RESPONSE:
+                    msgContent = view.getResources().getString(R.string.rc_voip_mt_no_response);
+                    break;
+                case NETWORK_ERROR:
+                case REMOTE_NETWORK_ERROR:
+                case INIT_VIDEO_ERROR:
+                    msgContent = view.getResources().getString(R.string.rc_voip_call_interrupt);
+                    break;
+                case OTHER_DEVICE_HAD_ACCEPTED:
+                    msgContent = view.getResources().getString(R.string.rc_voip_call_other);
+                    break;
+                case SERVICE_NOT_OPENED:
+                case REMOTE_ENGINE_UNSUPPORTED:
+                    msgContent = view.getResources().getString(R.string.rc_voip_engine_notfound);
+                    break;
+                case REJECTED_BY_BLACKLIST:
+                    msgContent =
+                            view.getResources()
+                                    .getString(R.string.rc_voip_mo_rejected_by_blocklist);
+                    break;
+                default:
+                    String mo_reject = view.getResources().getString(R.string.rc_voip_mo_reject);
+                    String mt_reject = view.getResources().getString(R.string.rc_voip_mt_reject);
+                    String extra = callSTerminateMessage.getExtra();
+                    String timeRegex = "([0-9]?[0-9]:)?([0-5][0-9]:)?([0-5][0-9])$";
+                    if (!TextUtils.isEmpty(extra)) {
+                        boolean val = extra.matches(timeRegex);
+                        if (val) {
+                            msgContent =
+                                    view.getResources()
+                                            .getString(R.string.rc_voip_call_time_length);
+                            msgContent += extra;
+                        } else {
+                            msgContent =
+                                    view.getResources()
+                                            .getString(R.string.rc_voip_call_time_length);
+                        }
                     } else {
                         msgContent =
-                                view.getResources().getString(R.string.rc_voip_call_time_length);
+                                callSTerminateMessage.getReason() == HANGUP ? mo_reject : mt_reject;
                     }
-                } else {
-                    msgContent =
-                            callSTerminateMessage.getReason() == HANGUP ? mo_reject : mt_reject;
-                }
-                break;
-        }
-
-        view.setText(msgContent);
-        view.setCompoundDrawablePadding(15);
-
-        if (mediaType.equals(RongCallCommon.CallMediaType.VIDEO)) {
-            if (direction != null && direction.equals("MO")) {
-                drawable = view.getResources().getDrawable(R.drawable.rc_voip_video_right);
-                drawable.setBounds(
-                        0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-                view.setCompoundDrawablesRelative(null, null, drawable, null);
-                view.setTextColor(view.getResources().getColor(R.color.rc_voip_color_right));
-            } else {
-                drawable = view.getResources().getDrawable(R.drawable.rc_voip_video_left);
-                drawable.setBounds(
-                        0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-                view.setCompoundDrawablesRelative(drawable, null, null, null);
-                view.setTextColor(view.getResources().getColor(R.color.rc_voip_color_left));
+                    break;
             }
-        } else {
-            if (direction != null && direction.equals("MO")) {
-                if (callSTerminateMessage.getReason().equals(HANGUP)
-                        || callSTerminateMessage
-                                .getReason()
-                                .equals(RongCallCommon.CallDisconnectedReason.REMOTE_HANGUP)) {
-                    drawable =
-                            view.getResources()
-                                    .getDrawable(R.drawable.rc_voip_audio_right_connected);
+
+            view.setText(msgContent);
+            view.setCompoundDrawablePadding(15);
+
+            if (mediaType.equals(RongCallCommon.CallMediaType.VIDEO)) {
+                if (direction != null && direction.equals("MO")) {
+                    drawable = view.getResources().getDrawable(R.drawable.rc_voip_video_right);
+                    drawable.setBounds(
+                            0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                    view.setCompoundDrawablesRelative(null, null, drawable, null);
+                    view.setTextColor(view.getResources().getColor(R.color.rc_voip_color_right));
                 } else {
-                    drawable =
-                            view.getResources().getDrawable(R.drawable.rc_voip_audio_right_cancel);
+                    drawable = view.getResources().getDrawable(R.drawable.rc_voip_video_left);
+                    drawable.setBounds(
+                            0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                    view.setCompoundDrawablesRelative(drawable, null, null, null);
+                    view.setTextColor(view.getResources().getColor(R.color.rc_voip_color_left));
                 }
-                drawable.setBounds(
-                        0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-                view.setCompoundDrawablesRelative(null, null, drawable, null);
-                view.setTextColor(view.getResources().getColor(R.color.rc_voip_color_right));
             } else {
-                if (callSTerminateMessage.getReason().equals(HANGUP)
-                        || callSTerminateMessage
-                                .getReason()
-                                .equals(RongCallCommon.CallDisconnectedReason.REMOTE_HANGUP)) {
-                    drawable =
-                            view.getResources()
-                                    .getDrawable(R.drawable.rc_voip_audio_left_connected);
+                if (direction != null && direction.equals("MO")) {
+                    if (callSTerminateMessage.getReason().equals(HANGUP)
+                            || callSTerminateMessage
+                                    .getReason()
+                                    .equals(RongCallCommon.CallDisconnectedReason.REMOTE_HANGUP)) {
+                        drawable =
+                                view.getResources()
+                                        .getDrawable(R.drawable.rc_voip_audio_right_connected);
+                    } else {
+                        drawable =
+                                view.getResources()
+                                        .getDrawable(R.drawable.rc_voip_audio_right_cancel);
+                    }
+                    drawable.setBounds(
+                            0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                    view.setCompoundDrawablesRelative(null, null, drawable, null);
+                    view.setTextColor(view.getResources().getColor(R.color.rc_voip_color_right));
                 } else {
-                    drawable =
-                            view.getResources().getDrawable(R.drawable.rc_voip_audio_left_cancel);
+                    if (callSTerminateMessage.getReason().equals(HANGUP)
+                            || callSTerminateMessage
+                                    .getReason()
+                                    .equals(RongCallCommon.CallDisconnectedReason.REMOTE_HANGUP)) {
+                        drawable =
+                                view.getResources()
+                                        .getDrawable(R.drawable.rc_voip_audio_left_connected);
+                    } else {
+                        drawable =
+                                view.getResources()
+                                        .getDrawable(R.drawable.rc_voip_audio_left_cancel);
+                    }
+                    drawable.setBounds(
+                            0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                    view.setCompoundDrawablesRelative(drawable, null, null, null);
+                    view.setTextColor(view.getResources().getColor(R.color.rc_voip_color_left));
                 }
-                drawable.setBounds(
-                        0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-                view.setCompoundDrawablesRelative(drawable, null, null, null);
-                view.setTextColor(view.getResources().getColor(R.color.rc_voip_color_left));
             }
+        } catch (Exception e) {
+            Log.e(TAG, "bindMessageContentViewHolder().exception : " + e.getMessage());
         }
     }
 

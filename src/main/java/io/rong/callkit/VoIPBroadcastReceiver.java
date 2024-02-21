@@ -19,6 +19,8 @@ import androidx.core.app.NotificationCompat;
 import io.rong.callkit.util.CallRingingUtil;
 import io.rong.callkit.util.IncomingCallExtraHandleUtil;
 import io.rong.callkit.util.RingingMode;
+import io.rong.calllib.ReportUtil;
+import io.rong.calllib.ReportUtil.TAG;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallSession;
@@ -61,12 +63,18 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
         if (ACTION_CALL_HANGUP_CLICKED.equals(action)) {
             RongCallSession session =
                     intent.getParcelableExtra(RongIncomingCallService.KEY_CALL_SESSION);
-            if (RongCallClient.getInstance() == null) return;
             stopIncomingService(context);
-            if (session == null) {
-                RongCallClient.getInstance().hangUpCall();
+            if (RongCallClient.getInstance() != null) {
+                if (session == null) {
+                    RongCallClient.getInstance().hangUpCall();
+                } else {
+                    RongCallClient.getInstance().hangUpCall(session.getCallId());
+                }
             } else {
-                RongCallClient.getInstance().hangUpCall(session.getCallId());
+                ReportUtil.appError(
+                        ReportUtil.TAG.INTERNAL_ERROR,
+                        "desc",
+                        "VoIPBroadcastReceiver.  RongCallClient.getInstance() is empty");
             }
             return;
         } else if (ACTION_CLEAR_VOIP_NOTIFICATION.equals(action)) {

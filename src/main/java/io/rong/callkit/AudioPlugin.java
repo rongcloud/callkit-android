@@ -76,6 +76,12 @@ public class AudioPlugin implements IPluginModule, IPluginRequestPermissionResul
         if (context == null) {
             return;
         }
+
+        if (RongCallClient.getInstance() == null) {
+            RLog.e(TAG, "AudioPlugin.startAudioActivity RongCallClient.getInstance() is null");
+            return;
+        }
+
         RongCallSession profile = RongCallClient.getInstance().getCallSession();
         if (profile != null && profile.getStartTime() > 0) {
             Toast.makeText(

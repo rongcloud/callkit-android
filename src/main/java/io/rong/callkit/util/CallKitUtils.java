@@ -23,6 +23,7 @@ import androidx.core.app.AppOpsManagerCompat;
 import androidx.core.content.ContextCompat;
 import io.rong.callkit.R;
 import io.rong.calllib.ReportUtil;
+import io.rong.calllib.ReportUtil.TAG;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.common.RLog;
@@ -194,10 +195,40 @@ public class CallKitUtils {
     }
 
     public static boolean isNetworkAvailable(Context context) {
-        ConnectivityManager cm =
-                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-        if (networkInfo == null || !networkInfo.isConnected() || !networkInfo.isAvailable()) {
+        if (context == null) {
+            ReportUtil.appStatus(
+                    TAG.INTERNAL_ERROR, "desc", "isNetworkAvailable().context is empty");
+            return false;
+        }
+
+        try {
+            ConnectivityManager cm =
+                    (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (cm == null) {
+                ReportUtil.appStatus(
+                        TAG.INTERNAL_ERROR,
+                        "desc",
+                        "isNetworkAvailable().ConnectivityManager is empty");
+                return false;
+            }
+
+            NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+            if (networkInfo == null) {
+                ReportUtil.appStatus(
+                        TAG.INTERNAL_ERROR, "desc", "isNetworkAvailable().NetworkInfo is empty");
+                return false;
+            }
+
+            if (!networkInfo.isConnected() || !networkInfo.isAvailable()) {
+                ReportUtil.appStatus(
+                        TAG.INTERNAL_ERROR, "desc", "isNetworkAvailable().Network unavailable");
+                return false;
+            }
+        } catch (Exception e) {
+            ReportUtil.appStatus(
+                    TAG.INTERNAL_ERROR,
+                    "desc",
+                    "isNetworkAvailable().exception: " + e.getMessage());
             return false;
         }
         return true;

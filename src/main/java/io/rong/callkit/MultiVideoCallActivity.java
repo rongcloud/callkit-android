@@ -740,7 +740,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         singleRemoteView.findViewById(R.id.user_portrait).setVisibility(View.GONE);
         singleRemoteView.findViewById(R.id.user_name).setVisibility(View.GONE);
         // 把最新的 surfaceView 展示出来，onRemoteUserJoined 返回的 surfaceView 已经失效了，流被绑定到新的 surfaceView 上了
-        addRemoteVideo(singleRemoteView, surfaceView, userId, true);
+        addRemoteVideo(singleRemoteView, surfaceView, userId, false);
     }
 
     @Override

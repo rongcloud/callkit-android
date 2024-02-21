@@ -18,12 +18,19 @@ import android.os.IBinder;
 import android.util.Log;
 import androidx.annotation.Nullable;
 import io.rong.callkit.util.CallRingingUtil;
+import io.rong.calllib.ReportUtil;
+import io.rong.common.RLog;
 import io.rong.push.notification.RongNotificationInterface;
 import io.rong.push.notification.RongNotificationInterface.SoundType;
 
 public class CallForegroundService extends Service {
 
     private static final String TAG = "CallForegroundService";
+    private String action = "";
+    private String title = "";
+    ;
+    private String content = "";
+    private Notification notification;
 
     @Override
     public void onCreate() {
@@ -36,7 +43,7 @@ public class CallForegroundService extends Service {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         String channelId = CallRingingUtil.getInstance().getNotificationChannelId();
-        Notification notification =
+        notification =
                 RongNotificationInterface.createNotification(
                         getApplicationContext(),
                         title,
@@ -83,12 +90,17 @@ public class CallForegroundService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent == null) {
-            return super.onStartCommand(null, flags, startId);
+        if (intent != null) {
+            action = intent.getStringExtra("action");
+            title = intent.getStringExtra("title");
+            content = intent.getStringExtra("content");
+        } else {
+            title = getString(R.string.rc_call_on_going);
+            ReportUtil.appError(
+                    ReportUtil.TAG.INTERNAL_ERROR,
+                    "desc",
+                    "CallForegroundService.  onStartCommand: intent is null!");
         }
-        String action = intent.getStringExtra("action");
-        String title = intent.getStringExtra("title");
-        String content = intent.getStringExtra("content");
         ResolveInfo info =
                 getPackageManager()
                         .resolveActivity(new Intent(action), PackageManager.MATCH_DEFAULT_ONLY);
@@ -97,7 +109,7 @@ public class CallForegroundService extends Service {
             Log.e(TAG, "onStartCommand: ResolveInfo is null! action=" + action);
             return super.onStartCommand(intent, flags, startId);
         }
-        Log.d(TAG, "onStartCommand: " + activityInfo.name);
+        RLog.d(TAG, "onStartCommand: " + activityInfo.name);
         Intent launched = new Intent(action);
         launched.setClassName(activityInfo.packageName, activityInfo.name);
         launched.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -86,7 +88,7 @@ public class CallFloatBoxView {
         }
         mBundle = bundle;
         wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        WindowManager.LayoutParams params = createLayoutParams(context);
+        WindowManager.LayoutParams params = createLayoutParams(wm);
         RongCallCommon.CallMediaType mediaType =
                 RongCallCommon.CallMediaType.valueOf(bundle.getInt("mediaType"));
         if (mediaType == RongCallCommon.CallMediaType.VIDEO
@@ -368,7 +370,7 @@ public class CallFloatBoxView {
                                             "set onMediaTypeChanged Failed CallFloatBoxView is Hiden");
                                     return;
                                 }
-                                WindowManager.LayoutParams params = createLayoutParams(mContext);
+                                WindowManager.LayoutParams params = createLayoutParams(wm);
                                 if (mediaType.equals(RongCallCommon.CallMediaType.AUDIO)) {
                                     if (remoteVideoContainer != null) {
                                         wm.removeView(remoteVideoContainer);
@@ -562,7 +564,7 @@ public class CallFloatBoxView {
         }
     }
 
-    private static WindowManager.LayoutParams createLayoutParams(Context context) {
+    private static WindowManager.LayoutParams createLayoutParams(WindowManager windowManager) {
         WindowManager.LayoutParams params = new WindowManager.LayoutParams();
 
         int type;
@@ -582,7 +584,20 @@ public class CallFloatBoxView {
         params.format = PixelFormat.TRANSLUCENT;
         params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
         params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-        params.gravity = Gravity.END | Gravity.CENTER_VERTICAL;
+        params.gravity = Gravity.TOP | Gravity.START;
+        int screenWidth, screenHeight;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            Rect bounds = windowManager.getCurrentWindowMetrics().getBounds();
+            screenWidth = bounds.width();
+            screenHeight = bounds.height();
+        } else {
+            Display display = windowManager.getDefaultDisplay();
+            screenWidth = display.getWidth();
+            screenHeight = display.getHeight();
+        }
+
+        params.x = screenWidth;
+        params.y = screenHeight / 2;
         return params;
     }
 
@@ -646,7 +661,7 @@ public class CallFloatBoxView {
 
         mBundle = bundle;
         wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        final WindowManager.LayoutParams params = createLayoutParams(context);
+        final WindowManager.LayoutParams params = createLayoutParams(wm);
 
         mView = LayoutInflater.from(context).inflate(R.layout.rc_voip_float_box, null);
         mView.setOnTouchListener(

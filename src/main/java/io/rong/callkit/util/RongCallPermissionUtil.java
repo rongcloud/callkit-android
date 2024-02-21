@@ -169,30 +169,36 @@ public class RongCallPermissionUtil {
 
     public static void requestFloatWindowNeedPermission(
             final Context context, final DialogInterface.OnClickListener listener) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            ArrayList<String> permissionList = new ArrayList<>();
-            permissionList.add(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-            showPermissionAlert(
-                    context,
-                    context.getString(io.rong.imkit.R.string.rc_permission_grant_needed)
-                            + getNotGrantedPermissionMsg(context, permissionList),
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (listener != null) {
-                                listener.onClick(dialog, which);
-                            }
-                            if (DialogInterface.BUTTON_POSITIVE == which) {
-                                Intent intent =
-                                        new Intent(
-                                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                                Uri.parse("package:" + context.getPackageName()));
-                                if (intent.resolveActivity(context.getPackageManager()) != null) {
-                                    context.startActivity(intent);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                ArrayList<String> permissionList = new ArrayList<>();
+                permissionList.add(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                showPermissionAlert(
+                        context,
+                        context.getString(io.rong.imkit.R.string.rc_permission_grant_needed)
+                                + getNotGrantedPermissionMsg(context, permissionList),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (listener != null) {
+                                    listener.onClick(dialog, which);
+                                }
+                                if (DialogInterface.BUTTON_POSITIVE == which) {
+                                    Intent intent =
+                                            new Intent(
+                                                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                                    Uri.parse(
+                                                            "package:" + context.getPackageName()));
+                                    if (intent.resolveActivity(context.getPackageManager())
+                                            != null) {
+                                        context.startActivity(intent);
+                                    }
                                 }
                             }
-                        }
-                    });
+                        });
+            }
+        } catch (Exception e) {
+            RLog.e(TAG, "requestFloatWindowNeedPermission().exception: " + e.getMessage());
         }
     }
 

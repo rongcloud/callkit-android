@@ -70,7 +70,10 @@ public class VideoPlugin implements IPluginModule, IPluginRequestPermissionResul
     }
 
     private void startVideoActivity(final RongExtension extension) {
-
+        if (RongCallClient.getInstance() == null) {
+            RLog.e(TAG, "RongCallClient.getInstance() is null");
+            return;
+        }
         RongCallSession profile = RongCallClient.getInstance().getCallSession();
         if (profile != null && profile.getStartTime() > 0) {
             Toast.makeText(

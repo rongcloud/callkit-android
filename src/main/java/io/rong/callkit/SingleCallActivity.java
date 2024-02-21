@@ -774,12 +774,10 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             RLog.v(TAG, "onRemoteUserJoined hasRemoteVideoView");
             return;
         }
-
-        if (remoteVideo.getParent() != null) {
-            RLog.v(TAG, "onRemoteUserJoined remoteVideo.getParent() != null");
-            return;
+        ViewParent parent = remoteVideo.getParent();
+        if (parent != null) {
+            ((ViewGroup) parent).removeView(remoteVideo);
         }
-
         findViewById(R.id.rc_voip_call_information)
                 .setBackgroundColor(getResources().getColor(android.R.color.transparent));
         mLPreviewContainer.setVisibility(View.VISIBLE);
