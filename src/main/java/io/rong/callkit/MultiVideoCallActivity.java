@@ -707,13 +707,18 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                 }
                 //
                 View firstView = portraitContainer1.getChildAt(0);
-                LinearLayout.LayoutParams layoutParams = (LayoutParams) firstView.getLayoutParams();
-                layoutParams.setMargins(
-                        CallKitUtils.dp2px(remoteUserViewMarginsLeft, MultiVideoCallActivity.this),
-                        0,
-                        CallKitUtils.dp2px(remoteUserViewMarginsRight, MultiVideoCallActivity.this),
-                        0);
-                firstView.requestLayout();
+                if (firstView != null) {
+                    LinearLayout.LayoutParams layoutParams =
+                            (LayoutParams) firstView.getLayoutParams();
+                    layoutParams.setMargins(
+                            CallKitUtils.dp2px(
+                                    remoteUserViewMarginsLeft, MultiVideoCallActivity.this),
+                            0,
+                            CallKitUtils.dp2px(
+                                    remoteUserViewMarginsRight, MultiVideoCallActivity.this),
+                            0);
+                    firstView.requestLayout();
+                }
                 return true;
             }
         }
@@ -845,6 +850,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
     @Override
     public void onCallConnected(RongCallSession callSession, SurfaceView localVideo) {
         super.onCallConnected(callSession, localVideo);
+        stopRing();
         this.callSession = callSession;
         if (null != rc_voip_multiVideoCall_minimize) {
             rc_voip_multiVideoCall_minimize.setVisibility(View.GONE);
