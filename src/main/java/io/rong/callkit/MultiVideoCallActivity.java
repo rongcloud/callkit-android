@@ -743,7 +743,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
     @Override
     public void onRemoteUserPublishVideoStream(
             String userId, String streamId, String tag, SurfaceView surfaceView) {
-        if (TextUtils.equals(userId, localViewUserId)) {
+        if (TextUtils.equals(userId, localViewUserId) || surfaceView == null) {
             return;
         }
         View singleRemoteView = null;
