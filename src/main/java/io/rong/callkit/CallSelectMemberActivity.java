@@ -5,8 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -375,20 +373,11 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity
     private void registerDisconnectBroadcastReceiver() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(DISCONNECT_ACTION);
-        if (VERSION.SDK_INT > VERSION_CODES.TIRAMISU) {
-            registerReceiver(
-                    disconnectBroadcastReceiver,
-                    intentFilter,
-                    this.getApplicationInfo().packageName + ".permission.RONG_ACCESS_RECEIVER",
-                    null,
-                    Context.RECEIVER_NOT_EXPORTED);
-        } else {
-            registerReceiver(
-                    disconnectBroadcastReceiver,
-                    intentFilter,
-                    this.getApplicationInfo().packageName + ".permission.RONG_ACCESS_RECEIVER",
-                    null);
-        }
+        registerReceiver(
+                disconnectBroadcastReceiver,
+                intentFilter,
+                this.getApplicationInfo().packageName + ".permission.RONG_ACCESS_RECEIVER",
+                null);
     }
 
     private void startSearchMember(String searchEditContent) {
