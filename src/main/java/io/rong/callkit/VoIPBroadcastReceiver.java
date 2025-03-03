@@ -146,7 +146,7 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
     }
 
     public void fcmShowNotification(final Context context, PushNotificationMessage message) {
-        RLog.d(TAG, "fcmShowNotification");
+
         try {
             CallRingingUtil.getInstance().createNotificationChannel(context);
             int smallIcon =
@@ -163,11 +163,9 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
                             .buildUpon()
                             .appendPath("conversationlist")
                             .build();
-            Intent intent = new Intent(Intent.ACTION_VIEW);
+            Intent intent = new Intent();
             intent.setData(uri);
             intent.setPackage(context.getPackageName());
-            intent.setComponent(intent.resolveActivity(context.getPackageManager()));
-            RLog.d(TAG, "fcmShowNotification: " + intent);
             // 目标activity的包名和类名
             PendingIntent pendingIntent;
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -223,7 +221,7 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
             // Android 10 以下允许后台运行，直接交由会话列表界面拉取消息
             RLog.d(TAG, "handle VoIP event.");
             try {
-                Intent newIntent = new Intent(Intent.ACTION_VIEW);
+                Intent newIntent = new Intent();
                 newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 Uri uri =
                         Uri.parse("rong://" + context.getPackageName())
@@ -233,7 +231,6 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
                                 .build();
                 newIntent.setData(uri);
                 newIntent.setPackage(context.getPackageName());
-                newIntent.setComponent(newIntent.resolveActivity(context.getPackageManager()));
                 context.startActivity(newIntent);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -520,7 +517,7 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
     }
 
     private static Intent createConversationListIntent(Context context) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
+        Intent intent = new Intent();
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         Uri uri =
                 Uri.parse("rong://" + context.getPackageName())
@@ -529,7 +526,6 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
                         .build();
         intent.setData(uri);
         intent.setPackage(context.getPackageName());
-        intent.setComponent(intent.resolveActivity(context.getPackageManager()));
         return intent;
     }
 
