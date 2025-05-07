@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -123,6 +125,9 @@ public class MultiVideoCallActivity extends BaseCallActivity {
             return;
         }
         setContentView(R.layout.rc_voip_multi_video_call);
+        if (VERSION.SDK_INT >= VERSION_CODES.Q) {
+            getWindow().setStatusBarContrastEnforced(true);
+        }
         Intent intent = getIntent();
         startForCheckPermissions = intent.getBooleanExtra("checkPermissions", false);
         boolean val =
@@ -687,7 +692,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                             .loadPortrait(
                                     getBaseContext(),
                                     firstUserInfo.getPortraitUri(),
-                                    R.drawable.rc_default_portrait,
+                                    io.rong.imkit.R.drawable.rc_default_portrait,
                                     userPortrait);
                     userPortrait.setVisibility(View.VISIBLE);
                 } else {
@@ -1384,7 +1389,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                             .loadPortrait(
                                     getBaseContext(),
                                     userInfo.getPortraitUri(),
-                                    R.drawable.rc_default_portrait,
+                                    io.rong.imkit.R.drawable.rc_default_portrait,
                                     userPortrait);
                     userPortrait.setVisibility(View.VISIBLE);
                     //

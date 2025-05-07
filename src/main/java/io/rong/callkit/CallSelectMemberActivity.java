@@ -52,6 +52,7 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity
     public static final String DISCONNECT_ACTION = "call_disconnect";
     ArrayList<String> selectedMember;
     private boolean isFirstDialog = true;
+
     /** 已经选择的观察者列表 */
     private ArrayList<String> observerMember;
 
@@ -75,6 +76,7 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity
     private RelativeLayout rlActionBar;
     private ImageView ivBack;
     private CallKitSearchBarView searchBar;
+
     /**
      * true:只能选择n个人同时进行音视频通话，>n选择无效; false:>n个人同时音视频通话之后,其他人视为观察者加入到本次通话中; n ：NORMAL_VIDEO_NUMBER 和
      * NORMAL_AUDIO_NUMBER
@@ -84,6 +86,7 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity
     private static final int NORMAL_VIDEO_NUMBER = 7;
     private static final int NORMAL_AUDIO_NUMBER = 20;
     private ArrayList<UserInfo> userInfoArrayList = new ArrayList<>();
+
     /** 用于存储获取不到userInfo的用户在列表中的位置 */
     private HashMap<String, Integer> userInfoIndex = new HashMap<>();
 
@@ -499,7 +502,8 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity
                 convertView =
                         LayoutInflater.from(CallSelectMemberActivity.this)
                                 .inflate(R.layout.rc_voip_listitem_select_member, null);
-                holder.checkbox = (ImageView) convertView.findViewById(R.id.rc_checkbox);
+                holder.checkbox =
+                        (ImageView) convertView.findViewById(io.rong.imkit.R.id.rc_checkbox);
                 holder.portrait = (ImageView) convertView.findViewById(R.id.rc_user_portrait);
                 holder.name = (TextView) convertView.findViewById(R.id.rc_user_name);
                 convertView.setTag(holder);
@@ -517,7 +521,7 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity
                         .loadPortrait(
                                 getApplicationContext(),
                                 null,
-                                R.drawable.rc_default_portrait,
+                                io.rong.imkit.R.drawable.rc_default_portrait,
                                 holder.portrait);
                 //                Glide.with(holder.portrait)
                 //                        .load(R.drawable.rc_default_portrait)
@@ -563,7 +567,7 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity
                     .loadPortrait(
                             getBaseContext(),
                             mUserInfo.getPortraitUri(),
-                            R.drawable.rc_default_portrait,
+                            io.rong.imkit.R.drawable.rc_default_portrait,
                             holder.portrait);
             return convertView;
         }
@@ -643,7 +647,7 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity
             new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    View v = view.findViewById(R.id.rc_checkbox);
+                    View v = view.findViewById(io.rong.imkit.R.id.rc_checkbox);
                     String userId = (String) v.getTag();
                     if (!TextUtils.isEmpty(userId) && !invitedMembers.contains(userId)) {
                         if (v.isSelected()) {

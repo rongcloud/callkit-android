@@ -6,6 +6,8 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -82,6 +84,9 @@ public class MultiAudioCallActivity extends BaseCallActivity {
             return;
         }
         setContentView(R.layout.rc_voip_ac_muti_audio);
+        if (VERSION.SDK_INT >= VERSION_CODES.Q) {
+            getWindow().setStatusBarContrastEnforced(true);
+        }
         audioContainer = (LinearLayout) findViewById(R.id.rc_voip_container);
         incomingLayout =
                 (RelativeLayout)
@@ -546,7 +551,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                     .loadPortrait(
                             getBaseContext(),
                             userInfo.getPortraitUri(),
-                            R.drawable.rc_default_portrait,
+                            io.rong.imkit.R.drawable.rc_default_portrait,
                             userPortrait);
             userPortrait.setVisibility(View.VISIBLE);
         }

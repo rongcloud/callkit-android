@@ -85,6 +85,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     private boolean checkingOverlaysPermission;
     private boolean notRemindRequestFloatWindowPermissionAgain = false;
     protected Handler handler;
+
     /** 表示是否正在挂断 */
     protected boolean isFinishing;
 

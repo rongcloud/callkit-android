@@ -132,7 +132,7 @@ public class CallVerticalScrollView extends ScrollView implements ICallScrollVie
                     .loadPortrait(
                             this.getContext(),
                             userInfo.getPortraitUri(),
-                            R.drawable.rc_default_portrait,
+                            io.rong.imkit.R.drawable.rc_default_portrait,
                             imageView);
             name.setText(userInfo.getName() == null ? userInfo.getUserId() : userInfo.getName());
         } else {
@@ -210,7 +210,7 @@ public class CallVerticalScrollView extends ScrollView implements ICallScrollVie
                 ImageView imageView = (ImageView) child.findViewById(R.id.rc_user_portrait);
                 Glide.with(this)
                         .load(userInfo.getPortraitUri())
-                        .placeholder(R.drawable.rc_default_portrait)
+                        .placeholder(io.rong.imkit.R.drawable.rc_default_portrait)
                         .apply(RequestOptions.bitmapTransform(new CircleCrop()))
                         .into(imageView);
                 if (enableTitle) {

@@ -18,7 +18,9 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-/** @author gusd @Date 2021/09/17 别在多线程里面用 */
+/**
+ * @author gusd @Date 2021/09/17 别在多线程里面用
+ */
 public enum PermissionType {
 
     /** {@link io.rong.callkit.util.RTCPhoneStateReceiver } 类逻辑需要该权限 用于监听SIM卡来电 */

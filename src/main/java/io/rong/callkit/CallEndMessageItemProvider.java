@@ -35,7 +35,7 @@ public class CallEndMessageItemProvider extends BaseMessageItemProvider<CallSTer
             ViewGroup parent, int viewType) {
         View textView =
                 LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.rc_text_message_item, parent, false);
+                        .inflate(io.rong.imkit.R.layout.rc_text_message_item, parent, false);
         return new ViewHolder(parent.getContext(), textView);
     }
 
@@ -52,9 +52,9 @@ public class CallEndMessageItemProvider extends BaseMessageItemProvider<CallSTer
         final TextView view = holder.getView(io.rong.imkit.R.id.rc_text);
         if (view != null) {
             if (message.getMessageDirection() == Message.MessageDirection.SEND) {
-                view.setBackgroundResource(R.drawable.rc_ic_bubble_right);
+                view.setBackgroundResource(io.rong.imkit.R.drawable.rc_ic_bubble_right);
             } else {
-                view.setBackgroundResource(R.drawable.rc_ic_bubble_left);
+                view.setBackgroundResource(io.rong.imkit.R.drawable.rc_ic_bubble_left);
             }
         } else {
             Log.e(TAG, "bindMessageContentViewHolder(). TextView is empty");

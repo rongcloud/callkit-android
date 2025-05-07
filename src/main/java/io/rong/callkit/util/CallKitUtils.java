@@ -42,8 +42,10 @@ public class CallKitUtils {
     public static boolean isDial = true;
 
     public static boolean shouldShowFloat;
+
     /** 是否已经建立通话连接 默认没有，为了修改接听之后将情景模式切换成震动 在通话界面一直震动的问题 */
     public static boolean callConnected = false;
+
     /** true:响铃中，false：响铃已结束 */
     // public static boolean RINGSTATE=false;
     /** 当前 免提 是否打开的状态 true：打开中 */
@@ -275,7 +277,9 @@ public class CallKitUtils {
         return new Message.ReceivedStatus(1);
     }
 
-    /** @param language zh en ar */
+    /**
+     * @param language zh en ar
+     */
     public static boolean findConfigurationLanguage(Context context, String language) {
         if (context == null || TextUtils.isEmpty(language)) {
             RLog.w("bugtags", "findConfigurationLanguage->Resources is empty");

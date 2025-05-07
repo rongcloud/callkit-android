@@ -73,7 +73,7 @@ public class MultiCallEndMessageProvider
                 msg = context.getResources().getString(R.string.rc_voip_video_no_response);
             }
         }
-        TextView tv = holder.getView(R.id.rc_msg);
+        TextView tv = holder.getView(io.rong.imkit.R.id.rc_msg);
         tv.setText(msg);
     }
 

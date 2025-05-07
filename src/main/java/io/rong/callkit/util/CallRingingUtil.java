@@ -31,7 +31,9 @@ import io.rong.imkit.notification.NotificationUtil;
 import io.rong.push.notification.RongNotificationHelper;
 import java.io.IOException;
 
-/** @author gusd @Date 2021/09/14 */
+/**
+ * @author gusd @Date 2021/09/14
+ */
 public class CallRingingUtil {
     private static final String TAG = "CallRingingUtil";
     private volatile boolean isRinging = false;

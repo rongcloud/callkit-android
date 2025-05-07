@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.net.Uri;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -89,6 +91,9 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.rc_voip_activity_single_call);
+        if (VERSION.SDK_INT >= VERSION_CODES.Q) {
+            getWindow().setStatusBarContrastEnforced(true);
+        }
         RLog.i(
                 "AudioPlugin",
                 "savedInstanceState != null="
@@ -217,12 +222,18 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                     StringBuilder builder = new StringBuilder();
                     for (String str : permissions) {
                         if (str.equals("android.permission.CAMERA")) {
-                            builder.append(getString(R.string.rc_android_permission_CAMERA));
+                            builder.append(
+                                    getString(io.rong.imkit.R.string.rc_android_permission_CAMERA));
                         } else if (str.equals("android.permission.RECORD_AUDIO")) {
-                            builder.append(getString(R.string.rc_android_permission_RECORD_AUDIO));
+                            builder.append(
+                                    getString(
+                                            io.rong.imkit.R.string
+                                                    .rc_android_permission_RECORD_AUDIO));
                         } else if (str.equals("android.permission.BLUETOOTH_CONNECT")) {
                             builder.append(
-                                    getString(R.string.rc_android_permission_BLUETOOTH_CONNECT));
+                                    getString(
+                                            io.rong.imkit.R.string
+                                                    .rc_android_permission_BLUETOOTH_CONNECT));
                         }
                         builder.append(",");
                     }
@@ -232,7 +243,8 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                     String msg =
                             String.format(
                                     "%s (%s)",
-                                    getString(R.string.rc_permission_grant_needed), rets);
+                                    getString(io.rong.imkit.R.string.rc_permission_grant_needed),
+                                    rets);
                     Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
                     if (startForCheckPermissions) {
                         startForCheckPermissions = false;
@@ -369,7 +381,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                             .loadPortrait(
                                     getBaseContext(),
                                     userInfo.getPortraitUri(),
-                                    R.drawable.rc_default_portrait,
+                                    io.rong.imkit.R.drawable.rc_default_portrait,
                                     userPortrait);
                 }
                 TextView userName =
@@ -633,6 +645,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
     int userType;
     SurfaceView remoteVideo;
     String remoteUserId;
+
     /** 远端首帧是否到来, 音频帧跟视频帧其中一个到来就更改该标记, 从而更新连接状态 */
     boolean isFirstRemoteFrame = false;
 
@@ -897,7 +910,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                             .loadPortrait(
                                     getBaseContext(),
                                     userInfo.getPortraitUri(),
-                                    R.drawable.rc_default_portrait,
+                                    io.rong.imkit.R.drawable.rc_default_portrait,
                                     userPortrait);
                     //                    Glide.with(this)
                     //                            .load(userInfo.getPortraitUri())
@@ -913,7 +926,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                         .loadPortrait(
                                 getBaseContext(),
                                 userInfo.getPortraitUri(),
-                                R.drawable.rc_default_portrait,
+                                io.rong.imkit.R.drawable.rc_default_portrait,
                                 iv_large_preview);
             }
         }
@@ -1182,7 +1195,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                             .loadPortrait(
                                     getBaseContext(),
                                     userInfo.getPortraitUri(),
-                                    R.drawable.rc_default_portrait,
+                                    io.rong.imkit.R.drawable.rc_default_portrait,
                                     userPortrait);
                 }
             } else if (mediaType.equals(RongCallCommon.CallMediaType.VIDEO)) {
@@ -1195,7 +1208,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                             .loadPortrait(
                                     getBaseContext(),
                                     imgUri,
-                                    R.drawable.rc_default_portrait,
+                                    io.rong.imkit.R.drawable.rc_default_portrait,
                                     iv_large_preview);
                 }
             }
@@ -1287,7 +1300,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                         .loadPortrait(
                                 getBaseContext(),
                                 info.getPortraitUri(),
-                                R.drawable.rc_default_portrait,
+                                io.rong.imkit.R.drawable.rc_default_portrait,
                                 userPortrait);
             }
         }

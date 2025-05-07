@@ -8,7 +8,6 @@ import cn.rongcloud.rtc.utils.FinLog;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.request.RequestOptions;
-import io.rong.callkit.R;
 
 /** Created by dengxudong on 2018/5/18. */
 public class GlideUtils {
@@ -39,12 +38,12 @@ public class GlideUtils {
         requestOptions
                 .transform(new GlideBlurformation(context))
                 .priority(Priority.HIGH)
-                .placeholder(R.drawable.rc_default_portrait)
+                .placeholder(io.rong.imkit.R.drawable.rc_default_portrait)
                 .apply(new RequestOptions().centerCrop());
         if (val == null) {
             Log.d(TAG, "showPortrait: val is Null");
             Glide.with(context)
-                    .load(R.drawable.rc_default_portrait)
+                    .load(io.rong.imkit.R.drawable.rc_default_portrait)
                     .apply(requestOptions)
                     .into(imageView);
         } else {

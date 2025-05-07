@@ -122,7 +122,7 @@ public class CallFloatBoxView {
             mView = LayoutInflater.from(context).inflate(R.layout.rc_voip_float_box, null);
             mView.setOnTouchListener(createTouchListener());
             wm.addView(mView, params);
-            TextView timeV = (TextView) mView.findViewById(R.id.rc_time);
+            TextView timeV = (TextView) mView.findViewById(io.rong.imkit.R.id.rc_time);
             setupTime(timeV);
             ImageView mediaIconV = (ImageView) mView.findViewById(R.id.rc_voip_media_type);
             if (mediaType.equals(RongCallCommon.CallMediaType.AUDIO)) {
@@ -383,7 +383,9 @@ public class CallFloatBoxView {
                                         mView.setOnTouchListener(createTouchListener());
                                         wm.addView(mView, params);
                                         TextView timeV =
-                                                (TextView) mView.findViewById(R.id.rc_time);
+                                                (TextView)
+                                                        mView.findViewById(
+                                                                io.rong.imkit.R.id.rc_time);
                                         setupTime(timeV);
                                         ImageView mediaIconV =
                                                 (ImageView)
@@ -704,7 +706,7 @@ public class CallFloatBoxView {
                     }
                 });
         wm.addView(mView, params);
-        showFBCallTime = (TextView) mView.findViewById(R.id.rc_time);
+        showFBCallTime = (TextView) mView.findViewById(io.rong.imkit.R.id.rc_time);
         showFBCallTime.setVisibility(View.GONE);
 
         ImageView mediaIconV = (ImageView) mView.findViewById(R.id.rc_voip_media_type);

@@ -25,7 +25,9 @@ import io.rong.common.RLog;
 import io.rong.push.notification.PushNotificationMessage;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/** @author gusd @Date 2021/09/01 */
+/**
+ * @author gusd @Date 2021/09/01
+ */
 public class RongIncomingCallService {
     private static final String TAG = "IncomingCallService";
     public static final int ACCEPT_REQUEST_CODE = 145679;

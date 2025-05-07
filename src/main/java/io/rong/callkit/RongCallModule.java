@@ -386,23 +386,17 @@ public class RongCallModule implements IExtensionModule {
                 @Override
                 public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
                     RLog.d(TAG, "onActivityCreated ---- : " + activity);
-
-                    if (mActivities == null || mActivities.size() == 0) {
-                        RLog.d(TAG, "onActivityCreated . mainPageClass is empty.");
-                        return;
-                    }
-                    String className1 = activity.getClass().getName();
-                    mActivities.remove(className1);
-                    if (mActivities.size() == 0) {
-                        retryStartVoIPActivity();
-                    }
+                    retryStartVoIPActivity(activity);
                 }
 
                 @Override
                 public void onActivityStarted(Activity activity) {}
 
                 @Override
-                public void onActivityResumed(Activity activity) {}
+                public void onActivityResumed(Activity activity) {
+                    RLog.d(TAG, "onActivityResumed ---- : " + activity);
+                    retryStartVoIPActivity(activity);
+                }
 
                 @Override
                 public void onActivityPaused(Activity activity) {}
@@ -417,11 +411,21 @@ public class RongCallModule implements IExtensionModule {
                 public void onActivityDestroyed(Activity activity) {}
             };
 
-    private void retryStartVoIPActivity() {
-        RLog.i(
-                TAG,
-                "Find the exact class, change mViewLoaded  as true . mCallSession ==null ?"
-                        + (mCallSession == null));
+    private void retryStartVoIPActivity(Activity activity) {
+        if (mActivities == null
+                || mActivities.isEmpty()
+                || activity instanceof SingleCallActivity
+                || activity instanceof MultiAudioCallActivity
+                || activity instanceof MultiVideoCallActivity) {
+            RLog.d(TAG, "retryStartVoIPActivity: . mainPageClass is empty.");
+            return;
+        }
+        String className1 = activity.getClass().getName();
+        mActivities.remove(className1);
+        if (!mActivities.isEmpty()) {
+            RLog.d(TAG, "retryStartVoIPActivity: . mainPageClass list is not empty.");
+            return;
+        }
         mViewLoaded = true;
         if (mCallSession != null) {
             startVoIPActivity(mContext, mCallSession, mStartForCheckPermissions);
