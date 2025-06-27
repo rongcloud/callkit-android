@@ -1,11 +1,9 @@
 package io.rong.callkit;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 import io.rong.callkit.util.CallKitUtils;
-import io.rong.callkit.util.RongCallPermissionUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallMissedListener;
@@ -214,18 +212,6 @@ public class RongCallKit {
      * @return 是否允许启动通话界面
      */
     private static boolean checkEnvironment(Context context, CallMediaType mediaType) {
-        if (context instanceof Activity) {
-            boolean result =
-                    RongCallPermissionUtil.checkPermissionByType(
-                            context,
-                            mediaType == CallMediaType.CALL_MEDIA_TYPE_AUDIO
-                                    ? RongCallCommon.CallMediaType.AUDIO
-                                    : RongCallCommon.CallMediaType.VIDEO);
-            if (!result) {
-                return false;
-            }
-        }
-
         if (!RongIMClient.getInstance()
                 .getCurrentConnectionStatus()
                 .equals(RongIMClient.ConnectionStatusListener.ConnectionStatus.CONNECTED)) {
