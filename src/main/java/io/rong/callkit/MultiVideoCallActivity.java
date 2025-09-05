@@ -130,6 +130,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         }
         Intent intent = getIntent();
         startForCheckPermissions = intent.getBooleanExtra("checkPermissions", false);
+        mUserProfileOrderManager = new UserProfileOrderManager();
         boolean val =
                 requestCallPermissions(
                         RongCallCommon.CallMediaType.VIDEO, REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
@@ -139,23 +140,11 @@ public class MultiVideoCallActivity extends BaseCallActivity {
             initViews();
             setupIntent();
         }
-        mUserProfileOrderManager = new UserProfileOrderManager();
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
-        RLog.d(TAG, "onNewIntent: [intent]");
-        startForCheckPermissions = intent.getBooleanExtra("checkPermissions", false);
         super.onNewIntent(intent);
-        boolean bool =
-                requestCallPermissions(
-                        RongCallCommon.CallMediaType.VIDEO, REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
-        RLog.i(TAG, "mult onNewIntent==" + bool);
-        if (bool) {
-            RLog.i(TAG, "mult onNewIntent initViews");
-            initViews();
-            setupIntent();
-        }
     }
 
     @TargetApi(23)
@@ -169,10 +158,9 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                     if (startForCheckPermissions) {
                         startForCheckPermissions = false;
                         RongCallClient.getInstance().onPermissionGranted();
-                    } else {
-                        initViews();
-                        setupIntent();
                     }
+                    initViews();
+                    setupIntent();
                 } else {
                     if (permissions.length > 0) {
                         RongCallClient.getInstance().onPermissionDenied();
@@ -928,6 +916,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         disableCameraButtion = bottomButtonContainer.findViewById(R.id.rc_voip_disable_camera_btn);
         disableCameraButtion.setSelected(isMuteCamera);
         topContainer.setVisibility(View.VISIBLE);
+        setEnableASRVisibility(true);
         minimizeButton.setVisibility(View.VISIBLE);
         rc_voip_multiVideoCall_minimize.setVisibility(View.VISIBLE);
         userPortrait.setVisibility(View.GONE);
@@ -1336,6 +1325,8 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                         MultiVideoCallActivity.super.onMinimizeClick(v);
                     }
                 });
+        initASRView();
+        initSubtitleViewLayout(findViewById(R.id.rc_remoteuser_horizontalScrollView));
     }
 
     protected void setupIntent() {
@@ -1459,6 +1450,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
             remoteViewContainer.setVisibility(View.GONE);
             participantPortraitContainer.setVisibility(View.VISIBLE);
             bottomButtonContainer.setVisibility(View.VISIBLE);
+            setEnableASRVisibility(false);
             incomingPreview();
         } else if (callAction.equals(RongCallAction.ACTION_OUTGOING_CALL)) {
             Conversation.ConversationType conversationType =
@@ -1530,6 +1522,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
             bottomButtonContainer.setVisibility(View.VISIBLE);
             rc_voip_multiVideoCall_minimize.setVisibility(View.GONE);
         }
+        showForegroundService();
     }
 
     /** 挂断通话 */

@@ -112,6 +112,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         mButtonContainer = (FrameLayout) findViewById(R.id.rc_voip_btn);
         mUserInfoContainer = (LinearLayout) findViewById(R.id.rc_voip_user_info);
         mConnectionStateTextView = findViewById(R.id.rc_tv_connection_state);
+        initASRView();
 
         if (CallKitUtils.findConfigurationLanguage(SingleCallActivity.this, "ar")) {
             // android:layout_gravity="right|top"
@@ -180,29 +181,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
 
     @Override
     protected void onNewIntent(Intent intent) {
-        startForCheckPermissions = intent.getBooleanExtra("checkPermissions", false);
-        RongCallAction callAction = RongCallAction.getAction(intent.getStringExtra("callAction"));
-        if (callAction == null) {
-            return;
-        }
-        if (callAction.equals(RongCallAction.ACTION_OUTGOING_CALL)) {
-            if (intent.getAction().equals(RongVoIPIntent.RONG_INTENT_ACTION_VOIP_SINGLEAUDIO)) {
-                mediaType = RongCallCommon.CallMediaType.AUDIO;
-            } else {
-                mediaType = RongCallCommon.CallMediaType.VIDEO;
-            }
-        } else if (callAction.equals(RongCallAction.ACTION_INCOMING_CALL)) {
-            callSession = intent.getParcelableExtra("callSession");
-            mediaType = callSession.getMediaType();
-        } else {
-            callSession = RongCallClient.getInstance().getCallSession();
-            mediaType = callSession.getMediaType();
-        }
         super.onNewIntent(intent);
-
-        if (requestCallPermissions(mediaType, REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS)) {
-            setupIntent();
-        }
     }
 
     @TargetApi(23)
@@ -215,9 +194,8 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                     if (startForCheckPermissions) {
                         startForCheckPermissions = false;
                         RongCallClient.getInstance().onPermissionGranted();
-                    } else {
-                        setupIntent();
                     }
+                    setupIntent();
                 } else {
                     StringBuilder builder = new StringBuilder();
                     for (String str : permissions) {
@@ -399,6 +377,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             }
         }
         createPickupDetector();
+        showForegroundService();
     }
 
     private boolean isCrossCall(String targetId) {
@@ -516,6 +495,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         mButtonContainer.addView(buttonLayout);
         mUserInfoContainer.removeAllViews();
         mUserInfoContainer.addView(userInfoLayout);
+        initSubtitleViewLayout(mButtonContainer);
     }
 
     @Override
@@ -567,6 +547,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         RLog.d(TAG, "onCallConnected----mediaType=" + callSession.getMediaType().getValue());
         if (callSession.getMediaType().equals(RongCallCommon.CallMediaType.AUDIO)) {
             findViewById(R.id.rc_voip_call_minimize).setVisibility(View.VISIBLE);
+            setEnableASRVisibility(true);
             RelativeLayout btnLayout =
                     (RelativeLayout)
                             inflater.inflate(
@@ -703,8 +684,8 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             mSPreviewContainer.removeAllViews();
             RLog.d(TAG, "onRemoteUserJoined mLocalVideo != null=" + (mLocalVideo != null));
             if (mLocalVideo != null) {
-                mLocalVideo.setZOrderMediaOverlay(true);
                 mLocalVideo.setZOrderOnTop(true);
+                mLocalVideo.setZOrderMediaOverlay(true);
                 mSPreviewContainer.addView(mLocalVideo);
             }
             /** 小窗口点击事件 * */
@@ -753,7 +734,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                             }
                         }
                     });
-            mButtonContainer.setVisibility(View.GONE);
+            mButtonContainer.setVisibility(View.INVISIBLE);
             mUserInfoContainer.setVisibility(View.GONE);
         }
     }
@@ -898,6 +879,9 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
 
         mUserInfoContainer.removeAllViews();
         mUserInfoContainer.addView(userInfoView);
+
+        findViewById(R.id.rc_voip_enable_subtitle)
+                .setSelected(mASRView.getVisibility() == View.VISIBLE);
         UserInfo userInfo = RongUserInfoManager.getInstance().getUserInfo(targetId);
         if (userInfo != null) {
             TextView userName = (TextView) mUserInfoContainer.findViewById(R.id.rc_voip_user_name);
@@ -932,6 +916,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         }
         mUserInfoContainer.setVisibility(View.VISIBLE);
         mUserInfoContainer.findViewById(R.id.rc_voip_call_minimize).setVisibility(View.VISIBLE);
+        setEnableASRVisibility(true);
 
         View button = inflater.inflate(R.layout.rc_voip_call_bottom_connected_button_layout, null);
         mButtonContainer.removeAllViews();
@@ -1006,6 +991,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         mUserInfoContainer.setVisibility(View.VISIBLE);
 
         mUserInfoContainer.findViewById(R.id.rc_voip_call_minimize).setVisibility(View.VISIBLE);
+        setEnableASRVisibility(true);
         mButtonContainer.setVisibility(View.VISIBLE);
         RelativeLayout btnLayout =
                 (RelativeLayout)
@@ -1054,7 +1040,6 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
     public void onCallDisconnected(
             RongCallSession callSession, RongCallCommon.CallDisconnectedReason reason) {
         super.onCallDisconnected(callSession, reason);
-        RongCallClient.getInstance().resetAVStatus();
         String senderId;
         String extra = "";
 
@@ -1237,6 +1222,9 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             }
             changeToConnectedState(remoteUserId, mediaType, 1, remoteVideo);
         }
+        initSubtitleViewLayout(mButtonContainer);
+        findViewById(R.id.rc_voip_enable_subtitle)
+                .setSelected(mASRView.getVisibility() == View.VISIBLE);
     }
 
     @Override

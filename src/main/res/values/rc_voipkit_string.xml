@@ -94,4 +94,6 @@
     <string name="rc_voip_search_no_member">无搜索结果</string>
 
     <string name="rc_voip_call_terminalted_notify">[结束通话]</string>
+    <string name="rc_voip_subtitle">字幕</string>
+    <string name="rc_voip_subtitle_not_available">打开字幕失败，请稍后再试。</string>
 </resources>

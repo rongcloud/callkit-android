@@ -6,7 +6,7 @@
     android:background="@color/rc_voip_background_color">
 
     <!--多人语音通话中顶部布局-->
-    <FrameLayout
+    <RelativeLayout
         android:visibility="gone"
         android:id="@+id/rc_voip_title"
         android:layout_width="match_parent"
@@ -18,21 +18,40 @@
             android:layout_height="wrap_content"
             android:padding="20dp"
             android:src="@drawable/rc_voip_icon_add"
-            android:layout_gravity="right|center_vertical" />
+          android:layout_alignParentEnd="true" />
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="20dp"
+            android:padding="10dp"
+          android:layout_marginTop="10dp"
             android:id="@+id/rc_voip_minimize"
             android:src="@drawable/rc_voip_minimize"
-            android:layout_gravity="left|center_vertical"
+            android:layout_alignParentStart="true"
             android:visibility="gone"/>
+
+        <TextView
+          android:id="@+id/rc_voip_enable_subtitle"
+          android:layout_width="wrap_content"
+          android:layout_height="32dp"
+          android:text="@string/rc_voip_subtitle"
+          android:gravity="center_vertical"
+          android:textColor="@color/rc_voip_subtitle_text"
+          android:textSize="12sp"
+          android:drawableEnd="@drawable/rc_voip_subtitle_selector"
+          android:padding="8dp"
+          android:drawablePadding="8dp"
+          android:onClick="onEnableSubtitleClick"
+          android:layout_below="@id/rc_voip_minimize"
+          android:layout_marginStart="11dp"
+          android:background="@drawable/rc_voip_white_bg"
+          android:visibility="gone"/>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:orientation="vertical"
-            android:layout_gravity="center"
+            android:layout_centerHorizontal="true"
+          android:layout_marginTop="11dp"
             android:layout_height="wrap_content">
 
             <TextView
@@ -53,7 +72,7 @@
                 android:layout_gravity="center" />
 
         </LinearLayout>
-    </FrameLayout>
+    </RelativeLayout>
     <!--多人语音主叫方顶部布局-->
     <RelativeLayout
         android:id="@+id/reltive_voip_outgoing_audio_title"

@@ -94,4 +94,7 @@ Please turn it on in the application permission management page of \""Settings\"
     <string name="rc_voip_observer_hint">You are an observer, please raise your hand if you wish to speak</string>
     <string name="rc_voip_video_numberofobservers">Up to %d members</string>
     <string name="rc_voip_audio_numberofobservers">Up to %d members</string>
+
+    <string name="rc_voip_subtitle">CC</string>
+    <string name="rc_voip_subtitle_not_available">Failed to turn on subtitles. Please retry later.</string>
 </resources>

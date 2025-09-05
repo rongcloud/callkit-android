@@ -93,4 +93,6 @@
     <string name="rc_voip_search_no_member">لا توجد نتائج بحث</string>
     <string name="rc_voip_call_terminalted_notify">[تم إنهاء المكالمة]</string>
     <string name="rc_dialog_cancel">الإلغاء</string>
+
+    <string name="rc_voip_subtitle">CC</string>
 </resources>

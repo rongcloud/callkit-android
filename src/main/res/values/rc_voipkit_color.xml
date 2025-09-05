@@ -35,4 +35,5 @@
     <color name="callkit_mutlaudiouserinfobackgroud">#803A91F3</color>
     <color name="rc_voip_color_left">#939393</color>
     <color name="rc_voip_color_right">#3F81BC</color>
+    <color name="rc_voip_subtitle_text">#020814</color>
 </resources>

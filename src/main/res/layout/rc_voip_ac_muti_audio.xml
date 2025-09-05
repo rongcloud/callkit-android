@@ -1,11 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/rc_voip_container"
-    android:orientation="vertical"
+<io.rong.callkit.DragFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/rc_voip_drag_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:background="@color/rc_voip_background_color">
+    android:fitsSystemWindows="true">
+
+  <LinearLayout
+    android:id="@+id/rc_voip_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/rc_voip_background_color"
+    android:orientation="vertical"/>
+
+  <io.rong.callkit.RongASRView
+    android:id="@+id/rc_voip_subtitle_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:visibility="gone"
+    android:layout_margin="8dp"/>
 
 
-</LinearLayout>
+</io.rong.callkit.DragFrameLayout>

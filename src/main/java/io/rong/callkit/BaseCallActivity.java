@@ -15,8 +15,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.os.Build;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -25,8 +23,11 @@ import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
+import android.widget.FrameLayout.LayoutParams;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -93,6 +94,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     protected PowerManager powerManager;
     protected PowerManager.WakeLock wakeLock;
     protected PowerManager.WakeLock screenLock;
+    protected RongASRView mASRView;
 
     //    static final String[] VIDEO_CALL_PERMISSIONS = {
     //        Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA
@@ -129,6 +131,8 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     private HeadsetPlugReceiver headsetPlugReceiver = null;
     private AudioManager.OnAudioFocusChangeListener onAudioFocusChangeListener;
 
+    public static final String EXTRA_BUNDLE_KEY_ENABLE_SUBTITLE = "enableSubtitle";
+    public static final String EXTRA_BUNDLE_KEY_SUBTITLE_TOP = "subtitleTop";
     public static final String EXTRA_BUNDLE_KEY_MUTECAMERA = "muteCamera";
     public static final String EXTRA_BUNDLE_KEY_MUTEMIC = "muteMIC";
     public static final String EXTRA_BUNDLE_KEY_LOCALVIEWUSERID = "localViewUserId";
@@ -144,6 +148,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
         super.onCreate(savedInstanceState);
         RLog.d(TAG, "BaseCallActivity onCreate");
         audioVideoConfig();
+        setSrcLanguageCode();
         getWindow()
                 .setFlags(
                         WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN,
@@ -193,6 +198,86 @@ public class BaseCallActivity extends BaseNoActionBarActivity
             intent.setPackage(getPackageName());
             sendBroadcast(intent);
         }
+    }
+
+    private static void setSrcLanguageCode() {
+        String language = Locale.getDefault().getLanguage();
+        if (!("zh".equals(language) || "en".equals(language) || "ar".equals(language))) {
+            language = "zh";
+        }
+        RongCallClient.getInstance().setSrcLanguageCode(language);
+    }
+
+    protected void initASRView() {
+        mASRView = findViewById(R.id.rc_voip_subtitle_view);
+        if (mASRView == null) {
+            return;
+        }
+        mASRView.setSubtitleViewCallback(
+                () -> {
+                    View enableView = findViewById(R.id.rc_voip_enable_subtitle);
+                    if (enableView != null) {
+                        enableView.setSelected(false);
+                    }
+                });
+        DragFrameLayout layout = (DragFrameLayout) findViewById(R.id.rc_voip_drag_layout);
+        if (layout != null) {
+            layout.setDragView(mASRView);
+        }
+    }
+
+    protected void setEnableASRVisibility(boolean isVisible) {
+        View enableView = findViewById(R.id.rc_voip_enable_subtitle);
+        if (enableView == null) {
+            return;
+        }
+        if (!RongCallKit.isDisplayASRUI()) {
+            enableView.setVisibility(View.GONE);
+            return;
+        }
+        enableView.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+    }
+
+    protected void initSubtitleViewLayout(View view) {
+        if (mASRView == null) {
+            Log.w(TAG, "initSubtitleViewLayout:mSubtitleView is null");
+            return;
+        }
+        Bundle bundle = getIntent().getBundleExtra("floatbox");
+        if (bundle != null && bundle.containsKey(EXTRA_BUNDLE_KEY_SUBTITLE_TOP)) {
+            FrameLayout.LayoutParams lp = (LayoutParams) mASRView.getLayoutParams();
+            lp.topMargin = bundle.getInt(EXTRA_BUNDLE_KEY_SUBTITLE_TOP, 0);
+            mASRView.setLayoutParams(lp);
+            return;
+        }
+        if (view == null) {
+            Log.e(TAG, "initSubtitleViewLayout: view is null");
+            return;
+        }
+        view.getViewTreeObserver()
+                .addOnGlobalLayoutListener(
+                        new OnGlobalLayoutListener() {
+                            @Override
+                            public void onGlobalLayout() {
+                                view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                                FrameLayout.LayoutParams lp =
+                                        (LayoutParams) mASRView.getLayoutParams();
+                                int top = view.getTop();
+                                lp.topMargin =
+                                        (int)
+                                                (top
+                                                        - CallKitUtils.dp2px(
+                                                                RongASRView.MAX_HEIGHT,
+                                                                getBaseContext()));
+                                Log.d(
+                                        TAG,
+                                        "onGlobalLayout: viewTop="
+                                                + top
+                                                + " , mSubtitleViewTop="
+                                                + lp.topMargin);
+                                mASRView.setLayoutParams(lp);
+                            }
+                        });
     }
 
     @Override
@@ -257,12 +342,14 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     public void onCallIncoming(RongCallSession callSession, SurfaceView localVideo) {
         CallKitUtils.shouldShowFloat = true;
         CallKitUtils.isDial = false;
+        showForegroundService();
     }
 
     @Override
     public void onCallOutgoing(RongCallSession callProfile, SurfaceView localVideo) {
         CallKitUtils.shouldShowFloat = true;
         CallKitUtils.isDial = true;
+        showForegroundService();
     }
 
     @Override
@@ -274,6 +361,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     @Override
     public void onCallDisconnected(
             RongCallSession callProfile, RongCallCommon.CallDisconnectedReason reason) {
+        RongCallClient.getInstance().resetAVStatus();
         stopForegroundService();
         if (RongCallKit.getCustomerHandlerListener() != null) {
             RongCallKit.getCustomerHandlerListener().onCallDisconnected(callProfile, reason);
@@ -288,6 +376,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
         NotificationUtil.getInstance()
                 .clearNotification(this, BaseCallActivity.CALL_NOTIFICATION_ID);
         RongCallProxy.getInstance().setCallListener(null);
+        showForegroundService();
     }
 
     @Override
@@ -297,6 +386,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
             int userType,
             SurfaceView remoteVideo) {
         CallKitUtils.isDial = false;
+        showForegroundService();
     }
 
     @Override
@@ -349,6 +439,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
         }
         AudioPlayManager.getInstance().setInVoipMode(true);
         AudioRecordManager.getInstance().destroyRecord();
+        showForegroundService();
     }
 
     private void registerAudioRouteTypeChange() {
@@ -373,9 +464,9 @@ public class BaseCallActivity extends BaseNoActionBarActivity
         super.onStop();
         RLog.d(TAG, "BaseCallActivity onStop");
         if (CallKitUtils.shouldShowFloat && !checkingOverlaysPermission) {
-            showForegroundService();
             Bundle bundle = new Bundle();
             String action = onSaveFloatBoxState(bundle);
+            showForegroundService();
             if (checkDrawOverlaysPermission(true)) {
                 if (action != null) {
                     bundle.putString("action", action);
@@ -402,32 +493,15 @@ public class BaseCallActivity extends BaseNoActionBarActivity
         }
     }
 
-    private void showForegroundService() {
+    protected void showForegroundService() {
         RongCallSession callSession = RongCallClient.getInstance().getCallSession();
         if (callSession == null) {
             Log.e(TAG, "showForegroundService: RongCallSession is Null!");
             return;
         }
-
-        String content =
-                callSession.getMediaType().getValue() == CallMediaType.AUDIO.getValue()
-                        ? getString(R.string.rc_audio_call_on_going)
-                        : getString(R.string.rc_video_call_on_going);
-        String action = getIntent().getAction();
-        String title = getString(R.string.rc_call_on_going);
-        Intent intent = new Intent(this, CallForegroundService.class);
-        intent.putExtra("content", content);
-        intent.putExtra("action", action);
-        intent.putExtra("title", title);
         Bundle bundle = new Bundle();
         onSaveFloatBoxState(bundle);
-        bundle.putBoolean("isDial", isDial);
-        intent.putExtra("floatbox", bundle);
-        if (VERSION.SDK_INT >= VERSION_CODES.O) {
-            startForegroundService(intent);
-        } else {
-            startService(intent);
-        }
+        CallKitUtils.startForegroundService(this, callSession, getIntent().getAction(), bundle);
     }
 
     private void stopForegroundService() {
@@ -441,7 +515,6 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     @Override
     protected void onResume() {
         super.onResume();
-        stopForegroundService();
         RLog.d(TAG, "BaseCallActivity onResume");
         try {
             RongCallSession session = RongCallClient.getInstance().getCallSession();
@@ -466,6 +539,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
                     checkingOverlaysPermission = false;
                 }
             }
+            showForegroundService();
         } catch (Exception e) {
             e.printStackTrace();
             RLog.d(TAG, "BaseCallActivity onResume Error : " + e.getMessage());
@@ -488,6 +562,9 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     protected void onDestroy() {
         try {
             RLog.d(TAG, "BaseCallActivity onDestroy");
+            if (mASRView != null) {
+                mASRView.destroy();
+            }
             RongUserInfoManager.getInstance().removeUserDataObserver(this);
             //            RongUserInfoManager.getInstance().remove
             handler.removeCallbacks(updateTimeRunnable);
@@ -600,6 +677,19 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     /** onStart时恢复浮窗 * */
     public void onRestoreFloatBox(Bundle bundle) {
         isMuteCamera = bundle.getBoolean(EXTRA_BUNDLE_KEY_MUTECAMERA);
+        boolean isSubtitle = bundle.getBoolean(EXTRA_BUNDLE_KEY_ENABLE_SUBTITLE, false);
+        if (mASRView != null) {
+            mASRView.enableSubtitle(isSubtitle);
+            if (bundle.containsKey(EXTRA_BUNDLE_KEY_SUBTITLE_TOP)) {
+                FrameLayout.LayoutParams lp = (LayoutParams) mASRView.getLayoutParams();
+                lp.topMargin = bundle.getInt(EXTRA_BUNDLE_KEY_SUBTITLE_TOP, 0);
+                mASRView.setLayoutParams(lp);
+            }
+        }
+        View view = findViewById(R.id.rc_voip_enable_subtitle);
+        if (view != null) {
+            view.setSelected(isSubtitle);
+        }
     }
 
     protected void addMember(ArrayList<String> currentMemberIds) {
@@ -614,6 +704,16 @@ public class BaseCallActivity extends BaseNoActionBarActivity
 
     /** onPause时保存页面各状态数据 * */
     public String onSaveFloatBoxState(Bundle bundle) {
+        bundle.putBoolean("isDial", isDial);
+        bundle.putBoolean(
+                EXTRA_BUNDLE_KEY_ENABLE_SUBTITLE,
+                mASRView != null && mASRView.getVisibility() == View.VISIBLE);
+        if (mASRView != null && mASRView.getLayoutParams() != null) {
+            bundle.putInt(
+                    EXTRA_BUNDLE_KEY_SUBTITLE_TOP,
+                    ((LayoutParams) mASRView.getLayoutParams()).topMargin);
+        }
+
         return null;
     }
 
@@ -635,7 +735,6 @@ public class BaseCallActivity extends BaseNoActionBarActivity
         //                PermissionCheckUtil.requestPermissions(this, permissions, requestCode);
         //            }
         //        }
-
         return RongCallPermissionUtil.checkAndRequestPermissionByCallType(this, type, requestCode);
     }
 
@@ -684,6 +783,14 @@ public class BaseCallActivity extends BaseNoActionBarActivity
                             getString(R.string.rc_voip_float_window_not_allowed),
                             Toast.LENGTH_SHORT)
                     .show();
+        }
+    }
+
+    public void onEnableSubtitleClick(View view) {
+        boolean selected = !view.isSelected();
+        view.setSelected(selected);
+        if (mASRView != null) {
+            mASRView.enableSubtitle(selected);
         }
     }
 

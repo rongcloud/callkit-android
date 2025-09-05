@@ -21,7 +21,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import cn.rongcloud.rtc.api.RCRTCEngine;
 import cn.rongcloud.rtc.audioroute.RCAudioRouteType;
 import cn.rongcloud.rtc.utils.FinLog;
 import io.rong.callkit.util.BluetoothUtil;
@@ -88,6 +87,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
             getWindow().setStatusBarContrastEnforced(true);
         }
         audioContainer = (LinearLayout) findViewById(R.id.rc_voip_container);
+        initASRView();
         incomingLayout =
                 (RelativeLayout)
                         LayoutInflater.from(this)
@@ -124,12 +124,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
-        startForCheckPermissions = getIntent().getBooleanExtra("checkPermissions", false);
         super.onNewIntent(intent);
-        if (requestCallPermissions(
-                RongCallCommon.CallMediaType.AUDIO, REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS)) {
-            initView();
-        }
     }
 
     @TargetApi(23)
@@ -142,9 +137,8 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                     if (startForCheckPermissions) {
                         startForCheckPermissions = false;
                         RongCallClient.getInstance().onPermissionGranted();
-                    } else {
-                        initView();
                     }
+                    initView();
                 } else {
                     if (startForCheckPermissions) {
                         startForCheckPermissions = false;
@@ -230,6 +224,8 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                 onCallOutgoing(callSession, null);
             }
         }
+        findViewById(R.id.rc_voip_enable_subtitle)
+                .setSelected(mASRView.getVisibility() == View.VISIBLE);
     }
 
     void initView() {
@@ -364,6 +360,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         }
         memberContainer.setScrollViewOverScrollMode(View.OVER_SCROLL_NEVER);
         createPickupDetector();
+        showForegroundService();
     }
 
     @Override
@@ -752,12 +749,18 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                 });
 
         RongCallClient.getInstance().setEnableLocalAudio(!muted);
+        setEnableASRVisibility(true);
         if (muteV != null) {
             muteV.setSelected(muted);
         }
-        RCRTCEngine.getInstance().enableSpeaker(false);
+        boolean enableSpeakerphone =
+                callAction == null || callAction.equals(RongCallAction.ACTION_RESUME_CALL)
+                        ? RongCallClient.getInstance().isSpeakerphoneEnabled()
+                        : false;
+        RongCallClient.getInstance().setEnableSpeakerphone(enableSpeakerphone);
 
         stopRing();
+        initSubtitleViewLayout(findViewById(R.id.rc_voip_control_layout));
     }
 
     protected void resetHandFreeStatus(RCAudioRouteType type) {

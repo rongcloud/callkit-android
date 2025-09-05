@@ -28,6 +28,22 @@ public class RongCallKit {
     private static RongCallCustomerHandlerListener customerHandlerListener;
     private static GlideCallKitImageEngine kitImageEngine = new GlideCallKitImageEngine();
 
+    /** 是否显示语音识别功能UI，默认显示 */
+    private static boolean mDisplayASRUI = true;
+
+    public static boolean isDisplayASRUI() {
+        return mDisplayASRUI;
+    }
+
+    /**
+     * 设置是否显示语音识别功能UI
+     *
+     * @param display
+     */
+    public static void setDisplayASRUI(boolean display) {
+        RongCallKit.mDisplayASRUI = display;
+    }
+
     /**
      * 发起单人通话。
      *

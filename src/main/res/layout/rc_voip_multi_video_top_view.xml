@@ -81,9 +81,28 @@
         android:id="@+id/rc_voip_call_minimize"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="11.5dp"
+        android:layout_marginTop="30dp"
         android:layout_marginLeft="17.5dp"
         android:layout_alignParentLeft="true"
         android:src="@drawable/rc_voip_minimize" />
+
+    <TextView
+      android:id="@+id/rc_voip_enable_subtitle"
+      android:layout_width="wrap_content"
+      android:layout_height="30dp"
+      android:text="@string/rc_voip_subtitle"
+      android:gravity="center_vertical"
+      android:textColor="@color/rc_voip_subtitle_text"
+      android:textSize="12sp"
+      android:drawableEnd="@drawable/rc_voip_subtitle_selector"
+      android:drawablePadding="8dp"
+      android:paddingStart="8dp"
+      android:paddingEnd="8dp"
+      android:layout_marginTop="11.5dp"
+      android:onClick="onEnableSubtitleClick"
+      android:layout_below="@id/rc_voip_call_minimize"
+      android:layout_marginStart="17.5dp"
+      android:visibility="gone"
+      android:background="@drawable/rc_voip_white_bg"/>
 
 </RelativeLayout>

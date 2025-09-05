@@ -3,6 +3,7 @@ package io.rong.callkit.util;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -11,8 +12,12 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.Window;
@@ -21,11 +26,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.app.AppOpsManagerCompat;
 import androidx.core.content.ContextCompat;
+import io.rong.callkit.CallForegroundService;
 import io.rong.callkit.R;
 import io.rong.calllib.ReportUtil;
 import io.rong.calllib.ReportUtil.TAG;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
+import io.rong.calllib.RongCallCommon.CallMediaType;
+import io.rong.calllib.RongCallSession;
 import io.rong.common.RLog;
 import io.rong.imlib.IRongCoreListener;
 import io.rong.imlib.RongCoreClient;
@@ -37,6 +45,8 @@ import java.util.Map;
 
 /** Created by dengxudong on 2018/5/17. */
 public class CallKitUtils {
+
+    public static final String TAG = "CallKitUtils";
 
     /** 拨打true or 接听false */
     public static boolean isDial = true;
@@ -54,6 +64,33 @@ public class CallKitUtils {
     public static StringBuffer stringBuffer = null;
 
     private static Map<String, Long> mapLastClickTime = new HashMap<>();
+
+    public static void startForegroundService(
+            Context context, RongCallSession callSession, String action, Bundle bundle) {
+        if (callSession == null) {
+            Log.e(TAG, "showForegroundService: RongCallSession is Null!");
+            return;
+        }
+
+        int mediaType = callSession.getMediaType().getValue();
+        String content =
+                mediaType == CallMediaType.AUDIO.getValue()
+                        ? context.getString(R.string.rc_audio_call_on_going)
+                        : context.getString(R.string.rc_video_call_on_going);
+        String title = context.getString(R.string.rc_call_on_going);
+        Intent intent = new Intent(context, CallForegroundService.class);
+        intent.putExtra("content", content);
+        intent.putExtra("action", action);
+        intent.putExtra("title", title);
+        bundle.putBoolean("isDial", isDial);
+        intent.putExtra("floatbox", bundle);
+        intent.putExtra("mediaType", mediaType);
+        if (VERSION.SDK_INT >= VERSION_CODES.O) {
+            context.startForegroundService(intent);
+        } else {
+            context.startService(intent);
+        }
+    }
 
     public static Drawable BackgroundDrawable(int drawable, Context context) {
         return ContextCompat.getDrawable(context, drawable);
@@ -199,7 +236,7 @@ public class CallKitUtils {
     public static boolean isNetworkAvailable(Context context) {
         if (context == null) {
             ReportUtil.appStatus(
-                    TAG.INTERNAL_ERROR, "desc", "isNetworkAvailable().context is empty");
+                    ReportUtil.TAG.INTERNAL_ERROR, "desc", "isNetworkAvailable().context is empty");
             return false;
         }
 
@@ -208,7 +245,7 @@ public class CallKitUtils {
                     (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             if (cm == null) {
                 ReportUtil.appStatus(
-                        TAG.INTERNAL_ERROR,
+                        ReportUtil.TAG.INTERNAL_ERROR,
                         "desc",
                         "isNetworkAvailable().ConnectivityManager is empty");
                 return false;
@@ -217,18 +254,22 @@ public class CallKitUtils {
             NetworkInfo networkInfo = cm.getActiveNetworkInfo();
             if (networkInfo == null) {
                 ReportUtil.appStatus(
-                        TAG.INTERNAL_ERROR, "desc", "isNetworkAvailable().NetworkInfo is empty");
+                        ReportUtil.TAG.INTERNAL_ERROR,
+                        "desc",
+                        "isNetworkAvailable().NetworkInfo is empty");
                 return false;
             }
 
             if (!networkInfo.isConnected() || !networkInfo.isAvailable()) {
                 ReportUtil.appStatus(
-                        TAG.INTERNAL_ERROR, "desc", "isNetworkAvailable().Network unavailable");
+                        ReportUtil.TAG.INTERNAL_ERROR,
+                        "desc",
+                        "isNetworkAvailable().Network unavailable");
                 return false;
             }
         } catch (Exception e) {
             ReportUtil.appStatus(
-                    TAG.INTERNAL_ERROR,
+                    ReportUtil.TAG.INTERNAL_ERROR,
                     "desc",
                     "isNetworkAvailable().exception: " + e.getMessage());
             return false;

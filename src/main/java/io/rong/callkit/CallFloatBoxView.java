@@ -323,6 +323,7 @@ public class CallFloatBoxView {
                                     int userType,
                                     SurfaceView remoteVideo) {
                                 CallKitUtils.isDial = false;
+                                updateForegroundService();
                                 ReportUtil.appStatus(
                                         ReportUtil.TAG.CALL_LISTENER,
                                         "userId|state|desc",
@@ -443,6 +444,7 @@ public class CallFloatBoxView {
                                         }
                                     }
                                 }
+                                updateForegroundService();
                             }
 
                             @Override
@@ -470,6 +472,7 @@ public class CallFloatBoxView {
                                 CallKitUtils.isDial = false;
                                 setAudioMode(AudioManager.MODE_IN_COMMUNICATION);
                                 AudioPlayManager.getInstance().setInVoipMode(true);
+                                updateForegroundService();
                             }
 
                             @Override
@@ -942,6 +945,7 @@ public class CallFloatBoxView {
                                 }
                                 AudioPlayManager.getInstance().setInVoipMode(true);
                                 setAudioMode(AudioManager.MODE_IN_COMMUNICATION);
+                                updateForegroundService();
                             }
 
                             @Override
@@ -960,6 +964,7 @@ public class CallFloatBoxView {
                                     CallFloatBoxView.showFloatBoxToCallTime();
                                     CallKitUtils.isDial = false;
                                 }
+                                updateForegroundService();
                             }
 
                             @Override
@@ -1108,6 +1113,17 @@ public class CallFloatBoxView {
         intent.putExtra("callAction", RongCallAction.ACTION_RESUME_CALL.getName());
 
         return intent;
+    }
+
+    public static void updateForegroundService() {
+        Context context = mContext;
+        Bundle bundle = mBundle;
+        RongCallSession callSession = RongCallClient.getInstance().getCallSession();
+        if (context == null || callSession == null || bundle == null) return;
+        bundle.putBoolean("isDial", isDial);
+
+        CallKitUtils.startForegroundService(
+                context, callSession, bundle.getString("action"), bundle);
     }
 
     public static void onClickToResume() {

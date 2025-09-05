@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<io.rong.callkit.DragFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/rc_voip_drag_layout"
     android:layout_width="match_parent"
 	android:background="@color/callkit_black"
     android:fitsSystemWindows="true"
@@ -86,4 +87,16 @@
         android:visibility="gone"
         android:textColor="@color/rc_voip_white"
         android:textSize="16sp"/>
-</FrameLayout>
+
+
+    <io.rong.callkit.RongASRView
+      android:id="@+id/rc_voip_subtitle_view"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:visibility="gone"
+      android:layout_margin="8dp"/>
+
+
+
+
+</io.rong.callkit.DragFrameLayout>

@@ -19,6 +19,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import io.rong.callkit.util.CallRingingUtil;
 import io.rong.calllib.ReportUtil;
+import io.rong.calllib.RongCallCommon.CallMediaType;
 import io.rong.common.RLog;
 import io.rong.push.notification.RongNotificationInterface;
 import io.rong.push.notification.RongNotificationInterface.SoundType;
@@ -28,9 +29,9 @@ public class CallForegroundService extends Service {
     private static final String TAG = "CallForegroundService";
     private String action = "";
     private String title = "";
-    ;
     private String content = "";
     private Notification notification;
+    private int mediaType;
 
     @Override
     public void onCreate() {
@@ -65,11 +66,11 @@ public class CallForegroundService extends Service {
         }
         notification.defaults = Notification.DEFAULT_ALL;
         if (VERSION.SDK_INT >= VERSION_CODES.Q) {
-            startForeground(
-                    notificationId,
-                    notification,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
-                            | ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA);
+            int foregroundServiceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
+            if (mediaType == CallMediaType.VIDEO.getValue()) {
+                foregroundServiceType |= ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
+            }
+            startForeground(notificationId, notification, foregroundServiceType);
         } else {
             startForeground(notificationId, notification);
         }
@@ -90,10 +91,12 @@ public class CallForegroundService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        mediaType = CallMediaType.AUDIO.getValue();
         if (intent != null) {
             action = intent.getStringExtra("action");
             title = intent.getStringExtra("title");
             content = intent.getStringExtra("content");
+            mediaType = intent.getIntExtra("mediaType", 1);
         } else {
             title = getString(R.string.rc_call_on_going);
             ReportUtil.appError(
@@ -109,7 +112,8 @@ public class CallForegroundService extends Service {
             Log.e(TAG, "onStartCommand: ResolveInfo is null! action=" + action);
             return super.onStartCommand(intent, flags, startId);
         }
-        RLog.d(TAG, "onStartCommand: " + activityInfo.name);
+        RLog.d(TAG, "onStartCommand: " + activityInfo.name + " mediaType=" + mediaType);
+
         Intent launched = new Intent(action);
         launched.setClassName(activityInfo.packageName, activityInfo.name);
         launched.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
