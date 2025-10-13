@@ -142,6 +142,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     public static final String EXTRA_BUNDLE_KEY_USER_TOP_NAME_TAG = "rc_voip_user_top_name_tag";
     public static final String EXTRA_BUNDLE_KEY_USER_PROFILE_TAG_ORDER_TAG =
             "extra_bundle_key_user_profile_tag_order_tag";
+    public static final String EXTRA_BUNDLE_KEY_ASR_SETTINGS = "asrSettings";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -264,11 +265,9 @@ public class BaseCallActivity extends BaseNoActionBarActivity
                                         (LayoutParams) mASRView.getLayoutParams();
                                 int top = view.getTop();
                                 lp.topMargin =
-                                        (int)
-                                                (top
-                                                        - CallKitUtils.dp2px(
-                                                                RongASRView.MAX_HEIGHT,
-                                                                getBaseContext()));
+                                        top
+                                                - mASRView.getMinHeight()
+                                                - CallKitUtils.dp2px(8, getBaseContext());
                                 Log.d(
                                         TAG,
                                         "onGlobalLayout: viewTop="
@@ -685,6 +684,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
                 lp.topMargin = bundle.getInt(EXTRA_BUNDLE_KEY_SUBTITLE_TOP, 0);
                 mASRView.setLayoutParams(lp);
             }
+            mASRView.setSettingsResult(bundle.getParcelable(EXTRA_BUNDLE_KEY_ASR_SETTINGS));
         }
         View view = findViewById(R.id.rc_voip_enable_subtitle);
         if (view != null) {
@@ -705,13 +705,15 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     /** onPause时保存页面各状态数据 * */
     public String onSaveFloatBoxState(Bundle bundle) {
         bundle.putBoolean("isDial", isDial);
-        bundle.putBoolean(
-                EXTRA_BUNDLE_KEY_ENABLE_SUBTITLE,
-                mASRView != null && mASRView.getVisibility() == View.VISIBLE);
-        if (mASRView != null && mASRView.getLayoutParams() != null) {
-            bundle.putInt(
-                    EXTRA_BUNDLE_KEY_SUBTITLE_TOP,
-                    ((LayoutParams) mASRView.getLayoutParams()).topMargin);
+        if (mASRView != null) {
+            bundle.putBoolean(
+                    EXTRA_BUNDLE_KEY_ENABLE_SUBTITLE, mASRView.getVisibility() == View.VISIBLE);
+            bundle.putParcelable(EXTRA_BUNDLE_KEY_ASR_SETTINGS, mASRView.getSettings());
+            if (mASRView.getLayoutParams() != null) {
+                bundle.putInt(
+                        EXTRA_BUNDLE_KEY_SUBTITLE_TOP,
+                        ((LayoutParams) mASRView.getLayoutParams()).topMargin);
+            }
         }
 
         return null;

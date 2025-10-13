@@ -96,4 +96,17 @@
     <string name="rc_voip_call_terminalted_notify">[结束通话]</string>
     <string name="rc_voip_subtitle">字幕</string>
     <string name="rc_voip_subtitle_not_available">打开字幕失败，请稍后再试。</string>
+
+    <string name="rc_voip_asr_setting_title">字幕设置</string>
+    <string name="rc_voip_asr_transolation_title">翻译设置</string>
+    <string name="rc_voip_asr_transolation_display_tip">翻译显示</string>
+    <string name="rc_voip_asr_transolation_display_model">字幕同时显示双语言</string>
+
+    <string name="rc_voip_asr_transolation_start_failed">无法开启翻译功能，请重试或联系客服</string>
+    <string name="rc_voip_asr_translation_display">翻译显示</string>
+    <string name="rc_voip_asr_translation_off">不翻译</string>
+    <string name="rc_voip_asr_translation_zh">简体中文</string>
+    <string name="rc_voip_asr_translation_en">English（英文）</string>
+    <string name="rc_voip_asr_translation_ar">العربية(阿拉伯语)</string>
+
 </resources>

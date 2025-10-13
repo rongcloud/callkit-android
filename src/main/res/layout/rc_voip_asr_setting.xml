@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/main"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:fitsSystemWindows="true"
+  android:background="#F2F1F6">
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:orientation="vertical">
+
+  <RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <ImageView
+      android:id="@+id/iv_back"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:src="@drawable/rc_voip_back"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      android:padding="2dp"/>
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/rc_voip_asr_setting_title"
+      android:layout_centerHorizontal="true"
+      android:textColor="#020814"
+      android:textSize="20sp"/>
+  </RelativeLayout>
+
+
+  <TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/rc_voip_asr_transolation_title"
+    android:layout_marginTop="30dp"
+    android:textSize="14sp"
+    android:textColor="#7C838E"/>
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/rc_voip_asr_setting_bg"
+    android:layout_marginTop="10dp">
+
+    <RelativeLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:padding="20dp">
+      <TextView
+        android:id="@+id/rc_voip_tip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/rc_voip_asr_transolation_display_tip"
+        android:textColor="@color/callkit_black"
+        android:textSize="16sp"/>
+
+      <TextView
+        android:id="@+id/tv_translation_dest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/rc_voip_asr_translation_off"
+        android:layout_toEndOf="@id/rc_voip_tip"
+        android:layout_marginStart="16dp"
+        android:layout_alignParentEnd="true"
+        android:gravity="right"
+        android:singleLine="true"
+        android:drawableEnd="@drawable/rc_voip_right_arrows"
+        android:drawablePadding="8dp"
+        android:textSize="16sp"
+        android:textColor="#7C838E"/>
+    </RelativeLayout>
+    <View
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_marginStart="20dp"
+      android:background="#E6E6E6"/>
+    <RelativeLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:padding="20dp">
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/rc_voip_asr_transolation_display_model"
+        android:textColor="@color/callkit_black"
+        android:textSize="16sp"/>
+
+      <Switch
+        android:id="@+id/switch_display_model"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:thumb="@drawable/rc_voip_switch_thumb"
+        android:track="@drawable/rc_voip_switch_track"/>
+
+    </RelativeLayout>
+
+
+
+
+  </LinearLayout>
+
+
+
+
+  </LinearLayout>
+</FrameLayout>

@@ -95,4 +95,16 @@
     <string name="rc_dialog_cancel">الإلغاء</string>
 
     <string name="rc_voip_subtitle">CC</string>
+
+    <string name="rc_voip_asr_setting_title">شرح الصورة</string>
+    <string name="rc_voip_asr_transolation_title">إعدادات الترجمة</string>
+    <string name="rc_voip_asr_transolation_display_tip">عرض الترجمة</string>
+    <string name="rc_voip_asr_transolation_display_model">شرحات ثنائية اللغة</string>
+
+    <string name="rc_voip_asr_transolation_start_failed">لا يمكن تمكين خدمة الترجمة. يرجى المحاولة مرة أخرى أو الاتصال بخدمة العملاء.</string>
+    <string name="rc_voip_asr_translation_display">عرض الترجمة</string>
+    <string name="rc_voip_asr_translation_off">لا تتجمّد</string>
+    <string name="rc_voip_asr_translation_zh">简体中文 (الصينية المبسطة)</string>
+    <string name="rc_voip_asr_translation_en">English (الإنجليزية)</string>
+    <string name="rc_voip_asr_translation_ar">العربية</string>
 </resources>

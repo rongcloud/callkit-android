@@ -17,7 +17,6 @@ public class DragFrameLayout extends FrameLayout {
     // ViewDragHelper相关
     private ViewDragHelper mDragHelper;
     private View mDragView;
-    private int mMaxTop;
 
     public DragFrameLayout(@NonNull Context context) {
         super(context);
@@ -42,9 +41,6 @@ public class DragFrameLayout extends FrameLayout {
 
     public void setDragView(View view) {
         mDragView = view;
-        if (mDragView.getHeight() > 0 && getHeight() > 0) {
-            mMaxTop = getHeight() - getPaddingTop() - getPaddingBottom() - mDragView.getHeight();
-        }
     }
 
     @Override
@@ -52,9 +48,6 @@ public class DragFrameLayout extends FrameLayout {
         //        Log.d(TAG, "onLayout: changed="+changed+" , left="+left+" , top="+top
         //            + " , right="+right+" , bottom="+bottom);
         super.onLayout(changed, left, top, right, bottom);
-        if (mMaxTop <= 0 && mDragView != null && mDragView.getHeight() > 0 && getHeight() > 0) {
-            mMaxTop = getHeight() - getPaddingTop() - getPaddingBottom() - mDragView.getHeight();
-        }
     }
 
     @Override
@@ -68,7 +61,7 @@ public class DragFrameLayout extends FrameLayout {
                         new ViewDragHelper.Callback() {
                             @Override
                             public boolean tryCaptureView(@NonNull View child, int pointerId) {
-                                if (mDragView == null) {
+                                if (mDragView == null || child == null) {
                                     return false;
                                 }
                                 return child == mDragView;
@@ -78,25 +71,20 @@ public class DragFrameLayout extends FrameLayout {
                             public void onViewPositionChanged(
                                     @NonNull View child, int left, int top, int dx, int dy) {
                                 LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                                //                                Log.d(TAG, "onViewPositionChanged:
-                                // topMargin="+
-                                //                                    lp.topMargin + " ,
-                                // child.top="+ child.getTop()+" , top="+ top);
                                 lp.topMargin = top - getPaddingTop();
                                 child.setLayoutParams(lp);
                             }
 
                             @Override
                             public int clampViewPositionVertical(View child, int top, int dy) {
-                                return Math.max(getPaddingTop(), Math.min(top, mMaxTop));
-                                //                                LayoutParams lp = (LayoutParams)
-                                // child.getLayoutParams();
-                                //                                Log.d(TAG,
-                                // "clampViewPositionVertical: topMargin="+
-                                //                                 lp.topMargin + " , child.top="+
-                                // child.getTop()+" , finalTop="+ finalTop+" , top="+ top+" ,
-                                // maxTop="+ mMaxTop);
-                                //                                return finalTop;
+                                return Math.max(
+                                        getPaddingTop(),
+                                        Math.min(
+                                                top,
+                                                getHeight()
+                                                        - getPaddingTop()
+                                                        - getPaddingBottom()
+                                                        - mDragView.getMinimumHeight()));
                             }
 
                             @Override

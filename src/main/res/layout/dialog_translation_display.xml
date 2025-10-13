@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+  android:paddingBottom="20dp"
+  android:fitsSystemWindows="true">
+
+
+<LinearLayout
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+    android:orientation="vertical"
+  android:layout_marginStart="20dp"
+  android:layout_marginEnd="20dp">
+    <!-- 选项列表 -->
+    <LinearLayout
+        android:id="@+id/ll_options"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="20dp"
+      android:paddingStart="20dp"
+      android:background="@drawable/rc_voip_asr_setting_bg">
+
+        <!-- 标题 -->
+        <TextView
+          android:id="@+id/tv_dialog_title"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/rc_voip_asr_transolation_display_tip"
+          android:textColor="#7C838E"
+          android:textSize="14sp" />
+
+    </LinearLayout>
+
+    <!-- 取消按钮 -->
+    <Button
+        android:id="@+id/btn_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="@string/rc_voip_cancel"
+        android:textColor="@color/callkit_black"
+        android:textSize="16sp"
+        android:background="@drawable/rc_voip_dialog_cancel_btn_bg"
+        android:layout_marginTop="20dp" />
+
+</LinearLayout>
+
+</FrameLayout>
+

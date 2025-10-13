@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="RC_VOIP_DialogFullScreen" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+    
+    <style name="RC_VOIP_DialogLikeActivity">
+        <item name="android:windowExitAnimation">@anim/rc_voip_slide_out_right</item>
+        <item name="android:windowEnterAnimation">@anim/rc_voip_slide_in_right</item>
+    </style>
+
+    <!-- 底部弹窗样式 -->
+    <style name="RC_VOIP_TranslationDisplayDialogStyle" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.5</item>
+    </style>
+
+    <!-- 底部弹窗动画 -->
+    <style name="RC_VOIP_TranslationDisplayDialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/rc_voip_dialog_slide_in_bottom</item>
+        <item name="android:windowExitAnimation">@anim/rc_voip_dialog_slide_out_bottom</item>
+    </style>
+</resources>
+
