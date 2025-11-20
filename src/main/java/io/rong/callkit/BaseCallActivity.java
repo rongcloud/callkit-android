@@ -36,7 +36,6 @@ import cn.rongcloud.rtc.api.RCRTCAudioRouteManager;
 import cn.rongcloud.rtc.api.callback.IRCRTCAudioRouteListener;
 import cn.rongcloud.rtc.api.stream.RCRTCVideoStreamConfig.Builder;
 import cn.rongcloud.rtc.audioroute.RCAudioRouteType;
-import cn.rongcloud.rtc.base.RCRTCParamsType.RCRTCVideoFps;
 import cn.rongcloud.rtc.base.RCRTCParamsType.RCRTCVideoResolution;
 import cn.rongcloud.rtc.utils.FinLog;
 import io.rong.callkit.util.BluetoothUtil;
@@ -915,7 +914,6 @@ public class BaseCallActivity extends BaseNoActionBarActivity
         Builder builder =
                 Builder.create()
                         .setVideoResolution(RCRTCVideoResolution.RESOLUTION_480_640)
-                        .setVideoFps(RCRTCVideoFps.Fps_15)
                         .setMaxRate(1000)
                         .setMinRate(350);
         RongCallClient instance = RongCallClient.getInstance();
