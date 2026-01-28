@@ -196,7 +196,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
             Intent intent = new Intent();
             intent.setAction(VoIPBroadcastReceiver.ACTION_CLEAR_VOIP_NOTIFICATION);
             intent.setPackage(getPackageName());
-            sendBroadcast(intent);
+            sendBroadcast(intent, getPackageName() + ".permission.RECEIVE_PUSH_NOTIFICATION");
         }
     }
 
@@ -677,7 +677,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
         isMuteCamera = bundle.getBoolean(EXTRA_BUNDLE_KEY_MUTECAMERA);
         boolean isSubtitle = bundle.getBoolean(EXTRA_BUNDLE_KEY_ENABLE_SUBTITLE, false);
         if (mASRView != null) {
-            mASRView.enableSubtitle(isSubtitle);
+            mASRView.setVisibility(isSubtitle ? View.VISIBLE : View.GONE);
             if (bundle.containsKey(EXTRA_BUNDLE_KEY_SUBTITLE_TOP)) {
                 FrameLayout.LayoutParams lp = (LayoutParams) mASRView.getLayoutParams();
                 lp.topMargin = bundle.getInt(EXTRA_BUNDLE_KEY_SUBTITLE_TOP, 0);

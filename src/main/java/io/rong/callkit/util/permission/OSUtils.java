@@ -2,9 +2,6 @@ package io.rong.callkit.util.permission;
 
 import android.os.Build;
 import android.text.TextUtils;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 
 /** Created by Android Studio. User: lvhongzhen Date: 2019-08-15 Time: 01:49 */
 public class OSUtils {
@@ -96,24 +93,6 @@ public class OSUtils {
     }
 
     public static String getProp(String name) {
-        String line = null;
-        BufferedReader input = null;
-        try {
-            Process p = Runtime.getRuntime().exec("getprop " + name);
-            input = new BufferedReader(new InputStreamReader(p.getInputStream()), 1024);
-            line = input.readLine();
-            input.close();
-        } catch (IOException ex) {
-            return null;
-        } finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return line;
+        return io.rong.imkit.utils.OSUtils.getProp(name);
     }
 }

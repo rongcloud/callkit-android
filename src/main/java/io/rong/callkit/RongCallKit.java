@@ -8,6 +8,7 @@ import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallMissedListener;
 import io.rong.calllib.RongCallSession;
+import io.rong.imlib.RongCoreClientImpl;
 import io.rong.imlib.RongIMClient;
 import io.rong.imlib.model.Conversation;
 import java.util.ArrayList;
@@ -28,8 +29,8 @@ public class RongCallKit {
     private static RongCallCustomerHandlerListener customerHandlerListener;
     private static GlideCallKitImageEngine kitImageEngine = new GlideCallKitImageEngine();
 
-    /** 是否显示语音识别功能UI，默认显示 */
-    private static boolean mDisplayASRUI = true;
+    /** 是否显示语音识别功能UI，公有云默认显示，私有云默认不显示 */
+    private static boolean mDisplayASRUI = !RongCoreClientImpl.isPrivateSDK();
 
     public static boolean isDisplayASRUI() {
         return mDisplayASRUI;

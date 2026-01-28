@@ -199,7 +199,8 @@ public class RongCallModule implements IExtensionModule {
         intent.putExtra("callsession", callSession);
         intent.putExtra("checkPermissions", startForCheckPermissions);
         intent.setAction(VoIPBroadcastReceiver.ACTION_CALLINVITEMESSAGE);
-        context.sendBroadcast(intent);
+        context.sendBroadcast(
+                intent, context.getPackageName() + ".permission.RECEIVE_PUSH_NOTIFICATION");
     }
 
     public static Intent createVoIPIntent(

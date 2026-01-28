@@ -28,6 +28,11 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.CAMERA"/>
 
+    <!--融云推送广播接收权限，用于限制推送广播的接收-->
+    <permission
+        android:name="${applicationId}.permission.RECEIVE_PUSH_NOTIFICATION"
+        android:protectionLevel="signature" />
+
     <application android:supportsRtl="true">
         <meta-data
             android:name="rc.callkit"
@@ -79,6 +84,7 @@
         <!-- Android Q 后台无法弹出Activity，通过通知栏提醒用户-->
         <receiver
             android:name="io.rong.callkit.VoIPBroadcastReceiver"
+            android:permission="${applicationId}.permission.RECEIVE_PUSH_NOTIFICATION"
             android:exported="false">
             <intent-filter>
                 <action android:name="action.push.CallInviteMessage" />
@@ -94,7 +100,8 @@
 
         <receiver
             android:name=".util.RTCPhoneStateReceiver"
-            android:exported="false">
+            android:exported="false"
+            android:permission="android.permission.READ_PHONE_STATE">
             <intent-filter>
                 <action android:name="android.intent.action.PHONE_STATE" />
             </intent-filter>

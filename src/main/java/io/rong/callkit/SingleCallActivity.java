@@ -25,7 +25,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import cn.rongcloud.rtc.api.RCRTCEngine;
 import cn.rongcloud.rtc.audioroute.RCAudioRouteType;
 import cn.rongcloud.rtc.utils.FinLog;
 import io.rong.callkit.util.BluetoothUtil;
@@ -428,20 +427,9 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             CallKitUtils.textViewShadowLayer(callInfo, SingleCallActivity.this);
         }
 
-        if (callAction.equals(RongCallAction.ACTION_RESUME_CALL) && CallKitUtils.isDial) {
-            try {
-                ImageView button = buttonLayout.findViewById(R.id.rc_voip_call_mute_btn);
-                button.setEnabled(false);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
         if (callAction.equals(RongCallAction.ACTION_OUTGOING_CALL)) {
             RelativeLayout layout = buttonLayout.findViewById(R.id.rc_voip_call_mute);
             layout.setVisibility(View.VISIBLE);
-            ImageView button = buttonLayout.findViewById(R.id.rc_voip_call_mute_btn);
-            button.setEnabled(true);
             buttonLayout.findViewById(R.id.rc_voip_handfree).setVisibility(View.VISIBLE);
         }
 
@@ -538,6 +526,8 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             e.printStackTrace();
         }
         callRinging(RingingMode.Outgoing);
+        // 更新ring状态下的麦克风和扬声器状态
+        restoreMediaViewStatus();
     }
 
     @Override
@@ -552,11 +542,9 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                     (RelativeLayout)
                             inflater.inflate(
                                     R.layout.rc_voip_call_bottom_connected_button_layout, null);
-            ImageView button = btnLayout.findViewById(R.id.rc_voip_call_mute_btn);
-            button.setEnabled(true);
             mButtonContainer.removeAllViews();
             mButtonContainer.addView(btnLayout);
-            RCRTCEngine.getInstance().enableSpeaker(handFree);
+            RongCallClient.getInstance().setEnableSpeakerphone(handFree);
         } else {
             mConnectionStateTextView.setVisibility(View.VISIBLE);
             mConnectionStateTextView.setText(R.string.rc_voip_connecting);
@@ -573,7 +561,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             }
             mLocalVideo = localVideo;
             mLocalVideo.setTag(callSession.getSelfUserId());
-            RCRTCEngine.getInstance().enableSpeaker(true);
+            RongCallClient.getInstance().setEnableSpeakerphone(true);
         }
         TextView tv_rc_voip_call_remind_info =
                 (TextView) mUserInfoContainer.findViewById(R.id.rc_voip_call_remind_info);
@@ -1225,6 +1213,24 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         initSubtitleViewLayout(mButtonContainer);
         findViewById(R.id.rc_voip_enable_subtitle)
                 .setSelected(mASRView.getVisibility() == View.VISIBLE);
+    }
+
+    private void restoreMediaViewStatus() {
+        RongCallClient.getInstance().setEnableSpeakerphone(handFree);
+        ImageView handFreeV = null;
+        if (null != mButtonContainer) {
+            handFreeV = mButtonContainer.findViewById(R.id.rc_voip_handfree_btn);
+        }
+        if (handFreeV != null) {
+            handFreeV.setSelected(handFree);
+        }
+
+        RongCallClient.getInstance().setEnableLocalAudio(!muted);
+        if (mButtonContainer == null) return;
+        View muteV = mButtonContainer.findViewById(R.id.rc_voip_call_mute);
+        if (muteV != null) {
+            muteV.setSelected(muted);
+        }
     }
 
     @Override

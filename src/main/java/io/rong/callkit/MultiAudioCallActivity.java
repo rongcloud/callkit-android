@@ -441,6 +441,25 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         super.onCallOutgoing(callSession, localVideo);
         this.callSession = callSession;
         callRinging(RingingMode.Outgoing);
+        restoreMediaViewStatus();
+    }
+
+    private void restoreMediaViewStatus() {
+        RongCallClient.getInstance().setEnableSpeakerphone(handFree);
+        ImageView handFreeV = null;
+        if (null != outgoingLayout) {
+            handFreeV = outgoingLayout.findViewById(R.id.rc_voip_handfree_btn);
+        }
+        if (handFreeV != null) {
+            handFreeV.setSelected(handFree);
+        }
+
+        RongCallClient.getInstance().setEnableLocalAudio(!muted);
+        if (outgoingLayout == null) return;
+        View muteV = outgoingLayout.findViewById(R.id.rc_voip_call_mute_btn);
+        if (muteV != null) {
+            muteV.setSelected(muted);
+        }
     }
 
     @Override
@@ -611,23 +630,9 @@ public class MultiAudioCallActivity extends BaseCallActivity {
 
         View muteV = outgoingLayout.findViewById(R.id.rc_voip_call_mute_btn);
         muteV.setVisibility(View.VISIBLE);
-        muteV.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        onMuteButtonClick(v);
-                    }
-                });
 
         View handfreeV = outgoingLayout.findViewById(R.id.rc_voip_handfree_btn);
         handfreeV.setVisibility(View.VISIBLE);
-        handfreeV.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        onHandFreeButtonClick(v);
-                    }
-                });
 
         outgoingLayout.findViewById(R.id.rc_voip_title).setVisibility(View.VISIBLE);
         TextView timeV = (TextView) outgoingLayout.findViewById(R.id.rc_voip_time);
@@ -753,11 +758,10 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         if (muteV != null) {
             muteV.setSelected(muted);
         }
-        boolean enableSpeakerphone =
-                callAction == null || callAction.equals(RongCallAction.ACTION_RESUME_CALL)
-                        ? RongCallClient.getInstance().isSpeakerphoneEnabled()
-                        : false;
-        RongCallClient.getInstance().setEnableSpeakerphone(enableSpeakerphone);
+        RongCallClient.getInstance().setEnableSpeakerphone(handFree);
+        if (handfreeV != null) {
+            handfreeV.setSelected(handFree);
+        }
 
         stopRing();
         initSubtitleViewLayout(findViewById(R.id.rc_voip_control_layout));
@@ -819,7 +823,9 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                         finish();
                     }
                 });
-        sendBroadcast(new Intent(DISCONNECT_ACTION).setPackage(getPackageName()));
+        sendBroadcast(
+                new Intent(DISCONNECT_ACTION).setPackage(getPackageName()),
+                getPackageName() + ".permission.RONG_ACCESS_RECEIVER");
     }
 
     @Override
