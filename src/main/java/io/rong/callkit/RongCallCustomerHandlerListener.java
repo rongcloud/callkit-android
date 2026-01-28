@@ -2,7 +2,7 @@ package io.rong.callkit;
 
 import android.content.Context;
 import android.content.Intent;
-import android.view.SurfaceView;
+import android.view.View;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallSession;
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ public interface RongCallCustomerHandlerListener {
 
     void onRemoteUserInvited(String userId, RongCallCommon.CallMediaType mediaType);
 
-    void onCallConnected(RongCallSession callSession, SurfaceView localVideo);
+    void onCallConnected(RongCallSession callSession, View localVideo);
 
     void onCallDisconnected(
             RongCallSession callSession, RongCallCommon.CallDisconnectedReason reason);

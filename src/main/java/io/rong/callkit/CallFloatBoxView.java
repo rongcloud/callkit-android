@@ -19,7 +19,6 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -30,7 +29,7 @@ import android.widget.Toast;
 import io.rong.callkit.util.ActivityStartCheckUtils;
 import io.rong.callkit.util.CallKitUtils;
 import io.rong.calllib.CallUserProfile;
-import io.rong.calllib.IRongCallListener;
+import io.rong.calllib.IRongCallListener2;
 import io.rong.calllib.ReportUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
@@ -94,7 +93,7 @@ public class CallFloatBoxView {
         if (mediaType == RongCallCommon.CallMediaType.VIDEO
                 && session != null
                 && session.getConversationType() == Conversation.ConversationType.PRIVATE) {
-            SurfaceView remoteVideo = null;
+            View remoteVideo = null;
             for (CallUserProfile profile : session.getParticipantProfileList()) {
                 if (!TextUtils.equals(
                         profile.getUserId(), RongIMClient.getInstance().getCurrentUserId())) {
@@ -135,15 +134,14 @@ public class CallFloatBoxView {
             setupTime(null);
         }
         RongCallClient.getInstance()
-                .setVoIPCallListener(
-                        new IRongCallListener() {
+                .setVoIPCallListener2(
+                        new IRongCallListener2() {
                             @Override
                             public void onCallIncoming(
-                                    RongCallSession callSession, SurfaceView localVideo) {}
+                                    RongCallSession callSession, View localVideo) {}
 
                             @Override
-                            public void onCallOutgoing(
-                                    RongCallSession callInfo, SurfaceView localVideo) {}
+                            public void onCallOutgoing(RongCallSession callInfo, View localVideo) {}
 
                             @Override
                             public void onRemoteUserRinging(String userId) {}
@@ -313,7 +311,7 @@ public class CallFloatBoxView {
                                         .clearNotification(
                                                 mContext, BaseCallActivity.CALL_NOTIFICATION_ID);
                                 RongCallClient.getInstance()
-                                        .setVoIPCallListener(RongCallProxy.getInstance());
+                                        .setVoIPCallListener2(RongCallProxy.getInstance());
                             }
 
                             @Override
@@ -321,7 +319,7 @@ public class CallFloatBoxView {
                                     String userId,
                                     RongCallCommon.CallMediaType mediaType,
                                     int userType,
-                                    SurfaceView remoteVideo) {
+                                    View remoteVideo) {
                                 CallKitUtils.isDial = false;
                                 updateForegroundService();
                                 ReportUtil.appStatus(
@@ -358,7 +356,7 @@ public class CallFloatBoxView {
                             public void onMediaTypeChanged(
                                     String userId,
                                     RongCallCommon.CallMediaType mediaType,
-                                    SurfaceView video) {
+                                    View video) {
                                 ReportUtil.appStatus(
                                         ReportUtil.TAG.CALL_LISTENER,
                                         RongCallClient.getInstance().getCallSession(),
@@ -402,7 +400,7 @@ public class CallFloatBoxView {
                                             wm.removeView(mView);
                                             mView = null;
                                         }
-                                        SurfaceView remoteVideo = null;
+                                        View remoteVideo = null;
                                         for (CallUserProfile profile :
                                                 callSession.getParticipantProfileList()) {
                                             if (!TextUtils.equals(
@@ -461,8 +459,7 @@ public class CallFloatBoxView {
                             }
 
                             @Override
-                            public void onCallConnected(
-                                    RongCallSession callInfo, SurfaceView localVideo) {
+                            public void onCallConnected(RongCallSession callInfo, View localVideo) {
                                 ReportUtil.appStatus(
                                         ReportUtil.TAG.CALL_LISTENER,
                                         callInfo,
@@ -529,10 +526,7 @@ public class CallFloatBoxView {
                             public void onAudioLevelSend(String audioLevel) {}
 
                             public void onRemoteUserPublishVideoStream(
-                                    String userId,
-                                    String streamId,
-                                    String tag,
-                                    SurfaceView surfaceView) {
+                                    String userId, String streamId, String tag, View surfaceView) {
                                 ReportUtil.appStatus(
                                         ReportUtil.TAG.CALL_LISTENER,
                                         "userId|state|streamId|desc",
@@ -721,15 +715,14 @@ public class CallFloatBoxView {
             mediaIconV.setImageResource(R.drawable.rc_voip_float_video);
         }
         RongCallClient.getInstance()
-                .setVoIPCallListener(
-                        new IRongCallListener() {
+                .setVoIPCallListener2(
+                        new IRongCallListener2() {
                             @Override
                             public void onCallIncoming(
-                                    RongCallSession callSession, SurfaceView localVideo) {}
+                                    RongCallSession callSession, View localVideo) {}
 
                             @Override
-                            public void onCallOutgoing(
-                                    RongCallSession callInfo, SurfaceView localVideo) {}
+                            public void onCallOutgoing(RongCallSession callInfo, View localVideo) {}
 
                             @Override
                             public void onRemoteUserRinging(String userId) {}
@@ -883,7 +876,7 @@ public class CallFloatBoxView {
                                         .clearNotification(
                                                 mContext, BaseCallActivity.CALL_NOTIFICATION_ID);
                                 RongCallClient.getInstance()
-                                        .setVoIPCallListener(RongCallProxy.getInstance());
+                                        .setVoIPCallListener2(RongCallProxy.getInstance());
                             }
 
                             @Override
@@ -901,7 +894,7 @@ public class CallFloatBoxView {
                             public void onMediaTypeChanged(
                                     String userId,
                                     RongCallCommon.CallMediaType mediaType,
-                                    SurfaceView video) {
+                                    View video) {
                                 ReportUtil.appStatus(
                                         ReportUtil.TAG.CALL_LISTENER,
                                         RongCallClient.getInstance().getCallSession(),
@@ -931,8 +924,7 @@ public class CallFloatBoxView {
                             }
 
                             @Override
-                            public void onCallConnected(
-                                    RongCallSession callInfo, SurfaceView localVideo) {
+                            public void onCallConnected(RongCallSession callInfo, View localVideo) {
                                 ReportUtil.appStatus(
                                         ReportUtil.TAG.CALL_LISTENER,
                                         callInfo,
@@ -953,7 +945,7 @@ public class CallFloatBoxView {
                                     String userId,
                                     RongCallCommon.CallMediaType mediaType,
                                     int userType,
-                                    SurfaceView remoteVideo) {
+                                    View remoteVideo) {
                                 ReportUtil.appStatus(
                                         ReportUtil.TAG.CALL_LISTENER,
                                         "userId|state|desc",
@@ -1032,10 +1024,7 @@ public class CallFloatBoxView {
                             public void onAudioLevelSend(String audioLevel) {}
 
                             public void onRemoteUserPublishVideoStream(
-                                    String userId,
-                                    String streamId,
-                                    String tag,
-                                    SurfaceView surfaceView) {
+                                    String userId, String streamId, String tag, View surfaceView) {
                                 ReportUtil.appStatus(
                                         ReportUtil.TAG.CALL_LISTENER,
                                         "userId|state|streamId|desc",
@@ -1078,7 +1067,7 @@ public class CallFloatBoxView {
 
     public static void hideFloatBox() {
         setExcludeFromRecents(mContext, false);
-        RongCallClient.getInstance().setVoIPCallListener(RongCallProxy.getInstance());
+        RongCallClient.getInstance().setVoIPCallListener2(RongCallProxy.getInstance());
         if (isShown) {
             if (mView != null) {
                 wm.removeView(mView);
@@ -1105,7 +1094,7 @@ public class CallFloatBoxView {
             return null;
         }
         mBundle.putBoolean("isDial", isDial);
-        RongCallClient.getInstance().setVoIPCallListener(RongCallProxy.getInstance());
+        RongCallClient.getInstance().setVoIPCallListener2(RongCallProxy.getInstance());
         Intent intent = new Intent(mBundle.getString("action"));
         intent.putExtra("floatbox", mBundle);
         intent.setPackage(mContext.getPackageName());
@@ -1144,7 +1133,7 @@ public class CallFloatBoxView {
             RongCallClient.getInstance().setEnableLocalVideo(true);
         }
         mBundle.putBoolean("isDial", isDial);
-        RongCallClient.getInstance().setVoIPCallListener(RongCallProxy.getInstance());
+        RongCallClient.getInstance().setVoIPCallListener2(RongCallProxy.getInstance());
         Intent intent = new Intent(mBundle.getString("action"));
         intent.setPackage(mContext.getPackageName());
         intent.putExtra("floatbox", mBundle);

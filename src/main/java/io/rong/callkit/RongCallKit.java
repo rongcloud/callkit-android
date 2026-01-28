@@ -32,6 +32,9 @@ public class RongCallKit {
     /** 是否显示语音识别功能UI，公有云默认显示，私有云默认不显示 */
     private static boolean mDisplayASRUI = !RongCoreClientImpl.isPrivateSDK();
 
+    /** 设置是否使用 TextureView 模式渲染视频，默认为 false。 */
+    private static boolean enableTextureViewMode = false;
+
     public static boolean isDisplayASRUI() {
         return mDisplayASRUI;
     }
@@ -43,6 +46,19 @@ public class RongCallKit {
      */
     public static void setDisplayASRUI(boolean display) {
         RongCallKit.mDisplayASRUI = display;
+    }
+
+    public static boolean isTextureViewMode() {
+        return enableTextureViewMode;
+    }
+
+    /**
+     * 设置是否使用 TextureView 模式渲染视频，默认为 false。
+     *
+     * @param enableTextureViewMode 是否使用 TextureView 模式渲染视频
+     */
+    public static void enableTextureViewMode(boolean enableTextureViewMode) {
+        RongCallKit.enableTextureViewMode = enableTextureViewMode;
     }
 
     /**

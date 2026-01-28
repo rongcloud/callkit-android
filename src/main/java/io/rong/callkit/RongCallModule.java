@@ -354,7 +354,7 @@ public class RongCallModule implements IExtensionModule {
                             public void onSuccess(String t) {
                                 if (RongCallClient.getInstance() != null) {
                                     RongCallClient.getInstance()
-                                            .setVoIPCallListener(RongCallProxy.getInstance());
+                                            .setVoIPCallListener2(RongCallProxy.getInstance());
                                 }
                             }
 
@@ -362,7 +362,7 @@ public class RongCallModule implements IExtensionModule {
                             public void onError(RongIMClient.ConnectionErrorCode e) {
                                 if (RongCallClient.getInstance() != null) {
                                     RongCallClient.getInstance()
-                                            .setVoIPCallListener(RongCallProxy.getInstance());
+                                            .setVoIPCallListener2(RongCallProxy.getInstance());
                                 }
                             }
 

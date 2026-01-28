@@ -2,12 +2,12 @@ package io.rong.callkit;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import androidx.annotation.NonNull;
-import cn.rongcloud.rtc.api.stream.RCRTCVideoView;
+import cn.rongcloud.rtc.api.stream.view.RCRTCBaseView;
 import cn.rongcloud.rtc.utils.FinLog;
 
 /** Created by Administrator on 2017/3/30. */
@@ -15,14 +15,19 @@ public class ContainerLayout extends RelativeLayout {
     private final String TAG = ContainerLayout.class.getSimpleName();
     private Context context;
     private static boolean isNeedFillScrren = true;
-    SurfaceView currentView;
+    View currentView;
 
     public ContainerLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
     }
 
-    public void addView(final SurfaceView videoView) {
+    @Override
+    public void addView(final View videoView) {
+        if (!(videoView instanceof RCRTCBaseView)) {
+            super.addView(videoView);
+            return;
+        }
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         this.screenWidth = wm.getDefaultDisplay().getWidth();
         this.screenHeight = wm.getDefaultDisplay().getHeight();
@@ -31,62 +36,39 @@ public class ContainerLayout extends RelativeLayout {
                 "---xx-- add view "
                         + videoView.toString()
                         + " Height: "
-                        + ((RCRTCVideoView) videoView).rotatedFrameHeight
+                        + ((RCRTCBaseView) videoView).getRotatedFrameHeight()
                         + " Width: "
-                        + ((RCRTCVideoView) videoView).rotatedFrameWidth);
-        super.addView(videoView, getBigContainerParams((RCRTCVideoView) videoView));
+                        + ((RCRTCBaseView) videoView).getRotatedFrameWidth());
+        super.addView(videoView, getBigContainerParams((RCRTCBaseView) videoView));
         currentView = videoView;
-        ((RCRTCVideoView) videoView)
-                .setOnSizeChangedListener(
-                        new RCRTCVideoView.OnSizeChangedListener() {
-                            @Override
-                            public void onChanged(RCRTCVideoView.Size size) {
-                                try {
-                                    ContainerLayout.this.removeAllViews();
-                                    FinLog.d(
-                                            TAG,
-                                            "---xx-- change view "
-                                                    + videoView.toString()
-                                                    + " Height: "
-                                                    + ((RCRTCVideoView) videoView)
-                                                            .rotatedFrameHeight
-                                                    + " Width: "
-                                                    + ((RCRTCVideoView) videoView)
-                                                            .rotatedFrameWidth);
-                                    ContainerLayout.this.addView(
-                                            videoView,
-                                            getBigContainerParams((RCRTCVideoView) videoView));
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        });
     }
 
     @NonNull
-    private LayoutParams getBigContainerParams(RCRTCVideoView videoView) {
+    private LayoutParams getBigContainerParams(RCRTCBaseView videoView) {
         LayoutParams layoutParams = null;
         if (!isNeedFillScrren) {
             if (screenHeight > screenWidth) { // V
                 int layoutParamsHeight =
-                        (videoView.rotatedFrameHeight == 0 || videoView.rotatedFrameWidth == 0)
+                        (videoView.getRotatedFrameHeight() == 0
+                                        || videoView.getRotatedFrameWidth() == 0)
                                 ? ViewGroup.LayoutParams.WRAP_CONTENT
                                 : screenWidth
-                                        * videoView.rotatedFrameHeight
-                                        / videoView.rotatedFrameWidth;
+                                        * videoView.getRotatedFrameHeight()
+                                        / videoView.getRotatedFrameWidth();
                 layoutParams = new LayoutParams(screenWidth, layoutParamsHeight);
             } else {
                 int layoutParamsWidth =
-                        (videoView.rotatedFrameWidth == 0 || videoView.rotatedFrameHeight == 0)
+                        (videoView.getRotatedFrameWidth() == 0
+                                        || videoView.getRotatedFrameHeight() == 0)
                                 ? ViewGroup.LayoutParams.WRAP_CONTENT
                                 : (screenWidth
-                                                        * videoView.rotatedFrameWidth
-                                                        / videoView.rotatedFrameHeight
+                                                        * videoView.getRotatedFrameWidth()
+                                                        / videoView.getRotatedFrameHeight()
                                                 > screenWidth
                                         ? screenWidth
                                         : screenHeight
-                                                * videoView.rotatedFrameWidth
-                                                / videoView.rotatedFrameHeight);
+                                                * videoView.getRotatedFrameWidth()
+                                                / videoView.getRotatedFrameHeight());
                 layoutParams = new LayoutParams(layoutParamsWidth, screenHeight);
             }
         } else {
@@ -98,12 +80,6 @@ public class ContainerLayout extends RelativeLayout {
 
     public void setIsNeedFillScrren(boolean isNeed) {
         isNeedFillScrren = isNeed;
-    }
-
-    @Override
-    public void removeAllViews() {
-        if (currentView != null) ((RCRTCVideoView) currentView).setOnSizeChangedListener(null);
-        super.removeAllViews();
     }
 
     private int screenWidth;

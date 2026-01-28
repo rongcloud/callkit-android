@@ -1,11 +1,11 @@
 package io.rong.callkit;
 
 import android.text.TextUtils;
-import android.view.SurfaceView;
+import android.view.View;
 import cn.rongcloud.rtc.api.RCRTCAudioRouteManager;
 import io.rong.callkit.util.CallKitUtils;
 import io.rong.callkit.util.IncomingCallExtraHandleUtil;
-import io.rong.calllib.IRongCallListener;
+import io.rong.calllib.IRongCallListener2;
 import io.rong.calllib.ReportUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
@@ -23,10 +23,10 @@ import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /** Created by jiangecho on 2016/10/27. */
-public class RongCallProxy implements IRongCallListener {
+public class RongCallProxy implements IRongCallListener2 {
 
     private static final String TAG = "RongCallProxy";
-    private IRongCallListener mCallListener;
+    private IRongCallListener2 mCallListener;
     private Queue<CallDisconnectedInfo> mCachedCallQueue;
     private static RongCallProxy mInstance;
 
@@ -41,20 +41,13 @@ public class RongCallProxy implements IRongCallListener {
         return mInstance;
     }
 
-    public void setCallListener(IRongCallListener listener) {
+    public void setCallListener(IRongCallListener2 listener) {
         RLog.d(TAG, "setCallListener listener = " + listener);
         this.mCallListener = listener;
-        //        if (listener != null) {
-        //            CallDisconnectedInfo callDisconnectedInfo = mCachedCallQueue.poll();
-        //            if (callDisconnectedInfo != null) {
-        //                listener.onCallDisconnected(callDisconnectedInfo.mCallSession,
-        // callDisconnectedInfo.mReason);
-        //            }
-        //        }
     }
 
     @Override
-    public void onCallIncoming(RongCallSession callSession, SurfaceView localVideo) {
+    public void onCallIncoming(RongCallSession callSession, View localVideo) {
         ReportUtil.appStatus(
                 ReportUtil.TAG.CALL_LISTENER,
                 callSession,
@@ -71,7 +64,7 @@ public class RongCallProxy implements IRongCallListener {
     }
 
     @Override
-    public void onCallOutgoing(RongCallSession callSession, SurfaceView localVideo) {
+    public void onCallOutgoing(RongCallSession callSession, View localVideo) {
         ReportUtil.appStatus(
                 ReportUtil.TAG.CALL_LISTENER,
                 callSession,
@@ -88,7 +81,7 @@ public class RongCallProxy implements IRongCallListener {
     }
 
     @Override
-    public void onCallConnected(RongCallSession callSession, SurfaceView localVideo) {
+    public void onCallConnected(RongCallSession callSession, View localVideo) {
         ReportUtil.appStatus(
                 ReportUtil.TAG.CALL_LISTENER,
                 callSession,
@@ -150,10 +143,7 @@ public class RongCallProxy implements IRongCallListener {
 
     @Override
     public void onRemoteUserJoined(
-            String userId,
-            RongCallCommon.CallMediaType mediaType,
-            int userType,
-            SurfaceView remoteVideo) {
+            String userId, RongCallCommon.CallMediaType mediaType, int userType, View remoteVideo) {
         ReportUtil.appStatus(
                 ReportUtil.TAG.CALL_LISTENER,
                 "userId|state|desc",
@@ -194,7 +184,7 @@ public class RongCallProxy implements IRongCallListener {
 
     @Override
     public void onMediaTypeChanged(
-            String userId, RongCallCommon.CallMediaType mediaType, SurfaceView video) {
+            String userId, RongCallCommon.CallMediaType mediaType, View video) {
         ReportUtil.appStatus(
                 ReportUtil.TAG.CALL_LISTENER,
                 "userId|state|mediaType|desc",
@@ -289,7 +279,7 @@ public class RongCallProxy implements IRongCallListener {
     }
 
     public void onRemoteUserPublishVideoStream(
-            String userId, String streamId, String tag, SurfaceView surfaceView) {
+            String userId, String streamId, String tag, View surfaceView) {
         ReportUtil.appStatus(
                 ReportUtil.TAG.CALL_LISTENER,
                 "userId|state|streamId|desc",

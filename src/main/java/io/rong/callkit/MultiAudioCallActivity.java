@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -437,7 +436,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
     public void onRemoteUserRinging(String userId) {}
 
     @Override
-    public void onCallOutgoing(RongCallSession callSession, SurfaceView localVideo) {
+    public void onCallOutgoing(RongCallSession callSession, View localVideo) {
         super.onCallOutgoing(callSession, localVideo);
         this.callSession = callSession;
         callRinging(RingingMode.Outgoing);
@@ -473,10 +472,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
 
     @Override
     public void onRemoteUserJoined(
-            String userId,
-            RongCallCommon.CallMediaType mediaType,
-            int userType,
-            SurfaceView remoteVideo) {
+            String userId, RongCallCommon.CallMediaType mediaType, int userType, View remoteVideo) {
         View view = memberContainer.findChildById(userId);
         if (view != null) {
             memberContainer.updateChildState(userId, false);
@@ -581,7 +577,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
      * @param localVideo 本地 camera 信息。
      */
     @Override
-    public void onCallConnected(final RongCallSession callSession, SurfaceView localVideo) {
+    public void onCallConnected(final RongCallSession callSession, View localVideo) {
         super.onCallConnected(callSession, localVideo);
         RongCallClient.getInstance().setEnableLocalVideo(false);
         this.callSession = callSession;

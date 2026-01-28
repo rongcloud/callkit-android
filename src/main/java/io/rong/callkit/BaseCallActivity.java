@@ -20,7 +20,6 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
@@ -44,7 +43,7 @@ import io.rong.callkit.util.CallRingingUtil;
 import io.rong.callkit.util.HeadsetInfo;
 import io.rong.callkit.util.RingingMode;
 import io.rong.callkit.util.RongCallPermissionUtil;
-import io.rong.calllib.IRongCallListener;
+import io.rong.calllib.IRongCallListener2;
 import io.rong.calllib.PublishCallBack;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
@@ -65,7 +64,7 @@ import java.util.Locale;
 
 /** Created by weiqinxiao on 16/3/9. */
 public class BaseCallActivity extends BaseNoActionBarActivity
-        implements IRongCallListener,
+        implements IRongCallListener2,
                 PickupDetector.PickupDetectListener,
                 RongUserInfoManager.UserDataObserver {
 
@@ -337,14 +336,14 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     }
 
     @Override
-    public void onCallIncoming(RongCallSession callSession, SurfaceView localVideo) {
+    public void onCallIncoming(RongCallSession callSession, View localVideo) {
         CallKitUtils.shouldShowFloat = true;
         CallKitUtils.isDial = false;
         showForegroundService();
     }
 
     @Override
-    public void onCallOutgoing(RongCallSession callProfile, SurfaceView localVideo) {
+    public void onCallOutgoing(RongCallSession callProfile, View localVideo) {
         CallKitUtils.shouldShowFloat = true;
         CallKitUtils.isDial = true;
         showForegroundService();
@@ -379,10 +378,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
 
     @Override
     public void onRemoteUserJoined(
-            String userId,
-            RongCallCommon.CallMediaType mediaType,
-            int userType,
-            SurfaceView remoteVideo) {
+            String userId, RongCallCommon.CallMediaType mediaType, int userType, View remoteVideo) {
         CallKitUtils.isDial = false;
         showForegroundService();
     }
@@ -407,7 +403,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
 
     @Override
     public void onMediaTypeChanged(
-            String userId, RongCallCommon.CallMediaType mediaType, SurfaceView video) {}
+            String userId, RongCallCommon.CallMediaType mediaType, View video) {}
 
     @Override
     public void onError(RongCallCommon.CallErrorCode errorCode) {
@@ -423,7 +419,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     }
 
     @Override
-    public void onCallConnected(RongCallSession callProfile, SurfaceView localVideo) {
+    public void onCallConnected(RongCallSession callProfile, View localVideo) {
         registerAudioRouteTypeChange();
         if (RongCallKit.getCustomerHandlerListener() != null) {
             RongCallKit.getCustomerHandlerListener().onCallConnected(callProfile, localVideo);
@@ -667,7 +663,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     }
 
     public void onRemoteUserPublishVideoStream(
-            String userId, String streamId, String tag, SurfaceView surfaceView) {}
+            String userId, String streamId, String tag, View surfaceView) {}
 
     @Override
     public void onRemoteUserUnpublishVideoStream(String userId, String streamId, String tag) {}
@@ -910,7 +906,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
         //         */
         //        // configBuilder.enableHttpsSelfCertificate(true);
         //        RongCallClient.getInstance().setRTCConfig(configBuilder);
-
+        RongCallClient.enableTextureViewMode(RongCallKit.isTextureViewMode());
         Builder builder =
                 Builder.create()
                         .setVideoResolution(RCRTCVideoResolution.RESOLUTION_480_640)
