@@ -28,9 +28,17 @@
       android:src="@drawable/rc_voip_minimize"
       android:visibility="gone" />
 
+    <LinearLayout
+      android:id="@+id/ai_btn_views"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/rc_voip_call_minimize"
+      android:visibility="gone"
+      android:orientation="vertical">
+
     <TextView
       android:id="@+id/rc_voip_enable_subtitle"
-      android:layout_width="wrap_content"
+      android:layout_width="65dp"
       android:layout_height="30dp"
       android:text="@string/rc_voip_subtitle"
       android:gravity="center_vertical"
@@ -42,10 +50,24 @@
       android:paddingEnd="8dp"
       android:layout_marginTop="8dp"
       android:onClick="onEnableSubtitleClick"
-      android:layout_below="@id/rc_voip_call_minimize"
       android:layout_marginStart="17.5dp"
-      android:background="@drawable/rc_voip_white_bg"
-      android:visibility="gone"/>
+      android:background="@drawable/rc_voip_white_bg"/>
+
+        <TextView
+          android:id="@+id/rc_voip_ai_summary"
+          android:layout_width="wrap_content"
+          android:layout_height="30dp"
+          android:text="@string/rc_voip_ai_sum"
+          android:gravity="center"
+          android:textColor="@color/rc_voip_subtitle_text"
+          android:textSize="12sp"
+          android:paddingStart="8dp"
+          android:paddingEnd="8dp"
+          android:layout_marginTop="8dp"
+          android:onClick="onSummaryButtonClick"
+          android:layout_marginStart="17.5dp"
+          android:background="@drawable/rc_voip_white_bg"/>
+    </LinearLayout>
 
     <RelativeLayout
       android:layout_width="match_parent"

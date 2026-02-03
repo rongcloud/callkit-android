@@ -107,4 +107,15 @@
     <string name="rc_voip_asr_translation_zh">简体中文 (الصينية المبسطة)</string>
     <string name="rc_voip_asr_translation_en">English (الإنجليزية)</string>
     <string name="rc_voip_asr_translation_ar">العربية</string>
+
+    <string name="rc_voip_ai_sum">ملخص</string>
+    <string name="rc_voip_ai_sum_lable">محتوى الملخص</string>
+    <string name="rc_voip_ai_sum_title"> ملخص ذكاء اصطناعي </string>
+    <string name="rc_voip_start_sum_failed">فشل التشغيل، يرجى المحاولة مرة أخرى لاحقًا</string>
+    <string name="rc_voip_generate_sum_failed">فشل الطلب، يرجى المحاولة مرة أخرى لاحقًا</string>
+    <string name="rc_voip_generate_sum_failed_empty">يتطلب المزيد من المحتوى للتلخيص. يرجى المحاولة مرة أخرى لاحقاً</string>
+    <string name="rc_voip_ai_sum_complete">اكتمل ملخص الذكاء الاصطناعي</string>
+    <string name="rc_voip_ai_sum_start_time">وقت بدء المكالمة:  </string>
+    <string name="rc_voip_ai_sum_go_to_info">عرض التفاصيل</string>
+    <string name="rc_voip_ai_sum_subtitle">[اكتمل ملخص الذكاء الاصطناعي]</string>
 </resources>

@@ -223,8 +223,7 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                 onCallOutgoing(callSession, null);
             }
         }
-        findViewById(R.id.rc_voip_enable_subtitle)
-                .setSelected(mASRView.getVisibility() == View.VISIBLE);
+        findViewById(R.id.ai_btn_views).setSelected(mASRView.getVisibility() == View.VISIBLE);
     }
 
     void initView() {

@@ -1,22 +1,26 @@
 package io.rong.callkit;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import cn.rongcloud.rtc.api.RCRTCAudioRouteManager;
 import io.rong.callkit.util.CallKitUtils;
 import io.rong.callkit.util.IncomingCallExtraHandleUtil;
+import io.rong.callkit.util.RongAIManager;
 import io.rong.calllib.IRongCallListener2;
 import io.rong.calllib.ReportUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
 import io.rong.calllib.RongCallCommon.CallMediaType;
 import io.rong.calllib.RongCallSession;
+import io.rong.calllib.message.CallAISummaryMessage;
 import io.rong.calllib.message.CallSTerminateMessage;
 import io.rong.calllib.message.MultiCallEndMessage;
 import io.rong.common.RLog;
 import io.rong.imkit.IMCenter;
 import io.rong.imlib.IRongCoreEnum;
 import io.rong.imlib.model.Conversation;
+import io.rong.imlib.model.Message;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Queue;
@@ -61,6 +65,7 @@ public class RongCallProxy implements IRongCallListener2 {
             RCRTCAudioRouteManager.getInstance()
                     .init(RongCallClient.getInstance().getContext().getApplicationContext());
         }
+        RongAIManager.getInstance().setCurrentSession(callSession);
     }
 
     @Override
@@ -78,6 +83,7 @@ public class RongCallProxy implements IRongCallListener2 {
             RCRTCAudioRouteManager.getInstance()
                     .init(RongCallClient.getInstance().getContext().getApplicationContext());
         }
+        RongAIManager.getInstance().setCurrentSession(callSession);
     }
 
     @Override
@@ -91,6 +97,7 @@ public class RongCallProxy implements IRongCallListener2 {
         if (mCallListener != null) {
             mCallListener.onCallConnected(callSession, localVideo);
         }
+        RongAIManager.getInstance().setCurrentSession(callSession);
     }
 
     @Override
@@ -111,8 +118,11 @@ public class RongCallProxy implements IRongCallListener2 {
         } else { // android 10 后台来电，被叫端不响应，主叫挂断时 mCallListener 为空 ，需要生成通话记录
             insertCallLogMessage(callSession, reason);
         }
+        insertAISummarizationMessage(
+                callSession, RongAIManager.getInstance().getCurrentSumTaskId());
         // 取消耳机监听
         RCRTCAudioRouteManager.getInstance().unInit();
+        RongAIManager.getInstance().release();
     }
 
     @Override
@@ -407,6 +417,43 @@ public class RongCallProxy implements IRongCallListener2 {
                                 insertTime,
                                 null);
             }
+        }
+    }
+
+    private void insertAISummarizationMessage(RongCallSession callSession, String sumTaskId) {
+        if (callSession.getActiveTime() <= 0 || TextUtils.isEmpty(sumTaskId)) {
+            Log.d(
+                    TAG,
+                    "insertAISummarizationMessage: callSession.getActiveTime() <=0 || TextUtils.isEmpty(sumTaskId)");
+            return;
+        }
+        CallAISummaryMessage message = new CallAISummaryMessage();
+        message.setCallId(callSession.getCallId());
+        message.setConnectedTime(callSession.getActiveTime());
+        message.setTaskId(sumTaskId);
+        String senderId = callSession.getInviterUserId();
+        long insertTime = callSession.getEndTime();
+        if (senderId.equals(callSession.getSelfUserId())) {
+            message.setDirection("MO");
+            IMCenter.getInstance()
+                    .insertOutgoingMessage(
+                            callSession.getConversationType(),
+                            callSession.getTargetId(),
+                            io.rong.imlib.model.Message.SentStatus.SENT,
+                            message,
+                            insertTime,
+                            null);
+        } else {
+            message.setDirection("MT");
+            IMCenter.getInstance()
+                    .insertIncomingMessage(
+                            callSession.getConversationType(),
+                            callSession.getTargetId(),
+                            senderId,
+                            new Message.ReceivedStatus(1),
+                            message,
+                            insertTime,
+                            null);
         }
     }
 }

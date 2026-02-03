@@ -42,6 +42,7 @@ import io.rong.callkit.util.CallKitUtils;
 import io.rong.callkit.util.CallRingingUtil;
 import io.rong.callkit.util.HeadsetInfo;
 import io.rong.callkit.util.RingingMode;
+import io.rong.callkit.util.RongAIManager;
 import io.rong.callkit.util.RongCallPermissionUtil;
 import io.rong.calllib.IRongCallListener2;
 import io.rong.calllib.PublishCallBack;
@@ -147,6 +148,12 @@ public class BaseCallActivity extends BaseNoActionBarActivity
         super.onCreate(savedInstanceState);
         RLog.d(TAG, "BaseCallActivity onCreate");
         audioVideoConfig();
+        // 设置AI会议总结当前用户昵称
+        UserInfo currentUserInfo = RongUserInfoManager.getInstance().getCurrentUserInfo();
+        RongCallClient instance = RongCallClient.getInstance();
+        if (currentUserInfo != null && instance != null) {
+            instance.setNickname(currentUserInfo.getName());
+        }
         setSrcLanguageCode();
         getWindow()
                 .setFlags(
@@ -207,6 +214,14 @@ public class BaseCallActivity extends BaseNoActionBarActivity
         RongCallClient.getInstance().setSrcLanguageCode(language);
     }
 
+    public void onSummaryButtonClick(View v) {
+        RongAISummarizationDialog.newInstance(
+                        RongAIManager.getInstance().getCurrentCallId(),
+                        RongAIManager.getInstance().getCurrentSumTaskId(),
+                        RongAIManager.getInstance().getSumTranslationLang())
+                .show(getSupportFragmentManager(), "RongAISummarizationDialog");
+    }
+
     protected void initASRView() {
         mASRView = findViewById(R.id.rc_voip_subtitle_view);
         if (mASRView == null) {
@@ -226,7 +241,7 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     }
 
     protected void setEnableASRVisibility(boolean isVisible) {
-        View enableView = findViewById(R.id.rc_voip_enable_subtitle);
+        View enableView = findViewById(R.id.ai_btn_views);
         if (enableView == null) {
             return;
         }
@@ -427,10 +442,6 @@ public class BaseCallActivity extends BaseNoActionBarActivity
         CallKitUtils.callConnected = true;
         CallKitUtils.shouldShowFloat = true;
         CallKitUtils.isDial = false;
-        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        if (audioManager != null) {
-            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-        }
         AudioPlayManager.getInstance().setInVoipMode(true);
         AudioRecordManager.getInstance().destroyRecord();
         showForegroundService();
@@ -563,15 +574,6 @@ public class BaseCallActivity extends BaseNoActionBarActivity
             //            RongUserInfoManager.getInstance().remove
             handler.removeCallbacks(updateTimeRunnable);
             CallRingingUtil.getInstance().stopRinging();
-
-            // 退出此页面后应设置成正常模式，否则按下音量键无法更改其他音频类型的音量
-            AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-            if (am != null) {
-                am.setMode(AudioManager.MODE_NORMAL);
-                if (onAudioFocusChangeListener != null) {
-                    am.abandonAudioFocus(onAudioFocusChangeListener);
-                }
-            }
         } catch (IllegalStateException e) {
             e.printStackTrace();
             Log.i(MEDIAPLAYERTAG, "--- onDestroy IllegalStateException---");

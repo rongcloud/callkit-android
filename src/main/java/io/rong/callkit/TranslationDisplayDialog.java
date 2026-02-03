@@ -19,14 +19,17 @@ public class TranslationDisplayDialog extends Dialog {
     private OnLanguageSelectedListener listener;
     private String currentLanguage;
     private DialogTranslationDisplayBinding binding;
+    private Map<String, Integer> languageMap;
 
     public interface OnLanguageSelectedListener {
         void onLanguageSelected(String language);
     }
 
-    public TranslationDisplayDialog(@NonNull Context context, String currentLanguage) {
+    public TranslationDisplayDialog(
+            @NonNull Context context, String currentLanguage, Map<String, Integer> languageMap) {
         super(context, R.style.RC_VOIP_TranslationDisplayDialogStyle);
         this.currentLanguage = currentLanguage;
+        this.languageMap = languageMap;
     }
 
     @Override
@@ -49,7 +52,7 @@ public class TranslationDisplayDialog extends Dialog {
 
     private void initView() {
         RcVoipItemTranslationLanguageBinding lastItem = null;
-        for (Map.Entry<String, Integer> entry : RongASRSettingsDialog.LANGUAGE_MAP.entrySet()) {
+        for (Map.Entry<String, Integer> entry : this.languageMap.entrySet()) {
             RcVoipItemTranslationLanguageBinding item =
                     RcVoipItemTranslationLanguageBinding.inflate(getLayoutInflater());
             item.ivCheck.setVisibility(currentLanguage.equals(entry.getKey()) ? VISIBLE : GONE);

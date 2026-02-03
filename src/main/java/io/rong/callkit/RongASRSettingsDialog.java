@@ -1,27 +1,21 @@
 package io.rong.callkit;
 
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
-import android.view.Window;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
 import io.rong.callkit.databinding.RcVoipAsrSettingBinding;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /** Created by RongCloud on 2025/9/8. */
-public class RongASRSettingsDialog extends DialogFragment {
+public class RongASRSettingsDialog extends BaseDialogFragment {
 
     public static String KEY_SETTINGS = "asr_settings";
     public static String KEY_OFF_TRANSLATION = "off";
@@ -57,28 +51,6 @@ public class RongASRSettingsDialog extends DialogFragment {
     }
 
     @Override
-    public int getTheme() {
-        return R.style.RC_VOIP_DialogFullScreen;
-    }
-
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        Dialog dialog = super.onCreateDialog(savedInstanceState);
-        Window window = dialog.getWindow();
-        window.setLayout(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        window.setWindowAnimations(R.style.RC_VOIP_DialogLikeActivity);
-        return dialog;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setStyle(STYLE_NORMAL, R.style.RC_VOIP_DialogFullScreen);
-    }
-
-    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initView();
@@ -107,7 +79,7 @@ public class RongASRSettingsDialog extends DialogFragment {
 
     private void changeDestLanguage() {
         TranslationDisplayDialog dialog =
-                new TranslationDisplayDialog(getContext(), settings.destLanguage);
+                new TranslationDisplayDialog(getContext(), settings.destLanguage, LANGUAGE_MAP);
         dialog.setOnLanguageSelectedListener(
                 language -> {
                     settings.destLanguage = language;

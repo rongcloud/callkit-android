@@ -109,4 +109,15 @@
     <string name="rc_voip_asr_translation_en">English（英文）</string>
     <string name="rc_voip_asr_translation_ar">العربية(阿拉伯语)</string>
 
+    <string name="rc_voip_ai_sum">总结</string>
+    <string name="rc_voip_ai_sum_lable">总结内容 </string>
+    <string name="rc_voip_ai_sum_title">AI 总结</string>
+    <string name="rc_voip_start_sum_failed">无法开启，请稍后重试</string>
+    <string name="rc_voip_generate_sum_failed">请求失败，请稍后重试</string>
+    <string name="rc_voip_generate_sum_failed_empty">需要更多内容才能总结，请稍后再试</string>
+    <string name="rc_voip_ai_sum_complete">AI 总结完成</string>
+    <string name="rc_voip_ai_sum_start_time">通话开始时间:  </string>
+    <string name="rc_voip_ai_sum_go_to_info">查看详情</string>
+    <string name="rc_voip_ai_sum_subtitle">[AI 总结完成]</string>
+
 </resources>

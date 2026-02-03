@@ -6,7 +6,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Toast;
@@ -22,6 +21,7 @@ import io.rong.callkit.RongASRItemView.ASRItemData;
 import io.rong.callkit.RongASRSettingsDialog.ASRSettings;
 import io.rong.callkit.databinding.RcVoipAsrViewBinding;
 import io.rong.callkit.util.CallKitUtils;
+import io.rong.callkit.util.RongAIManager;
 import io.rong.calllib.IRongCallASRListener;
 import io.rong.calllib.RongCallClient;
 import java.util.HashMap;
@@ -87,7 +87,7 @@ public class RongASRView extends ConstraintLayout implements IRongCallASRListene
                             ((FragmentActivity) getContext()).getSupportFragmentManager(),
                             "RongASRSettingsDialog");
                 });
-        RongCallClient.getInstance().setASRListener(this);
+        RongAIManager.getInstance().registerASRListener(TAG, this);
     }
 
     @Override
@@ -249,7 +249,7 @@ public class RongASRView extends ConstraintLayout implements IRongCallASRListene
         setVisibility(enable ? VISIBLE : GONE);
         RongCallClient.getInstance().setEnableASR(enable);
         if (enable) {
-            RongCallClient.getInstance()
+            RongAIManager.getInstance()
                     .startASR(
                             new IRCRTCResultCallback() {
                                 @Override
@@ -267,7 +267,7 @@ public class RongASRView extends ConstraintLayout implements IRongCallASRListene
     }
 
     public void destroy() {
-        RongCallClient.getInstance().setASRListener(null);
+        RongAIManager.getInstance().unregisterASRListener(TAG);
     }
 
     public void setSettingsResult(ASRSettings newSetting) {

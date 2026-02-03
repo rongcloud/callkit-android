@@ -82,9 +82,6 @@ public class CallFloatBoxView {
         RongCallSession session = RongCallClient.getInstance().getCallSession();
         long activeTime = session != null ? session.getActiveTime() : 0;
         mTime = activeTime == 0 ? 0 : (System.currentTimeMillis() - activeTime) / 1000;
-        if (mTime > 0) {
-            setAudioMode(AudioManager.MODE_IN_COMMUNICATION);
-        }
         mBundle = bundle;
         wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         WindowManager.LayoutParams params = createLayoutParams(wm);

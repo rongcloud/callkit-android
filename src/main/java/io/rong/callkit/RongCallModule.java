@@ -308,6 +308,7 @@ public class RongCallModule implements IExtensionModule {
         registerLifecycleCallbacks(mContext);
         RongConfigCenter.conversationConfig().addMessageProvider(new CallEndMessageItemProvider());
         RongConfigCenter.conversationConfig().addMessageProvider(new MultiCallEndMessageProvider());
+        RongConfigCenter.conversationConfig().addMessageProvider(new CallAISumMsgProvider());
         initMissedCallListener();
 
         IRongReceivedCallListener callListener =

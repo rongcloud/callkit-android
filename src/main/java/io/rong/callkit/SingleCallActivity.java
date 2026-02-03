@@ -38,6 +38,7 @@ import io.rong.calllib.CallUserProfile;
 import io.rong.calllib.ReportUtil;
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallCommon;
+import io.rong.calllib.RongCallCommon.CallStatus;
 import io.rong.calllib.RongCallCommon.RoomType;
 import io.rong.calllib.RongCallSession;
 import io.rong.calllib.StartIncomingPreviewCallback;
@@ -525,7 +526,13 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         } catch (Exception e) {
             e.printStackTrace();
         }
-        callRinging(RingingMode.Outgoing);
+        List<CallUserProfile> users = callSession.getParticipantProfileList();
+        CallUserProfile user = users != null && !users.isEmpty() ? users.get(0) : null;
+        if (user == null
+                || (user.getCallStatus() != CallStatus.CONNECTED
+                        && user.getCallStatus() != CallStatus.ACCEPTED)) {
+            callRinging(RingingMode.Outgoing);
+        }
         // 更新ring状态下的麦克风和扬声器状态
         restoreMediaViewStatus();
     }
@@ -864,8 +871,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         mUserInfoContainer.removeAllViews();
         mUserInfoContainer.addView(userInfoView);
 
-        findViewById(R.id.rc_voip_enable_subtitle)
-                .setSelected(mASRView.getVisibility() == View.VISIBLE);
+        findViewById(R.id.ai_btn_views).setSelected(mASRView.getVisibility() == View.VISIBLE);
         UserInfo userInfo = RongUserInfoManager.getInstance().getUserInfo(targetId);
         if (userInfo != null) {
             TextView userName = (TextView) mUserInfoContainer.findViewById(R.id.rc_voip_user_name);
@@ -1207,8 +1213,7 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
             changeToConnectedState(remoteUserId, mediaType, 1, remoteVideo);
         }
         initSubtitleViewLayout(mButtonContainer);
-        findViewById(R.id.rc_voip_enable_subtitle)
-                .setSelected(mASRView.getVisibility() == View.VISIBLE);
+        findViewById(R.id.ai_btn_views).setSelected(mASRView.getVisibility() == View.VISIBLE);
     }
 
     private void restoreMediaViewStatus() {

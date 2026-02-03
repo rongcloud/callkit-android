@@ -270,11 +270,6 @@ public class CallRingingUtil {
                     applicationContext.unregisterReceiver(mRingModeReceiver);
                 } catch (Exception e) {
                 }
-                final AudioManager am =
-                        (AudioManager) applicationContext.getSystemService(Context.AUDIO_SERVICE);
-                if (am != null) {
-                    am.setMode(AudioManager.MODE_IN_COMMUNICATION);
-                }
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,9 +40,17 @@ import io.rong.calllib.RongCallSession;
 import io.rong.common.RLog;
 import io.rong.imkit.feature.mention.RongMentionManager;
 import io.rong.imkit.userinfo.RongUserInfoManager;
+import io.rong.imkit.userinfo.RongUserInfoManager.DataSourceType;
 import io.rong.imkit.userinfo.model.GroupUserInfo;
+import io.rong.imlib.IRongCoreCallback;
+import io.rong.imlib.IRongCoreEnum;
+import io.rong.imlib.RongCoreClient;
 import io.rong.imlib.model.Conversation;
 import io.rong.imlib.model.Group;
+import io.rong.imlib.model.GroupMemberInfo;
+import io.rong.imlib.model.GroupMemberRole;
+import io.rong.imlib.model.PagingQueryOption;
+import io.rong.imlib.model.PagingQueryResult;
 import io.rong.imlib.model.UserInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -83,6 +93,7 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity
      */
     private boolean ctrlTag = true;
 
+    private static final int PAGE_SIZE = 100;
     private static final int NORMAL_VIDEO_NUMBER = 7;
     private static final int NORMAL_AUDIO_NUMBER = 20;
     private ArrayList<UserInfo> userInfoArrayList = new ArrayList<>();
@@ -280,6 +291,9 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity
                             mHandler.sendMessage(message);
                         }
                     });
+        } else if (RongUserInfoManager.getInstance().getDataSourceType()
+                == DataSourceType.INFO_PROVIDER) {
+            getGroupMembersByRole("");
         } else {
             if (RongMentionManager.getInstance().getGroupMembersProvider() != null) {
                 RongMentionManager.getInstance()
@@ -375,6 +389,56 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity
         registerDisconnectBroadcastReceiver();
     }
 
+    private void getGroupMembersByRole(String pageToken) {
+        if (isDestroyed()) {
+            return;
+        }
+        PagingQueryOption pagingQueryOption = new PagingQueryOption();
+        pagingQueryOption.setCount(PAGE_SIZE);
+        pagingQueryOption.setPageToken(pageToken);
+        pagingQueryOption.setOrder(true);
+        RongCoreClient.getInstance()
+                .getGroupMembersByRole(
+                        groupId,
+                        GroupMemberRole.Undef,
+                        pagingQueryOption,
+                        new IRongCoreCallback.PageResultCallback<GroupMemberInfo>() {
+                            @Override
+                            public void onSuccess(PagingQueryResult<GroupMemberInfo> result) {
+                                Log.d("getGroupMembersByRole", "onSuccess: " + result);
+                                List<GroupMemberInfo> data = result.getData();
+                                if (data != null && !data.isEmpty()) {
+                                    for (GroupMemberInfo item : data) {
+                                        userInfoArrayList.add(
+                                                new UserInfo(
+                                                        item.getUserId(),
+                                                        item.getName(),
+                                                        Uri.parse(item.getPortraitUri())));
+                                    }
+                                }
+                                if (result.getTotalCount() >= PAGE_SIZE
+                                        && !TextUtils.isEmpty(result.getPageToken())) {
+                                    getGroupMembersByRole(result.getPageToken());
+                                    return;
+                                }
+
+                                Message message = new Message();
+                                message.obj = GROUPMEMBERSRESULT_KEY;
+                                Bundle bundle = new Bundle();
+                                bundle.putParcelableArrayList(
+                                        GROUPMEMBERSRESULT_KEY, userInfoArrayList);
+                                bundle.putInt("conversationType", conversationType.getValue());
+                                message.setData(bundle);
+                                mHandler.sendMessage(message);
+                            }
+
+                            @Override
+                            public void onError(IRongCoreEnum.CoreErrorCode e) {
+                                Log.e("getGroupMembersByRole", "onError: ");
+                            }
+                        });
+    }
+
     private void registerDisconnectBroadcastReceiver() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(DISCONNECT_ACTION);
@@ -432,6 +496,8 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity
         super.onDestroy();
         RongUserInfoManager.getInstance().removeUserDataObserver(this);
         unregisterReceiver(disconnectBroadcastReceiver);
+        mHandler.removeCallbacksAndMessages(null);
+        uiHandler.removeCallbacksAndMessages(null);
     }
 
     @Override

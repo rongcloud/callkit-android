@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:layout_width="wrap_content"
+  android:layout_height="wrap_content"
+  android:padding="8dp">
+
+  <TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/rc_voip_ai_sum_complete"
+    android:textColor="@color/rc_voice_color"
+    android:textStyle="bold"
+    android:textSize="14sp"/>
+
+  <TextView
+    android:id="@+id/rc_voip_ai_sum_start_time"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="4dp"
+    android:text="@string/rc_voip_ai_sum_start_time"
+    android:textSize="14sp"
+    android:textColor="@color/rc_voice_color"/>
+
+  <TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:text="@string/rc_voip_ai_sum_go_to_info"
+    android:textColor="@color/rc_voice_color"
+    android:textSize="14sp"
+    android:padding="4dp"
+    android:background="@drawable/rc_voip_text_gray_border"/>
+
+
+</LinearLayout>
