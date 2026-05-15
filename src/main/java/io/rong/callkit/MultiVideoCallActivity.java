@@ -28,6 +28,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import cn.rongcloud.rtc.api.RCRTCEngine;
 import cn.rongcloud.rtc.api.stream.view.RCRTCBaseView;
 import cn.rongcloud.rtc.audioroute.RCAudioRouteType;
@@ -1196,9 +1197,9 @@ public class MultiVideoCallActivity extends BaseCallActivity {
                     }
                 });
         super.onCallDisconnected(callSession, reason);
-        sendBroadcast(
-                new Intent(DISCONNECT_ACTION).setPackage(getPackageName()),
-                getPackageName() + ".permission.RONG_ACCESS_RECEIVER");
+        Intent disconnectIntent = new Intent(DISCONNECT_ACTION);
+        // 使用 LocalBroadcastManager 绕开华为等厂商的后台广播限制
+        LocalBroadcastManager.getInstance(this).sendBroadcast(disconnectIntent);
     }
 
     @Override

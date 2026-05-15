@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -30,6 +28,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import io.rong.callkit.util.CallKitSearchBarListener;
 import io.rong.callkit.util.CallKitSearchBarView;
 import io.rong.callkit.util.CallKitUtils;
@@ -174,6 +173,7 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        registerDisconnectBroadcastReceiver();
         getWindow()
                 .setFlags(
                         WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN,
@@ -386,7 +386,6 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity
                         }
                     }
                 });
-        registerDisconnectBroadcastReceiver();
     }
 
     private void getGroupMembersByRole(String pageToken) {
@@ -442,20 +441,9 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity
     private void registerDisconnectBroadcastReceiver() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(DISCONNECT_ACTION);
-        if (VERSION.SDK_INT > VERSION_CODES.TIRAMISU) {
-            registerReceiver(
-                    disconnectBroadcastReceiver,
-                    intentFilter,
-                    this.getApplicationInfo().packageName + ".permission.RONG_ACCESS_RECEIVER",
-                    null,
-                    Context.RECEIVER_NOT_EXPORTED);
-        } else {
-            registerReceiver(
-                    disconnectBroadcastReceiver,
-                    intentFilter,
-                    this.getApplicationInfo().packageName + ".permission.RONG_ACCESS_RECEIVER",
-                    null);
-        }
+        // 使用 LocalBroadcastManager 绕开华为等厂商的后台广播限制
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(disconnectBroadcastReceiver, intentFilter);
     }
 
     private void startSearchMember(String searchEditContent) {
@@ -495,7 +483,7 @@ public class CallSelectMemberActivity extends BaseNoActionBarActivity
     protected void onDestroy() {
         super.onDestroy();
         RongUserInfoManager.getInstance().removeUserDataObserver(this);
-        unregisterReceiver(disconnectBroadcastReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(disconnectBroadcastReceiver);
         mHandler.removeCallbacksAndMessages(null);
         uiHandler.removeCallbacksAndMessages(null);
     }

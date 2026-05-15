@@ -10,12 +10,14 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import io.rong.callkit.util.CallRingingUtil;
 import io.rong.callkit.util.IncomingCallExtraHandleUtil;
 import io.rong.callkit.util.RingingMode;
@@ -44,8 +46,8 @@ import java.util.Map;
 public class VoIPBroadcastReceiver extends BroadcastReceiver {
 
     public static final int DEFAULT_FCM_NOTIFICATION_ID = 5000;
-    private static final String HANGUP = "RC:VCHangup";
-    private static final String INVITE = "RC:VCInvite";
+    public static final String HANGUP = "RC:VCHangup";
+    public static final String INVITE = "RC:VCInvite";
     public static final String ACTION_CALLINVITEMESSAGE = "action.push.CallInviteMessage";
     public static final String ACTION_CALLINVITEMESSAGE_CLICKED =
             "action.push.CallInviteMessage.CLICKED";
@@ -535,5 +537,36 @@ public class VoIPBroadcastReceiver extends BroadcastReceiver {
 
     public static void clearNotificationCache() {
         notificationCache.clear();
+    }
+
+    private static BroadcastReceiver localReceiver;
+
+    /** 注册本地广播接收器，用于接收应用内部发送的 VoIP 广播 绕开华为等厂商的后台广播限制 */
+    public static void registerLocalReceiver(Context context) {
+        if (localReceiver != null || context == null) {
+            return;
+        }
+
+        Context appContext = context.getApplicationContext();
+        localReceiver = new VoIPBroadcastReceiver();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_CALLINVITEMESSAGE);
+        filter.addAction(ACTION_CLEAR_VOIP_NOTIFICATION);
+
+        LocalBroadcastManager.getInstance(appContext).registerReceiver(localReceiver, filter);
+        RLog.d(TAG, "Local broadcast receiver registered");
+    }
+
+    /** 注销本地广播接收器 */
+    public static void unregisterLocalReceiver(Context context) {
+        if (localReceiver == null || context == null) {
+            return;
+        }
+
+        Context appContext = context.getApplicationContext();
+        LocalBroadcastManager.getInstance(appContext).unregisterReceiver(localReceiver);
+        localReceiver = null;
+        RLog.d(TAG, "Local broadcast receiver unregistered");
     }
 }

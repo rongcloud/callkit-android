@@ -82,15 +82,14 @@
         </activity>
 
         <!-- Android Q 后台无法弹出Activity，通过通知栏提醒用户-->
+        <!-- 只保留系统通知栏 PendingIntent 触发的广播，应用内部广播已改用 LocalBroadcastManager -->
         <receiver
             android:name="io.rong.callkit.VoIPBroadcastReceiver"
-            android:permission="${applicationId}.permission.RECEIVE_PUSH_NOTIFICATION"
             android:exported="false">
             <intent-filter>
                 <action android:name="action.push.CallInviteMessage" />
                 <action android:name="action.push.CallInviteMessage.CLICKED" />
                 <action android:name="action.push.voip.hangup.click" />
-                <action android:name="action.voip.notification.clear" />
             </intent-filter>
         </receiver>
 

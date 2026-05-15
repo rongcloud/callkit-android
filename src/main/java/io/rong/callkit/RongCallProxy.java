@@ -118,6 +118,14 @@ public class RongCallProxy implements IRongCallListener2 {
         } else { // android 10 后台来电，被叫端不响应，主叫挂断时 mCallListener 为空 ，需要生成通话记录
             insertCallLogMessage(callSession, reason);
         }
+        if (RongCallClient.getInstance().getContext() != null
+                && !RongCallModule.isAppOnForeground(RongCallClient.getInstance().getContext())) {
+            RongCallModule.onSendLocalBroadcast(
+                    RongCallClient.getInstance().getContext(),
+                    callSession,
+                    false,
+                    VoIPBroadcastReceiver.HANGUP);
+        }
         insertAISummarizationMessage(
                 callSession, RongAIManager.getInstance().getCurrentSumTaskId());
         // 取消耳机监听

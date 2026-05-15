@@ -20,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import cn.rongcloud.rtc.audioroute.RCAudioRouteType;
 import cn.rongcloud.rtc.utils.FinLog;
 import io.rong.callkit.util.BluetoothUtil;
@@ -818,9 +819,8 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                         finish();
                     }
                 });
-        sendBroadcast(
-                new Intent(DISCONNECT_ACTION).setPackage(getPackageName()),
-                getPackageName() + ".permission.RONG_ACCESS_RECEIVER");
+        // 使用 LocalBroadcastManager 绕开华为等厂商的后台广播限制
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(DISCONNECT_ACTION));
     }
 
     @Override

@@ -31,6 +31,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import cn.rongcloud.rtc.api.RCRTCAudioRouteManager;
 import cn.rongcloud.rtc.api.callback.IRCRTCAudioRouteListener;
 import cn.rongcloud.rtc.api.stream.RCRTCVideoStreamConfig.Builder;
@@ -199,10 +200,9 @@ public class BaseCallActivity extends BaseNoActionBarActivity
         if (Build.VERSION.SDK_INT >= 31
                 && getApplication().getApplicationInfo().targetSdkVersion >= 31) {
             // Android 12 禁止了通过广播和服务跳板的方式启动 Activity，此代码是为了兼容之前的逻辑
-            Intent intent = new Intent();
-            intent.setAction(VoIPBroadcastReceiver.ACTION_CLEAR_VOIP_NOTIFICATION);
-            intent.setPackage(getPackageName());
-            sendBroadcast(intent, getPackageName() + ".permission.RECEIVE_PUSH_NOTIFICATION");
+            // 使用 LocalBroadcastManager 绕开华为等厂商的后台广播限制
+            Intent intent = new Intent(VoIPBroadcastReceiver.ACTION_CLEAR_VOIP_NOTIFICATION);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         }
     }
 

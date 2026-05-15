@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import cn.rongcloud.rtc.api.RCRTCAudioRouteManager;
 import io.rong.callkit.util.ActivityStartCheckUtils;
 import io.rong.callkit.util.CallKitUtils;
@@ -184,23 +185,25 @@ public class RongCallModule implements IExtensionModule {
         if (Build.VERSION.SDK_INT < 29 || isAppOnForeground(context)) {
             context.startActivity(createVoIPIntent(context, callSession, startForCheckPermissions));
         } else {
-            onSendBroadcast(context, callSession, startForCheckPermissions);
+            onSendLocalBroadcast(
+                    context, callSession, startForCheckPermissions, VoIPBroadcastReceiver.INVITE);
         }
         mCallSession = null;
     }
 
-    private void onSendBroadcast(
-            Context context, RongCallSession callSession, boolean startForCheckPermissions) {
-        RLog.d(TAG, "onSendBroadcast");
+    public static void onSendLocalBroadcast(
+            Context context,
+            RongCallSession callSession,
+            boolean startForCheckPermissions,
+            String objectName) {
+        RLog.d(TAG, "onSendLocalBroadcast, objectName = " + objectName);
+        // 使用 LocalBroadcastManager 绕开华为等厂商的后台广播限制
         Intent intent = new Intent();
-        intent.setPackage(context.getPackageName());
-        // intent.setFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-        intent.putExtra("message", transformToPushMessage(context, callSession));
+        intent.putExtra("message", transformToPushMessage(context, callSession, objectName));
         intent.putExtra("callsession", callSession);
         intent.putExtra("checkPermissions", startForCheckPermissions);
         intent.setAction(VoIPBroadcastReceiver.ACTION_CALLINVITEMESSAGE);
-        context.sendBroadcast(
-                intent, context.getPackageName() + ".permission.RECEIVE_PUSH_NOTIFICATION");
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
 
     public static Intent createVoIPIntent(
@@ -251,8 +254,8 @@ public class RongCallModule implements IExtensionModule {
      * @param session
      * @return
      */
-    private PushNotificationMessage transformToPushMessage(
-            Context context, RongCallSession session) {
+    private static PushNotificationMessage transformToPushMessage(
+            Context context, RongCallSession session, String objectName) {
         PushNotificationMessage pushMsg = new PushNotificationMessage();
         //        pushMsg.setPushContent(session.getMediaType() ==
         // RongCallCommon.CallMediaType.AUDIO ? "音频电话呼叫" : "视频电话呼叫");
@@ -266,7 +269,7 @@ public class RongCallModule implements IExtensionModule {
         pushMsg.setTargetUserName("");
         pushMsg.setSenderId(session.getCallerUserId());
         pushMsg.setSenderName("");
-        pushMsg.setObjectName("RC:VCInvite");
+        pushMsg.setObjectName(objectName);
         pushMsg.setPushFlag("false");
         pushMsg.setToId(RongIMClient.getInstance().getCurrentUserId());
         pushMsg.setSourceType(PushNotificationMessage.PushSourceType.LOCAL_MESSAGE);
@@ -280,7 +283,7 @@ public class RongCallModule implements IExtensionModule {
      * @param context
      * @return
      */
-    private boolean isAppOnForeground(Context context) {
+    public static boolean isAppOnForeground(Context context) {
         if (context == null) return false;
         ActivityManager activityManager =
                 (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
@@ -305,6 +308,8 @@ public class RongCallModule implements IExtensionModule {
     public void onInit(Context context, String appKey) {
         RLog.d(TAG, "onInit");
         mContext = context.getApplicationContext();
+        // 注册本地广播接收器，用于接收应用内部的 VoIP 广播，绕开华为等厂商的后台广播限制
+        VoIPBroadcastReceiver.registerLocalReceiver(mContext);
         registerLifecycleCallbacks(mContext);
         RongConfigCenter.conversationConfig().addMessageProvider(new CallEndMessageItemProvider());
         RongConfigCenter.conversationConfig().addMessageProvider(new MultiCallEndMessageProvider());
