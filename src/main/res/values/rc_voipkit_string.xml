@@ -65,6 +65,8 @@
     <string name="rc_voip_whiteboard">白板</string>
     <string name="rc_voip_ok">确认</string>
     <string name="rc_voip_cancel">取消</string>
+    <string name="rc_voip_fraud_prevention_title">防诈骗提醒</string>
+    <string name="rc_voip_fraud_prevention_message">请警惕电信网络诈骗。若对方要求转账、提供验证码或索取个人信息，请立即挂断。确认继续通话？</string>
     <string name="rc_voip_invite_to_normal">主持人邀请您参与讨论 是否接受?</string>
     <string name="rc_voip_ask_to_do">主持人请求您%1$s%2$s 是否接受?</string>
     <string name="rc_voip_mic">麦克风</string>

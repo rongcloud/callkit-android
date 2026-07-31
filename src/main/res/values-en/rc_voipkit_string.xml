@@ -86,6 +86,8 @@ Please turn it on in the application permission management page of \""Settings\"
     <string name="rc_voip_whiteboard">whiteboard</string>
     <string name="rc_voip_ok">ok</string>
     <string name="rc_voip_cancel">cancel</string>
+    <string name="rc_voip_fraud_prevention_title">Fraud Warning</string>
+    <string name="rc_voip_fraud_prevention_message">Beware of telecom and online fraud. If the other party asks for money transfers, verification codes, or personal information, hang up immediately. Continue the call?</string>
     <string name="rc_voip_mic">microphone</string>
     <string name="rc_voip_camera_mic">camera and mic</string>
     <string name="rc_voip_open">open</string>

@@ -35,6 +35,9 @@ public class RongCallKit {
     /** 设置是否使用 TextureView 模式渲染视频，默认为 false。 */
     private static boolean enableTextureViewMode = false;
 
+    /** 防诈提醒开关，默认关闭。开启后发起呼叫或收到呼叫弹出通话页面时，会先弹出防诈确认框。 */
+    private static boolean enableFraudPreventionAlert = false;
+
     public static boolean isDisplayASRUI() {
         return mDisplayASRUI;
     }
@@ -59,6 +62,19 @@ public class RongCallKit {
      */
     public static void enableTextureViewMode(boolean enableTextureViewMode) {
         RongCallKit.enableTextureViewMode = enableTextureViewMode;
+    }
+
+    public static boolean isFraudPreventionAlertEnabled() {
+        return enableFraudPreventionAlert;
+    }
+
+    /**
+     * 设置是否启用防诈提醒。开启后，发起呼叫或收到呼叫弹出通话页面时会先弹出防诈确认框， 用户点击确认后继续通话，点击取消则挂断当前通话。默认关闭。
+     *
+     * @param enabled 是否启用防诈提醒
+     */
+    public static void setFraudPreventionAlertEnabled(boolean enabled) {
+        RongCallKit.enableFraudPreventionAlert = enabled;
     }
 
     /**

@@ -3,6 +3,7 @@ package io.rong.callkit;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.net.Uri;
@@ -266,6 +267,10 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
                 "SingleCallActivity#setupIntent().RongCallClient ie empty")) {
             return;
         }
+        // 防诈提醒：开启开关时先弹确认框，用户确认后重入本方法继续，取消则挂断退出
+        if (interceptForFraudPrevention(this::setupIntent)) {
+            return;
+        }
         RongCallCommon.CallMediaType mediaType;
         Intent intent = getIntent();
         RongCallAction callAction = RongCallAction.getAction(intent.getStringExtra("callAction"));
@@ -378,6 +383,26 @@ public class SingleCallActivity extends BaseCallActivity implements Handler.Call
         }
         createPickupDetector();
         showForegroundService();
+    }
+
+    /**
+     * 窗口尺寸/方向变化后刷新布局。本页视频以 MATCH_PARENT 居中添加、小窗为固定 dp，框架会自动重新 measure/layout； 此处显式触发预览容器重排以确保
+     * WebRTC Surface 按新窗口尺寸重新测量，并在 RTL（阿拉伯语）下维持小窗 gravity。 字幕条重定位由基类统一处理。
+     */
+    @Override
+    protected void onCallLayoutConfigurationChanged(Configuration newConfig) {
+        if (mSPreviewContainer != null && CallKitUtils.findConfigurationLanguage(this, "ar")) {
+            FrameLayout.LayoutParams params =
+                    (FrameLayout.LayoutParams) mSPreviewContainer.getLayoutParams();
+            params.gravity = Gravity.LEFT | Gravity.TOP;
+            mSPreviewContainer.setLayoutParams(params);
+        }
+        if (mLPreviewContainer != null) {
+            mLPreviewContainer.requestLayout();
+        }
+        if (mSPreviewContainer != null) {
+            mSPreviewContainer.requestLayout();
+        }
     }
 
     private boolean isCrossCall(String targetId) {

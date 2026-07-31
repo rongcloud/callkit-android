@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -95,6 +96,8 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     protected PowerManager.WakeLock wakeLock;
     protected PowerManager.WakeLock screenLock;
     protected RongASRView mASRView;
+    // ASR 字幕条锚点 view，配置变更后据此重新定位字幕条
+    private View subtitleAnchorView;
 
     //    static final String[] VIDEO_CALL_PERMISSIONS = {
     //        Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA
@@ -192,10 +195,18 @@ public class BaseCallActivity extends BaseNoActionBarActivity
                         @Override
                         public void onAudioFocusChange(int focusChange) {}
                     };
-            am.requestAudioFocus(
-                    onAudioFocusChangeListener,
-                    AudioManager.STREAM_MUSIC,
-                    AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+            int focusResult =
+                    am.requestAudioFocus(
+                            onAudioFocusChangeListener,
+                            AudioManager.STREAM_MUSIC,
+                            AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+            if (focusResult == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
+                // Android 17 (API 37) 后台音频收紧：后台且无 WIU 前台服务时请求焦点会静默失败返回此值。
+                // 通话主路径有可见 UI 或带 WIU 的前台服务覆盖，正常不会走到这里，此处仅记录便于排查。
+                RLog.w(
+                        TAG,
+                        "requestAudioFocus failed, possibly Android 17 background audio hardening");
+            }
         }
         if (Build.VERSION.SDK_INT >= 31
                 && getApplication().getApplicationInfo().targetSdkVersion >= 31) {
@@ -205,6 +216,24 @@ public class BaseCallActivity extends BaseNoActionBarActivity
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         }
     }
+
+    /**
+     * 三个通话页均声明了 configChanges（screenSize|screenLayout|orientation 等），窗口尺寸/方向变化时不重建、
+     * 不中断通话，由系统回调此方法。此处统一重定位 ASR 字幕条（锚点位置可能变化），并交由子类刷新各自的动态布局。
+     */
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // 全页面共用：锚点位置可能随窗口尺寸变化，重算 ASR 字幕条 topMargin，避免错位
+        if (mASRView != null && subtitleAnchorView != null) {
+            relocateSubtitleView(subtitleAnchorView);
+        }
+        // 交由子类刷新各自的动态 Surface / 成员布局
+        onCallLayoutConfigurationChanged(newConfig);
+    }
+
+    /** 子类覆写以在窗口尺寸/方向变化后刷新各自的动态视频 Surface / 成员布局。默认空实现。 */
+    protected void onCallLayoutConfigurationChanged(Configuration newConfig) {}
 
     private static void setSrcLanguageCode() {
         String language = Locale.getDefault().getLanguage();
@@ -266,6 +295,16 @@ public class BaseCallActivity extends BaseNoActionBarActivity
         }
         if (view == null) {
             Log.e(TAG, "initSubtitleViewLayout: view is null");
+            return;
+        }
+        // 记录锚点，供窗口尺寸/方向变化后（onConfigurationChanged）重新定位字幕条
+        subtitleAnchorView = view;
+        relocateSubtitleView(view);
+    }
+
+    /** 依据锚点 view 的位置重新计算 ASR 字幕条 topMargin。抽出以便配置变更时复用（绕开浮窗恢复固定值分支）。 */
+    private void relocateSubtitleView(final View view) {
+        if (mASRView == null || view == null) {
             return;
         }
         view.getViewTreeObserver()
@@ -348,6 +387,67 @@ public class BaseCallActivity extends BaseNoActionBarActivity
     @SuppressLint("MissingPermission")
     protected void stopRing() {
         CallRingingUtil.getInstance().stopRinging();
+    }
+
+    // 标记本次通话是否已通过防诈确认，避免权限回调导致 setupIntent 多次触发时重复弹窗
+    protected boolean fraudAlertConfirmed = false;
+    private CallPromptDialog fraudPromptDialog;
+
+    /**
+     * 若开启了防诈提醒开关且本次通话尚未确认，则弹出防诈提醒框并返回 true（调用方应立即 return，中断后续通话建立流程）。 用户点击确认后回调 {@code onConfirm}
+     * 继续通话流程；点击取消则挂断当前通话并结束页面。
+     *
+     * @param onConfirm 用户确认后继续执行的动作（通常传入 {@code this::setupIntent} 以重入并继续）
+     * @return true 表示已弹窗拦截（调用方需 return）；false 表示无需拦截，正常继续
+     */
+    protected boolean interceptForFraudPrevention(Runnable onConfirm) {
+        if (!RongCallKit.isFraudPreventionAlertEnabled() || fraudAlertConfirmed) {
+            return false;
+        }
+        if (fraudPromptDialog != null && fraudPromptDialog.isShowing()) {
+            return true;
+        }
+        fraudPromptDialog =
+                CallPromptDialog.newInstance(
+                        this,
+                        getString(R.string.rc_voip_fraud_prevention_title),
+                        getString(R.string.rc_voip_fraud_prevention_message));
+        fraudPromptDialog.setPromptButtonClickedListener(
+                new CallPromptDialog.OnPromptButtonClickedListener() {
+                    @Override
+                    public void onPositiveButtonClicked() {
+                        fraudAlertConfirmed = true;
+                        if (onConfirm != null) {
+                            onConfirm.run();
+                        }
+                    }
+
+                    @Override
+                    public void onNegativeButtonClicked() {
+                        hangUpForFraudCancel();
+                    }
+                });
+        // 必须显式二选一，不允许通过返回键 / 点击外部绕过
+        fraudPromptDialog.setCancelable(false);
+        fraudPromptDialog.show();
+        return true;
+    }
+
+    /** 防诈弹窗取消时挂断当前通话并结束页面。子类如有特殊挂断逻辑可 override。 */
+    protected void hangUpForFraudCancel() {
+        try {
+            RongCallSession session =
+                    RongCallClient.getInstance() != null
+                            ? RongCallClient.getInstance().getCallSession()
+                            : null;
+            if (session != null) {
+                RongCallClient.getInstance().hangUpCall(session.getCallId());
+            }
+        } catch (Exception e) {
+            RLog.e(TAG, "hangUpForFraudCancel error:" + e);
+        }
+        stopRing();
+        finish();
     }
 
     @Override

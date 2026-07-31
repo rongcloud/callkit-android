@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -1298,9 +1299,7 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         iv_large_preview_mutilvideo = (ImageView) findViewById(R.id.iv_large_preview_mutilvideo);
         iv_large_preview_Mask = (ImageView) findViewById(R.id.iv_large_preview_Mask);
 
-        DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        remoteUserViewWidth = (metrics.widthPixels - 50) / 4;
+        calcRemoteUserViewWidth();
 
         localView = null;
         localViewContainer.removeAllViews();
@@ -1325,6 +1324,57 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         initSubtitleViewLayout(findViewById(R.id.rc_remoteuser_horizontalScrollView));
     }
 
+    /** 根据当前窗口宽度计算远端视频宫格边长（一行 4 个）。窗口尺寸变化时需重新计算。 */
+    private void calcRemoteUserViewWidth() {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        remoteUserViewWidth = (metrics.widthPixels - 50) / 4;
+    }
+
+    /**
+     * Android 17 起，大屏（sw>=600dp）会忽略 screenOrientation="portrait" 锁，通话页可横竖屏切换；
+     * 大屏分屏/多窗口/折叠屏的窗口尺寸变化同样会触发。 本页 Manifest 已声明 configChanges 捕获
+     * orientation/screenSize，变化时不重建、不中断通话， 由基类 {@link BaseCallActivity#onConfigurationChanged}
+     * 统一入口回调此覆写。此处重算宫格边长并同步更新已存在的远端视频 tile，避免用旧值。
+     */
+    @Override
+    protected void onCallLayoutConfigurationChanged(Configuration newConfig) {
+        calcRemoteUserViewWidth();
+        resizeRemoteUserViews();
+    }
+
+    /**
+     * 旋转/窗口尺寸变化后，把 remoteViewContainer2 里已存在的视频 tile 更新为新边长。 tile 根节点及其内部 布局均为
+     * match_parent，会随根节点级联；但真正的视频 surface 是以固定 w×w 添加进 viewlet_remote_video_user 的，需单独更新。
+     */
+    private void resizeRemoteUserViews() {
+        if (remoteViewContainer2 == null) {
+            return;
+        }
+        for (int i = 0; i < remoteViewContainer2.getChildCount(); i++) {
+            View singleRemoteView = remoteViewContainer2.getChildAt(i);
+            ViewGroup.LayoutParams lp = singleRemoteView.getLayoutParams();
+            if (lp != null) {
+                lp.width = remoteUserViewWidth;
+                lp.height = remoteUserViewWidth;
+                singleRemoteView.setLayoutParams(lp);
+            }
+            View videoContainer = singleRemoteView.findViewById(R.id.viewlet_remote_video_user);
+            if (videoContainer instanceof ViewGroup) {
+                ViewGroup container = (ViewGroup) videoContainer;
+                for (int j = 0; j < container.getChildCount(); j++) {
+                    View videoSurface = container.getChildAt(j);
+                    ViewGroup.LayoutParams vlp = videoSurface.getLayoutParams();
+                    if (vlp != null) {
+                        vlp.width = remoteUserViewWidth;
+                        vlp.height = remoteUserViewWidth;
+                        videoSurface.setLayoutParams(vlp);
+                    }
+                }
+            }
+        }
+        remoteViewContainer2.requestLayout();
+    }
+
     protected void setupIntent() {
         Intent intent = getIntent();
         String name = intent.getStringExtra("callAction");
@@ -1333,6 +1383,10 @@ public class MultiVideoCallActivity extends BaseCallActivity {
         }
         RongCallAction callAction = RongCallAction.valueOf(name);
         if (callAction == null || callAction.equals(RongCallAction.ACTION_RESUME_CALL)) {
+            return;
+        }
+        // 防诈提醒：开启开关时先弹确认框，用户确认后重入本方法继续，取消则挂断退出
+        if (interceptForFraudPrevention(this::setupIntent)) {
             return;
         }
         ArrayList<String> invitedList = new ArrayList<>();

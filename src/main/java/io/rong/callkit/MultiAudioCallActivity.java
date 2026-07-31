@@ -5,6 +5,7 @@ import static io.rong.callkit.CallSelectMemberActivity.DISCONNECT_ACTION;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
@@ -227,6 +228,20 @@ public class MultiAudioCallActivity extends BaseCallActivity {
         findViewById(R.id.ai_btn_views).setSelected(mASRView.getVisibility() == View.VISIBLE);
     }
 
+    /**
+     * 窗口尺寸/方向变化后刷新布局。成员容器为固定列数 + 固定 dp（运行时 dip2pix 换算），框架会自动重新 measure/layout；
+     * 此处显式触发成员/音频容器重排以确保按新窗口尺寸排布。字幕条重定位由基类统一处理。
+     */
+    @Override
+    protected void onCallLayoutConfigurationChanged(Configuration newConfig) {
+        if (memberContainer instanceof View) {
+            ((View) memberContainer).requestLayout();
+        }
+        if (audioContainer != null) {
+            audioContainer.requestLayout();
+        }
+    }
+
     void initView() {
         Intent intent = getIntent();
         callAction = RongCallAction.getAction(intent.getStringExtra("callAction"));
@@ -235,6 +250,10 @@ public class MultiAudioCallActivity extends BaseCallActivity {
                     (RelativeLayout)
                             outgoingLayout.findViewById(R.id.reltive_voip_outgoing_audio_title);
             relativeLayout.setVisibility(View.VISIBLE);
+            return;
+        }
+        // 防诈提醒：开启开关时先弹确认框，用户确认后重入本方法继续，取消则挂断退出
+        if (interceptForFraudPrevention(this::initView)) {
             return;
         }
         ArrayList<String> invitedList = new ArrayList<>();
