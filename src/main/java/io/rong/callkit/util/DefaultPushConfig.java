@@ -5,6 +5,9 @@ import static android.content.Context.MODE_PRIVATE;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import io.rong.callkit.R;
 import io.rong.imkit.RongIM;
 import io.rong.imkit.userinfo.RongUserInfoManager;
@@ -12,8 +15,19 @@ import io.rong.imlib.model.AndroidConfig;
 import io.rong.imlib.model.IOSConfig;
 import io.rong.imlib.model.MessagePushConfig;
 import io.rong.imlib.model.UserInfo;
+import java.lang.reflect.Type;
+import java.util.Map;
 
 public class DefaultPushConfig {
+
+    // CallKit 音视频通话小米模板配置常量
+    private static final String PUSH_CONFIG_PREFERENCES = "push_config";
+    private static final String CALL_MI_TEMPLATE_ENABLED = "callMiTemplateEnabled";
+    private static final String CALL_MI_TEMPLATE_ID = "callMiTemplateId";
+    private static final String CALL_INVITE_MI_TEMPLATE_PARAM = "callInviteMiTemplateParam";
+    private static final String CALL_HANGUP_MI_TEMPLATE_PARAM = "callHangupMiTemplateParam";
+    private static final boolean DEFAULT_CALL_MI_TEMPLATE_ENABLED = false;
+    private static final String DEFAULT_CALL_MI_TEMPLATE_ID = "";
 
     /**
      * 获取邀请的 push config
@@ -66,6 +80,8 @@ public class DefaultPushConfig {
         boolean forceDetail = sharedPreferences.getBoolean("forceDetail", false);
         MessagePushConfig invitePushConfig =
                 getMessagePushConfig(
+                        context,
+                        true,
                         id,
                         pushTile,
                         invitePushContent,
@@ -113,6 +129,8 @@ public class DefaultPushConfig {
         boolean forceDetail = sharedPreferences.getBoolean("forceDetail", false);
         MessagePushConfig hangupPushConfig =
                 getMessagePushConfig(
+                        context,
+                        false,
                         id,
                         pushTile,
                         hangupPushContent,
@@ -127,9 +145,11 @@ public class DefaultPushConfig {
     }
 
     private static MessagePushConfig getMessagePushConfig(
+            Context context,
+            boolean isInvite,
             String id,
             String pushTile,
-            String invitePushContent,
+            String pushContent,
             String data,
             String hw,
             String mi,
@@ -137,21 +157,66 @@ public class DefaultPushConfig {
             String threadId,
             String apnsId,
             boolean forceDetail) {
-        return new MessagePushConfig.Builder() //
-                .setPushTitle(pushTile) //
-                .setPushContent(invitePushContent) //
-                .setPushData(data) //
-                .setForceShowDetailContent(forceDetail) //
-                .setAndroidConfig(
-                        new AndroidConfig.Builder() //
-                                .setNotificationId(id) //
-                                .setChannelIdHW(hw) //
-                                .setChannelIdMi(mi) //
-                                .setChannelIdOPPO(oppo) //
-                                .setCategoryHW("VOIP")
-                                .setCategoryVivo("IM")
-                                .build()) //
+        SharedPreferences sharedPreferences =
+                context.getSharedPreferences(PUSH_CONFIG_PREFERENCES, MODE_PRIVATE);
+        boolean callMiTemplateEnabled =
+                sharedPreferences.getBoolean(
+                        CALL_MI_TEMPLATE_ENABLED, DEFAULT_CALL_MI_TEMPLATE_ENABLED);
+        String callMiTemplateId =
+                sharedPreferences.getString(CALL_MI_TEMPLATE_ID, DEFAULT_CALL_MI_TEMPLATE_ID);
+        String callMiTemplateParamKey =
+                isInvite ? CALL_INVITE_MI_TEMPLATE_PARAM : CALL_HANGUP_MI_TEMPLATE_PARAM;
+        String defaultCallMiTemplateParam =
+                "{\"keywords1\":\"" + pushTile + "\",\"keywords2\":\"" + pushContent + "\"}";
+        String callMiTemplateParam =
+                sharedPreferences.getString(callMiTemplateParamKey, defaultCallMiTemplateParam);
+        if (TextUtils.isEmpty(callMiTemplateParam)) {
+            callMiTemplateParam = defaultCallMiTemplateParam;
+        }
+
+        AndroidConfig.Builder androidConfigBuilder =
+                new AndroidConfig.Builder()
+                        .setNotificationId(id)
+                        .setChannelIdHW(hw)
+                        .setChannelIdMi(mi)
+                        .setChannelIdOPPO(oppo)
+                        .setCategoryHW("VOIP")
+                        .setCategoryVivo("IM");
+
+        applyCallMiTemplateConfig(
+                androidConfigBuilder, callMiTemplateEnabled, callMiTemplateId, callMiTemplateParam);
+
+        return new MessagePushConfig.Builder()
+                .setPushTitle(pushTile)
+                .setPushContent(pushContent)
+                .setPushData(data)
+                .setForceShowDetailContent(forceDetail)
+                .setAndroidConfig(androidConfigBuilder.build())
                 .setIOSConfig(new IOSConfig(threadId, apnsId))
-                .build(); //
+                .build();
+    }
+
+    private static void applyCallMiTemplateConfig(
+            AndroidConfig.Builder androidConfigBuilder,
+            boolean enabled,
+            String templateId,
+            String templateParamJson) {
+        if (!enabled || TextUtils.isEmpty(templateId)) {
+            return;
+        }
+        androidConfigBuilder.setTemplateIdMi(templateId);
+        Map<String, String> templateParameters = parseMiTemplateParameters(templateParamJson);
+        if (templateParameters != null && !templateParameters.isEmpty()) {
+            androidConfigBuilder.setTemplateParamMi(templateParameters);
+        }
+    }
+
+    private static Map<String, String> parseMiTemplateParameters(String templateParamJson) {
+        try {
+            Type mapType = new TypeToken<Map<String, String>>() {}.getType();
+            return new Gson().fromJson(templateParamJson, mapType);
+        } catch (JsonSyntaxException e) {
+            return null;
+        }
     }
 }
